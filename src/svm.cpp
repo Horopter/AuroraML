@@ -140,6 +140,95 @@ void LinearSVC::load(const std::string& filepath) {
     ifs.close();
 }
 
+// SVR implementation
+SVR::SVR(double C, double epsilon, int max_iter, double lr, int random_state)
+    : C_(C), epsilon_(epsilon), max_iter_(max_iter), lr_(lr), random_state_(random_state) {}
+
+Estimator& SVR::fit(const MatrixXd& X, const VectorXd& y) {
+    validation::check_X_y(X, y);
+    
+    if (C_ <= 0.0) {
+        throw std::invalid_argument("C must be positive");
+    }
+    if (max_iter_ <= 0) {
+        throw std::invalid_argument("max_iter must be positive");
+    }
+    if (lr_ <= 0.0) {
+        throw std::invalid_argument("learning rate must be positive");
+    }
+    if (epsilon_ < 0.0) {
+        throw std::invalid_argument("epsilon must be non-negative");
+    }
+    
+    w_ = VectorXd::Zero(X.cols());
+    b_ = 0.0;
+    
+    std::mt19937 rng(static_cast<unsigned>(random_state_ == -1 ? std::random_device{}() : random_state_));
+    std::uniform_int_distribution<int> uni(0, X.rows() - 1);
+    
+    const double lambda = 1.0 / std::max(C_, 1e-12);
+    
+    // SGD for epsilon-insensitive loss
+    for (int it = 0; it < max_iter_; ++it) {
+        int i = uni(rng);
+        double prediction = X.row(i).dot(w_) + b_;
+        double error = y(i) - prediction;
+        
+        // Epsilon-insensitive loss: L(y, f(x)) = max(0, |error| - epsilon)
+        double loss = std::max(0.0, std::abs(error) - epsilon_);
+        
+        if (loss > 0.0) {
+            // Update weights based on error sign and epsilon
+            double sign = (error > 0.0) ? 1.0 : -1.0;
+            w_ = (1.0 - lr_ * lambda) * w_ + lr_ * sign * X.row(i).transpose();
+            b_ = b_ + lr_ * sign;
+        } else {
+            // Within epsilon tube - only apply regularization
+            w_ = (1.0 - lr_ * lambda) * w_;
+        }
+    }
+    
+    fitted_ = true;
+    return *this;
+}
+
+VectorXd SVR::predict(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("SVR must be fitted before predict");
+    }
+    validation::check_X(X);
+    
+    if (X.cols() != w_.size()) {
+        throw std::invalid_argument("X must have the same number of features as training data");
+    }
+    
+    VectorXd predictions(X.rows());
+    for (int i = 0; i < X.rows(); ++i) {
+        predictions(i) = X.row(i).dot(w_) + b_;
+    }
+    
+    return predictions;
+}
+
+Params SVR::get_params() const {
+    return {
+        {"C", std::to_string(C_)},
+        {"epsilon", std::to_string(epsilon_)},
+        {"max_iter", std::to_string(max_iter_)},
+        {"lr", std::to_string(lr_)},
+        {"random_state", std::to_string(random_state_)}
+    };
+}
+
+Estimator& SVR::set_params(const Params& params) {
+    C_ = utils::get_param_double(params, "C", C_);
+    epsilon_ = utils::get_param_double(params, "epsilon", epsilon_);
+    max_iter_ = utils::get_param_int(params, "max_iter", max_iter_);
+    lr_ = utils::get_param_double(params, "lr", lr_);
+    random_state_ = utils::get_param_int(params, "random_state", random_state_);
+    return *this;
+}
+
 } // namespace svm
 } // namespace cxml
 

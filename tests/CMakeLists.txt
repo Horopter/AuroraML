@@ -53,6 +53,15 @@ target_link_libraries(test_lda auroraml_core GTest::GTest GTest::Main)
 add_executable(test_gradient_boosting test_gradient_boosting.cpp)
 target_link_libraries(test_gradient_boosting auroraml_core GTest::GTest GTest::Main)
 
+add_executable(test_adaboost test_adaboost.cpp)
+target_link_libraries(test_adaboost auroraml_core GTest::GTest GTest::Main)
+
+add_executable(test_xgboost test_xgboost.cpp)
+target_link_libraries(test_xgboost auroraml_core GTest::GTest GTest::Main)
+
+add_executable(test_catboost test_catboost.cpp)
+target_link_libraries(test_catboost auroraml_core GTest::GTest GTest::Main)
+
 # Enable testing
 enable_testing()
 
@@ -72,3 +81,6 @@ add_test(NAME MetricsTest COMMAND test_metrics)
 add_test(NAME ModelSelectionTest COMMAND test_model_selection)
 add_test(NAME LDATest COMMAND test_lda)
 add_test(NAME GradientBoostingTest COMMAND test_gradient_boosting)
+add_test(NAME AdaBoostTest COMMAND test_adaboost)
+add_test(NAME XGBoostTest COMMAND test_xgboost)
+add_test(NAME CatBoostTest COMMAND test_catboost)

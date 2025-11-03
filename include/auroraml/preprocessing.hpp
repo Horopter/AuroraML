@@ -183,5 +183,76 @@ public:
     const std::vector<std::vector<double>>& categories() const { return categories_; }
 };
 
+/**
+ * Normalizer - Normalize samples individually to unit norm
+ */
+class Normalizer : public Estimator, public Transformer {
+private:
+    std::string norm_;
+    bool fitted_;
+
+public:
+    Normalizer(const std::string& norm = "l2");
+    
+    Estimator& fit(const MatrixXd& X, const VectorXd& y) override;
+    MatrixXd transform(const MatrixXd& X) const override;
+    MatrixXd inverse_transform(const MatrixXd& X) const override;
+    MatrixXd fit_transform(const MatrixXd& X, const VectorXd& y) override;
+    Params get_params() const override;
+    Estimator& set_params(const Params& params) override;
+    bool is_fitted() const override { return fitted_; }
+};
+
+/**
+ * PolynomialFeatures - Generate polynomial and interaction features
+ */
+class PolynomialFeatures : public Estimator, public Transformer {
+private:
+    int degree_;
+    bool interaction_only_;
+    bool include_bias_;
+    bool fitted_;
+    int n_features_;
+    int n_output_features_;
+
+public:
+    PolynomialFeatures(int degree = 2, bool interaction_only = false, bool include_bias = true);
+    
+    Estimator& fit(const MatrixXd& X, const VectorXd& y) override;
+    MatrixXd transform(const MatrixXd& X) const override;
+    MatrixXd inverse_transform(const MatrixXd& X) const override;
+    MatrixXd fit_transform(const MatrixXd& X, const VectorXd& y) override;
+    Params get_params() const override;
+    Estimator& set_params(const Params& params) override;
+    bool is_fitted() const override { return fitted_; }
+    
+    int n_input_features() const { return n_features_; }
+    int n_output_features() const { return n_output_features_; }
+};
+
+/**
+ * SimpleImputer - Imputation transformer for completing missing values
+ */
+class SimpleImputer : public Estimator, public Transformer {
+private:
+    std::string strategy_;
+    double fill_value_;
+    bool fitted_;
+    VectorXd statistics_;
+
+public:
+    SimpleImputer(const std::string& strategy = "mean", double fill_value = 0.0);
+    
+    Estimator& fit(const MatrixXd& X, const VectorXd& y) override;
+    MatrixXd transform(const MatrixXd& X) const override;
+    MatrixXd inverse_transform(const MatrixXd& X) const override;
+    MatrixXd fit_transform(const MatrixXd& X, const VectorXd& y) override;
+    Params get_params() const override;
+    Estimator& set_params(const Params& params) override;
+    bool is_fitted() const override { return fitted_; }
+    
+    VectorXd statistics() const { return statistics_; }
+};
+
 } // namespace preprocessing
 } // namespace cxml

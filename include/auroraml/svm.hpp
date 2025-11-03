@@ -43,6 +43,38 @@ public:
     void load(const std::string& filepath);
 };
 
+/**
+ * Support Vector Regression (SVR)
+ * Uses epsilon-insensitive loss function
+ */
+class SVR : public Estimator, public Regressor {
+private:
+    VectorXd w_;
+    double b_ = 0.0;
+    bool fitted_ = false;
+    
+    // params
+    double C_;          // regularization strength
+    double epsilon_;    // epsilon-tube width
+    int max_iter_;
+    double lr_;         // learning rate
+    int random_state_;
+
+public:
+    SVR(double C = 1.0, double epsilon = 0.1, int max_iter = 1000, 
+        double lr = 0.01, int random_state = -1);
+    
+    Estimator& fit(const MatrixXd& X, const VectorXd& y) override;
+    VectorXd predict(const MatrixXd& X) const override;
+    
+    Params get_params() const override;
+    Estimator& set_params(const Params& params) override;
+    bool is_fitted() const override { return fitted_; }
+    
+    VectorXd coef() const { return w_; }
+    double intercept() const { return b_; }
+};
+
 } // namespace svm
 } // namespace cxml
 
