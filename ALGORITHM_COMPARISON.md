@@ -216,23 +216,13 @@ This document provides a comprehensive comparison of algorithms available in sci
 ## 📊 Metrics
 
 ### ✅ Implemented in AuroraML
-- **accuracy_score** - Classification accuracy
-- **precision_score** - Precision (macro/weighted)
-- **recall_score** - Recall (macro/weighted)
-- **f1_score** - F1 score (macro/weighted)
-- **confusion_matrix** - Confusion matrix
-- **classification_report** - Classification report
-- **mean_squared_error** - MSE
-- **root_mean_squared_error** - RMSE
-- **mean_absolute_error** - MAE
-- **r2_score** - R² score
-- **explained_variance_score** - Explained variance
-- **mean_absolute_percentage_error** - MAPE
 
-### ❌ Missing from AuroraML
+#### Classification Metrics
+- **accuracy_score** - Classification accuracy
 - **balanced_accuracy_score** - Balanced accuracy
 - **top_k_accuracy_score** - Top-k accuracy
-- **roc_auc_score** - ROC AUC score
+- **roc_auc_score** - ROC AUC score (binary classification)
+- **roc_auc_score_multiclass** - ROC AUC score (multiclass)
 - **average_precision_score** - Average precision
 - **log_loss** - Log loss
 - **hinge_loss** - Hinge loss
@@ -242,6 +232,16 @@ This document provides a comprehensive comparison of algorithms available in sci
 - **jaccard_score** - Jaccard score
 - **zero_one_loss** - Zero-one loss
 - **brier_score_loss** - Brier score
+- **precision_score** - Precision (macro/weighted/micro)
+- **recall_score** - Recall (macro/weighted/micro)
+- **f1_score** - F1 score (macro/weighted/micro)
+- **confusion_matrix** - Confusion matrix
+- **classification_report** - Classification report
+
+#### Regression Metrics
+- **mean_squared_error** - MSE
+- **root_mean_squared_error** - RMSE
+- **mean_absolute_error** - MAE
 - **median_absolute_error** - Median absolute error
 - **max_error** - Max error
 - **mean_poisson_deviance** - Mean Poisson deviance
@@ -250,10 +250,17 @@ This document provides a comprehensive comparison of algorithms available in sci
 - **d2_tweedie_score** - D² Tweedie score
 - **d2_pinball_score** - D² Pinball score
 - **d2_absolute_error_score** - D² Absolute error score
+- **r2_score** - R² score
+- **explained_variance_score** - Explained variance
+- **mean_absolute_percentage_error** - MAPE
+
+#### Clustering Metrics
 - **silhouette_score** - Silhouette score (clustering)
 - **silhouette_samples** - Silhouette samples
 - **calinski_harabasz_score** - Calinski-Harabasz index
 - **davies_bouldin_score** - Davies-Bouldin index
+
+#### Clustering Comparison Metrics
 - **adjusted_rand_score** - Adjusted Rand index
 - **adjusted_mutual_info_score** - Adjusted mutual information
 - **normalized_mutual_info_score** - Normalized mutual information
@@ -261,6 +268,9 @@ This document provides a comprehensive comparison of algorithms available in sci
 - **completeness_score** - Completeness score
 - **v_measure_score** - V-measure score
 - **fowlkes_mallows_score** - Fowlkes-Mallows index
+
+### ❌ Missing from AuroraML
+- None! All major metrics from scikit-learn are now implemented.
 
 ---
 
@@ -333,9 +343,9 @@ This document provides a comprehensive comparison of algorithms available in sci
 - **Coverage**: ~35%
 
 ### Metrics
-- **AuroraML**: 12 metrics
+- **AuroraML**: 53 metrics
 - **Scikit-learn**: ~60+ metrics
-- **Coverage**: ~20%
+- **Coverage**: ~88%
 
 ---
 
@@ -355,7 +365,7 @@ This document provides a comprehensive comparison of algorithms available in sci
 9. **Pipeline** - Pipeline for chaining transformers
 10. **ColumnTransformer** - Feature-specific transformations
 11. **More clustering** - SpectralClustering, OPTICS, AffinityPropagation
-12. **More metrics** - ROC-AUC, balanced accuracy, silhouette score
+12. ~~**More metrics** - ROC-AUC, balanced accuracy, silhouette score~~ ✅ **COMPLETED**
 13. **Outlier detection** - IsolationForest, LocalOutlierFactor
 14. **Imputation** - KNNImputer, IterativeImputer
 
@@ -371,4 +381,16 @@ This document provides a comprehensive comparison of algorithms available in sci
 
 ## 📅 Last Updated
 January 2025
+
+## 🎉 Recent Updates
+
+### ✅ Metrics Implementation (January 2025)
+- **COMPLETED**: All major scikit-learn metrics are now implemented!
+- Added 41 new metrics covering:
+  - Classification: ROC-AUC, balanced accuracy, log loss, hinge loss, Cohen's kappa, Matthews correlation, Jaccard score, Brier score, and more
+  - Regression: Median absolute error, max error, Poisson/Gamma/Tweedie deviances, D² scores, and more
+  - Clustering: Silhouette score, Calinski-Harabasz index, Davies-Bouldin index
+  - Clustering comparison: Adjusted Rand index, mutual information scores, homogeneity, completeness, V-measure, Fowlkes-Mallows index
+- **Total metrics**: 53 (up from 12)
+- **Coverage**: 88% of scikit-learn metrics
 
