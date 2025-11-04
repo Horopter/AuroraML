@@ -71,7 +71,7 @@ class TestLinearSVC(unittest.TestCase):
         self.assertIn('random_state', params)
         
         # Test parameter setting
-        model.set_params(C=2.0)
+        model.set_params({'C': '2.0'})
         self.assertEqual(model.get_params()['C'], "2.000000")
         
     def test_performance(self):
@@ -152,6 +152,7 @@ class TestLinearSVCIntegration(unittest.TestCase):
         np.random.seed(42)
         self.X = np.random.randn(100, 4).astype(np.float64)
         self.y = (self.X[:, 0] + self.X[:, 1] > 0).astype(np.int32)
+        self.X_test = np.random.randn(20, 4).astype(np.float64)
         
     def test_cross_validation_compatibility(self):
         """Test compatibility with cross-validation"""
@@ -246,7 +247,7 @@ class TestLinearSVCIntegration(unittest.TestCase):
         # All C values should give reasonable performance
         for acc in accuracies:
             self.assertGreater(acc, 0.5)
-            
+    
     def test_convergence(self):
         """Test that model converges with sufficient iterations"""
         import auroraml.svm as aml_svm

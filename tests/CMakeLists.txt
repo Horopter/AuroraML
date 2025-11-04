@@ -65,22 +65,59 @@ target_link_libraries(test_catboost auroraml_core GTest::GTest GTest::Main)
 # Enable testing
 enable_testing()
 
-# Add tests
+# Add tests with 5-minute (300 second) timeout
+set(TEST_TIMEOUT 300)
+
 add_test(NAME LinearModelsTest COMMAND test_linear_models)
+set_tests_properties(LinearModelsTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME PreprocessingTest COMMAND test_preprocessing)
+set_tests_properties(PreprocessingTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME NeighborsTest COMMAND test_neighbors)
+set_tests_properties(NeighborsTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME NaiveBayesTest COMMAND test_naive_bayes)
+set_tests_properties(NaiveBayesTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME KMeansTest COMMAND test_kmeans)
+set_tests_properties(KMeansTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME PCATest COMMAND test_pca)
+set_tests_properties(PCATest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME TreeTest COMMAND test_tree)
+set_tests_properties(TreeTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME SVMTest COMMAND test_svm)
+set_tests_properties(SVMTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME EnsembleTest COMMAND test_ensemble)
+set_tests_properties(EnsembleTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME ClusterTest COMMAND test_cluster)
+set_tests_properties(ClusterTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME DecompositionTest COMMAND test_decomposition)
+set_tests_properties(DecompositionTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME MetricsTest COMMAND test_metrics)
+set_tests_properties(MetricsTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME ModelSelectionTest COMMAND test_model_selection)
+set_tests_properties(ModelSelectionTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME LDATest COMMAND test_lda)
+set_tests_properties(LDATest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME GradientBoostingTest COMMAND test_gradient_boosting)
+set_tests_properties(GradientBoostingTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME AdaBoostTest COMMAND test_adaboost)
+set_tests_properties(AdaBoostTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME XGBoostTest COMMAND test_xgboost)
+set_tests_properties(XGBoostTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})
+
 add_test(NAME CatBoostTest COMMAND test_catboost)
+set_tests_properties(CatBoostTest PROPERTIES TIMEOUT ${TEST_TIMEOUT})

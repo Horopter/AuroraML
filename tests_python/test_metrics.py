@@ -316,5 +316,301 @@ class TestMetricsIntegration(unittest.TestCase):
         r2 = aml_metrics.r2_score(y_true_reg, y_pred_reg)
         self.assertLessEqual(r2, 1.0)
 
+class TestAdditionalClassificationMetrics(unittest.TestCase):
+    """Test additional classification metrics"""
+    
+    def setUp(self):
+        """Set up test data"""
+        self.y_true = np.array([0, 1, 0, 1, 0, 1, 1, 0, 1, 0])
+        self.y_pred = np.array([0, 1, 1, 1, 0, 1, 0, 0, 1, 0])
+        self.y_score = np.array([0.1, 0.9, 0.3, 0.8, 0.2, 0.95, 0.4, 0.1, 0.85, 0.05])
+        self.y_proba = np.array([
+            [0.9, 0.1], [0.2, 0.8], [0.3, 0.7], [0.1, 0.9], [0.8, 0.2],
+            [0.05, 0.95], [0.6, 0.4], [0.7, 0.3], [0.15, 0.85], [0.95, 0.05]
+        ])
+        
+    def test_balanced_accuracy_score(self):
+        """Test balanced accuracy score"""
+        import auroraml.metrics as aml_metrics
+        
+        balanced_acc = aml_metrics.balanced_accuracy_score(self.y_true, self.y_pred)
+        
+        self.assertGreaterEqual(balanced_acc, 0.0)
+        self.assertLessEqual(balanced_acc, 1.0)
+        
+    def test_roc_auc_score(self):
+        """Test ROC AUC score"""
+        import auroraml.metrics as aml_metrics
+        
+        roc_auc = aml_metrics.roc_auc_score(self.y_true, self.y_score)
+        
+        self.assertGreaterEqual(roc_auc, 0.0)
+        self.assertLessEqual(roc_auc, 1.0)
+        
+    def test_average_precision_score(self):
+        """Test average precision score"""
+        import auroraml.metrics as aml_metrics
+        
+        ap = aml_metrics.average_precision_score(self.y_true, self.y_score)
+        
+        self.assertGreaterEqual(ap, 0.0)
+        self.assertLessEqual(ap, 1.0)
+        
+    def test_log_loss(self):
+        """Test log loss"""
+        import auroraml.metrics as aml_metrics
+        
+        log_loss_val = aml_metrics.log_loss(self.y_true, self.y_proba)
+        
+        self.assertGreaterEqual(log_loss_val, 0.0)
+        
+    def test_hinge_loss(self):
+        """Test hinge loss"""
+        import auroraml.metrics as aml_metrics
+        
+        decision = self.y_score * 2.0 - 1.0  # Convert to [-1, 1]
+        hinge = aml_metrics.hinge_loss(self.y_true, decision)
+        
+        self.assertGreaterEqual(hinge, 0.0)
+        
+    def test_cohen_kappa_score(self):
+        """Test Cohen's kappa score"""
+        import auroraml.metrics as aml_metrics
+        
+        kappa = aml_metrics.cohen_kappa_score(self.y_true, self.y_pred)
+        
+        self.assertGreaterEqual(kappa, -1.0)
+        self.assertLessEqual(kappa, 1.0)
+        
+    def test_matthews_corrcoef(self):
+        """Test Matthews correlation coefficient"""
+        import auroraml.metrics as aml_metrics
+        
+        mcc = aml_metrics.matthews_corrcoef(self.y_true, self.y_pred)
+        
+        self.assertGreaterEqual(mcc, -1.0)
+        self.assertLessEqual(mcc, 1.0)
+        
+    def test_hamming_loss(self):
+        """Test Hamming loss"""
+        import auroraml.metrics as aml_metrics
+        
+        hamming = aml_metrics.hamming_loss(self.y_true, self.y_pred)
+        
+        self.assertGreaterEqual(hamming, 0.0)
+        self.assertLessEqual(hamming, 1.0)
+        
+    def test_jaccard_score(self):
+        """Test Jaccard score"""
+        import auroraml.metrics as aml_metrics
+        
+        jaccard = aml_metrics.jaccard_score(self.y_true, self.y_pred, "macro")
+        
+        self.assertGreaterEqual(jaccard, 0.0)
+        self.assertLessEqual(jaccard, 1.0)
+        
+    def test_zero_one_loss(self):
+        """Test zero-one loss"""
+        import auroraml.metrics as aml_metrics
+        
+        zero_one = aml_metrics.zero_one_loss(self.y_true, self.y_pred)
+        
+        self.assertGreaterEqual(zero_one, 0.0)
+        self.assertLessEqual(zero_one, 1.0)
+        
+    def test_brier_score_loss(self):
+        """Test Brier score loss"""
+        import auroraml.metrics as aml_metrics
+        
+        brier = aml_metrics.brier_score_loss(self.y_true, self.y_score)
+        
+        self.assertGreaterEqual(brier, 0.0)
+        self.assertLessEqual(brier, 1.0)
+
+class TestAdditionalRegressionMetrics(unittest.TestCase):
+    """Test additional regression metrics"""
+    
+    def setUp(self):
+        """Set up test data"""
+        self.y_true = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0])
+        self.y_pred = np.array([1.1, 1.9, 3.1, 3.9, 5.1, 5.8, 7.2, 7.9])
+        self.y_true_positive = np.array([2.0, 3.0, 4.0, 5.0, 6.0])
+        self.y_pred_positive = np.array([2.1, 2.9, 4.1, 4.9, 6.1])
+        
+    def test_median_absolute_error(self):
+        """Test median absolute error"""
+        import auroraml.metrics as aml_metrics
+        
+        median_ae = aml_metrics.median_absolute_error(self.y_true, self.y_pred)
+        
+        self.assertGreaterEqual(median_ae, 0.0)
+        
+    def test_max_error(self):
+        """Test max error"""
+        import auroraml.metrics as aml_metrics
+        
+        max_err = aml_metrics.max_error(self.y_true, self.y_pred)
+        
+        self.assertGreaterEqual(max_err, 0.0)
+        
+    def test_mean_poisson_deviance(self):
+        """Test mean Poisson deviance"""
+        import auroraml.metrics as aml_metrics
+        
+        poisson_dev = aml_metrics.mean_poisson_deviance(self.y_true_positive, self.y_pred_positive)
+        
+        self.assertGreaterEqual(poisson_dev, 0.0)
+        
+    def test_mean_gamma_deviance(self):
+        """Test mean Gamma deviance"""
+        import auroraml.metrics as aml_metrics
+        
+        gamma_dev = aml_metrics.mean_gamma_deviance(self.y_true_positive, self.y_pred_positive)
+        
+        self.assertGreaterEqual(gamma_dev, 0.0)
+        
+    def test_mean_tweedie_deviance(self):
+        """Test mean Tweedie deviance"""
+        import auroraml.metrics as aml_metrics
+        
+        tweedie_dev = aml_metrics.mean_tweedie_deviance(self.y_true_positive, self.y_pred_positive, 1.5)
+        
+        self.assertGreaterEqual(tweedie_dev, 0.0)
+        
+    def test_d2_tweedie_score(self):
+        """Test D² Tweedie score"""
+        import auroraml.metrics as aml_metrics
+        
+        d2 = aml_metrics.d2_tweedie_score(self.y_true_positive, self.y_pred_positive, 1.0)
+        
+        # D² can be negative or positive
+        self.assertFalse(np.isnan(d2))
+        
+    def test_d2_pinball_score(self):
+        """Test D² pinball score"""
+        import auroraml.metrics as aml_metrics
+        
+        d2_pinball = aml_metrics.d2_pinball_score(self.y_true, self.y_pred, 0.5)
+        
+        self.assertFalse(np.isnan(d2_pinball))
+        
+    def test_d2_absolute_error_score(self):
+        """Test D² absolute error score"""
+        import auroraml.metrics as aml_metrics
+        
+        d2_ae = aml_metrics.d2_absolute_error_score(self.y_true, self.y_pred)
+        
+        self.assertFalse(np.isnan(d2_ae))
+
+class TestClusteringMetrics(unittest.TestCase):
+    """Test clustering metrics"""
+    
+    def setUp(self):
+        """Set up test data"""
+        np.random.seed(42)
+        self.X = np.random.rand(30, 3)
+        self.labels = np.array([0] * 10 + [1] * 10 + [2] * 10)
+        self.labels_true = np.array([0] * 10 + [1] * 10 + [2] * 10)
+        self.labels_pred = np.array([1] * 10 + [2] * 10 + [0] * 10)  # Permuted
+        
+    def test_silhouette_score(self):
+        """Test silhouette score"""
+        import auroraml.metrics as aml_metrics
+        
+        silhouette = aml_metrics.silhouette_score(self.X, self.labels)
+        
+        self.assertGreaterEqual(silhouette, -1.0)
+        self.assertLessEqual(silhouette, 1.0)
+        
+    def test_silhouette_samples(self):
+        """Test silhouette samples"""
+        import auroraml.metrics as aml_metrics
+        
+        samples = aml_metrics.silhouette_samples(self.X, self.labels)
+        
+        self.assertEqual(len(samples), self.X.shape[0])
+        for s in samples:
+            self.assertGreaterEqual(s, -1.0)
+            self.assertLessEqual(s, 1.0)
+        
+    def test_calinski_harabasz_score(self):
+        """Test Calinski-Harabasz score"""
+        import auroraml.metrics as aml_metrics
+        
+        ch_score = aml_metrics.calinski_harabasz_score(self.X, self.labels)
+        
+        self.assertGreaterEqual(ch_score, 0.0)
+        
+    def test_davies_bouldin_score(self):
+        """Test Davies-Bouldin score"""
+        import auroraml.metrics as aml_metrics
+        
+        db_score = aml_metrics.davies_bouldin_score(self.X, self.labels)
+        
+        self.assertGreaterEqual(db_score, 0.0)
+        
+    def test_adjusted_rand_score(self):
+        """Test adjusted Rand score"""
+        import auroraml.metrics as aml_metrics
+        
+        ari = aml_metrics.adjusted_rand_score(self.labels_true, self.labels_pred)
+        
+        self.assertGreaterEqual(ari, -1.0)
+        self.assertLessEqual(ari, 1.0)
+        
+    def test_adjusted_mutual_info_score(self):
+        """Test adjusted mutual information score"""
+        import auroraml.metrics as aml_metrics
+        
+        ami = aml_metrics.adjusted_mutual_info_score(self.labels_true, self.labels_pred)
+        
+        self.assertGreaterEqual(ami, -1.0)
+        self.assertLessEqual(ami, 1.0 + 1e-10)  # Allow for floating point precision
+        
+    def test_normalized_mutual_info_score(self):
+        """Test normalized mutual information score"""
+        import auroraml.metrics as aml_metrics
+        
+        nmi = aml_metrics.normalized_mutual_info_score(self.labels_true, self.labels_pred)
+        
+        self.assertGreaterEqual(nmi, 0.0)
+        self.assertLessEqual(nmi, 1.0)
+        
+    def test_homogeneity_score(self):
+        """Test homogeneity score"""
+        import auroraml.metrics as aml_metrics
+        
+        homogeneity = aml_metrics.homogeneity_score(self.labels_true, self.labels_pred)
+        
+        self.assertGreaterEqual(homogeneity, 0.0)
+        self.assertLessEqual(homogeneity, 1.0)
+        
+    def test_completeness_score(self):
+        """Test completeness score"""
+        import auroraml.metrics as aml_metrics
+        
+        completeness = aml_metrics.completeness_score(self.labels_true, self.labels_pred)
+        
+        self.assertGreaterEqual(completeness, 0.0)
+        self.assertLessEqual(completeness, 1.0)
+        
+    def test_v_measure_score(self):
+        """Test V-measure score"""
+        import auroraml.metrics as aml_metrics
+        
+        v_measure = aml_metrics.v_measure_score(self.labels_true, self.labels_pred)
+        
+        self.assertGreaterEqual(v_measure, 0.0)
+        self.assertLessEqual(v_measure, 1.0)
+        
+    def test_fowlkes_mallows_score(self):
+        """Test Fowlkes-Mallows score"""
+        import auroraml.metrics as aml_metrics
+        
+        fm_score = aml_metrics.fowlkes_mallows_score(self.labels_true, self.labels_pred)
+        
+        self.assertGreaterEqual(fm_score, 0.0)
+        self.assertLessEqual(fm_score, 1.0)
+
 if __name__ == '__main__':
     unittest.main()

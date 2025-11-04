@@ -279,33 +279,59 @@ This document provides a comprehensive comparison of algorithms available in sci
 ### ✅ Implemented in AuroraML
 - **PCG64** - Random number generator
 - Model persistence (save/load) for most algorithms
+- **pipeline** module - Pipeline, FeatureUnion ✅
+- **compose** module - ColumnTransformer, TransformedTargetRegressor ✅
+- **feature_selection** module - Feature selection methods ✅
+  - VarianceThreshold, SelectKBest, SelectPercentile
+  - Scoring functions: f_classif, f_regression, mutual_info_classif, mutual_info_regression, chi2
+- **impute** module - Advanced imputation ✅
+  - KNNImputer, IterativeImputer
+- **inspection** module - Model inspection ✅
+  - PermutationImportance, PartialDependence
+- **calibration** module - Probability calibration ✅
+  - CalibratedClassifierCV
+- **isotonic** module - Isotonic regression ✅
+  - IsotonicRegression
+- **discriminant_analysis** module - Discriminant analysis ✅
+  - QuadraticDiscriminantAnalysis
+- **naive_bayes** module - Additional NB variants ✅
+  - MultinomialNB, BernoulliNB, ComplementNB
+- **tree** module - Additional tree variants ✅
+  - ExtraTreeClassifier, ExtraTreeRegressor
+- **ensemble** module - Additional ensemble methods ✅
+  - BaggingClassifier, BaggingRegressor
+  - VotingClassifier, VotingRegressor
+  - StackingClassifier, StackingRegressor
+- **cluster** module - Additional clustering methods ✅
+  - SpectralClustering, MiniBatchKMeans
+- **outlier_detection** module - Outlier detection ✅
+  - IsolationForest, LocalOutlierFactor
+- **mixture** module - Gaussian Mixture Models ✅
+  - GaussianMixture
+- **semi_supervised** module - Semi-supervised learning ✅
+  - LabelPropagation, LabelSpreading
+- **preprocessing** module - Extended preprocessing ✅
+  - MaxAbsScaler, Binarizer
+- **utils** module - Various utilities ✅
+  - Multiclass utilities (is_multiclass, unique_labels, type_of_target)
+  - Resampling (resample, shuffle, train_test_split_stratified)
+  - Validation (check_finite, check_has_nan, check_has_inf)
+  - Class weight utilities
+  - Array utilities
 
 ### ❌ Missing from AuroraML
-- **calibration** module - Probability calibration (CalibratedClassifierCV)
-- **feature_selection** module - Feature selection methods
-  - SelectKBest, SelectPercentile, SelectFpr, SelectFdr, SelectFwe
-  - GenericUnivariateSelect, SelectFromModel, RFE, RFECV
-  - VarianceThreshold, mutual_info_classif, chi2, f_classif, etc.
-- **impute** module - Advanced imputation (KNNImputer, IterativeImputer)
-- **pipeline** module - Pipeline, FeatureUnion
-- **compose** module - ColumnTransformer, TransformedTargetRegressor
-- **inspection** module - Permutation importance, partial dependence
-- **manifold** module - Manifold learning (t-SNE, Isomap, etc.)
-- **mixture** module - Gaussian Mixture Models
-- **semi_supervised** module - Semi-supervised learning
-- **isotonic** module - Isotonic regression
-- **discriminant_analysis** module - LDA, QDA (LDA exists as transformer)
+- **manifold** module - Manifold learning (t-SNE, Isomap, LocallyLinearEmbedding, etc.)
 - **gaussian_process** module - Gaussian Process models
 - **neural_network** module - MLPClassifier, MLPRegressor
 - **kernel_approximation** module - Kernel approximation methods
 - **kernel_ridge** module - Kernel ridge regression
-- **naive_bayes** module - Additional NB variants (Multinomial, Bernoulli, etc.)
-- **tree** module - Additional tree variants (ExtraTree)
-- **ensemble** module - Additional ensemble methods (Bagging, Stacking, Voting)
-- **cluster** module - Additional clustering methods (AffinityPropagation, MeanShift, etc.)
+- **feature_selection** module - Additional methods
+  - SelectFpr, SelectFdr, SelectFwe, GenericUnivariateSelect
+  - SelectFromModel, RFE, RFECV
+- **cluster** module - Additional clustering methods
+  - AffinityPropagation, MeanShift, OPTICS, Birch
 - **covariance** module - Covariance estimation
-- **outlier_detection** module - Isolation Forest, Local Outlier Factor, One-Class SVM
-- **utils** module - Various utilities (multiclass, resample, shuffle, etc.)
+- **outlier_detection** module - One-Class SVM
 - **datasets** module - Sample datasets
 
 ---
@@ -313,9 +339,9 @@ This document provides a comprehensive comparison of algorithms available in sci
 ## 📝 Summary Statistics
 
 ### Classification
-- **AuroraML**: 10 algorithms
+- **AuroraML**: 20 algorithms (including variants)
 - **Scikit-learn**: ~50+ algorithms
-- **Coverage**: ~20%
+- **Coverage**: ~40%
 
 ### Regression
 - **AuroraML**: 11 algorithms
@@ -323,14 +349,14 @@ This document provides a comprehensive comparison of algorithms available in sci
 - **Coverage**: ~37%
 
 ### Clustering
-- **AuroraML**: 3 algorithms
+- **AuroraML**: 5 algorithms
 - **Scikit-learn**: ~10+ algorithms
-- **Coverage**: ~30%
+- **Coverage**: ~50%
 
 ### Preprocessing
-- **AuroraML**: 9 transformers
+- **AuroraML**: 11 transformers
 - **Scikit-learn**: ~30+ transformers
-- **Coverage**: ~30%
+- **Coverage**: ~37%
 
 ### Dimensionality Reduction
 - **AuroraML**: 3 methods
@@ -355,19 +381,25 @@ This document provides a comprehensive comparison of algorithms available in sci
 1. **SVC** - Support Vector Classifier with kernels (RBF, polynomial, sigmoid)
 2. **SGDClassifier/SGDRegressor** - Stochastic Gradient Descent (very common)
 3. **MLPClassifier/MLPRegressor** - Neural networks (multi-layer perceptron)
-4. **MultinomialNB/BernoulliNB** - Additional Naive Bayes variants
-5. **BaggingClassifier/BaggingRegressor** - Bagging ensemble
-6. **StackingClassifier/StackingRegressor** - Stacking ensemble
-7. **VotingClassifier/VotingRegressor** - Voting ensemble
 
 ### Medium Priority (Useful Features)
-8. **Feature Selection** - SelectKBest, RFE, SelectFromModel
-9. **Pipeline** - Pipeline for chaining transformers
-10. **ColumnTransformer** - Feature-specific transformations
-11. **More clustering** - SpectralClustering, OPTICS, AffinityPropagation
+4. ~~**MultinomialNB/BernoulliNB** - Additional Naive Bayes variants~~ ✅ **COMPLETED**
+5. ~~**BaggingClassifier/BaggingRegressor** - Bagging ensemble~~ ✅ **COMPLETED**
+6. ~~**StackingClassifier/StackingRegressor** - Stacking ensemble~~ ✅ **COMPLETED**
+7. ~~**VotingClassifier/VotingRegressor** - Voting ensemble~~ ✅ **COMPLETED**
+8. ~~**Feature Selection** - SelectKBest, VarianceThreshold~~ ✅ **COMPLETED**
+9. ~~**Pipeline** - Pipeline for chaining transformers~~ ✅ **COMPLETED**
+10. ~~**ColumnTransformer** - Feature-specific transformations~~ ✅ **COMPLETED**
+11. ~~**More clustering** - SpectralClustering, MiniBatchKMeans~~ ✅ **COMPLETED**
 12. ~~**More metrics** - ROC-AUC, balanced accuracy, silhouette score~~ ✅ **COMPLETED**
-13. **Outlier detection** - IsolationForest, LocalOutlierFactor
-14. **Imputation** - KNNImputer, IterativeImputer
+13. ~~**Outlier detection** - IsolationForest, LocalOutlierFactor~~ ✅ **COMPLETED**
+14. ~~**Imputation** - KNNImputer, IterativeImputer~~ ✅ **COMPLETED**
+15. ~~**Calibration** - CalibratedClassifierCV~~ ✅ **COMPLETED**
+16. ~~**Semi-supervised** - LabelPropagation, LabelSpreading~~ ✅ **COMPLETED**
+17. ~~**Mixture models** - GaussianMixture~~ ✅ **COMPLETED**
+18. ~~**Isotonic regression** - IsotonicRegression~~ ✅ **COMPLETED**
+19. ~~**Discriminant analysis** - QuadraticDiscriminantAnalysis~~ ✅ **COMPLETED**
+20. ~~**ExtraTree** - ExtraTreeClassifier, ExtraTreeRegressor~~ ✅ **COMPLETED**
 
 ### Lower Priority (Niche Use Cases)
 15. **Gaussian Process** models
@@ -383,6 +415,27 @@ This document provides a comprehensive comparison of algorithms available in sci
 January 2025
 
 ## 🎉 Recent Updates
+
+### ✅ Utilities & Modules Implementation (January 2025)
+- **COMPLETED**: 20 major utility modules implemented!
+- **Pipeline & Composition**: Pipeline, FeatureUnion, ColumnTransformer, TransformedTargetRegressor
+- **Feature Selection**: VarianceThreshold, SelectKBest, SelectPercentile with scoring functions
+- **Imputation**: KNNImputer, IterativeImputer
+- **Model Inspection**: PermutationImportance, PartialDependence
+- **Calibration**: CalibratedClassifierCV
+- **Isotonic Regression**: IsotonicRegression
+- **Discriminant Analysis**: QuadraticDiscriminantAnalysis
+- **Naive Bayes Variants**: MultinomialNB, BernoulliNB, ComplementNB
+- **ExtraTree**: ExtraTreeClassifier, ExtraTreeRegressor
+- **Ensemble Wrappers**: Bagging, Voting, Stacking (classifier and regressor)
+- **Clustering Extended**: SpectralClustering, MiniBatchKMeans
+- **Outlier Detection**: IsolationForest, LocalOutlierFactor
+- **Mixture Models**: GaussianMixture
+- **Semi-supervised**: LabelPropagation, LabelSpreading
+- **Preprocessing Extended**: MaxAbsScaler, Binarizer
+- **Utils Module**: Multiclass utilities, resampling, validation, class weights, array utilities
+- **Total new modules**: 20
+- **Coverage**: Significantly improved across all categories
 
 ### ✅ Metrics Implementation (January 2025)
 - **COMPLETED**: All major scikit-learn metrics are now implemented!
