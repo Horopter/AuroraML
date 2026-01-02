@@ -18,6 +18,9 @@ IsolationForest::IsolationForest(
     contamination_(contamination), random_state_(random_state), fitted_(false) {
 }
 
+IsolationForest::IsolationForest(int n_estimators, double contamination, int random_state)
+    : IsolationForest(n_estimators, -1, contamination, random_state) {}
+
 std::unique_ptr<tree::TreeNode> IsolationForest::build_isolation_tree(
     const MatrixXd& X, const std::vector<int>& samples, int depth, int max_depth, std::mt19937& rng) {
     
@@ -156,6 +159,7 @@ VectorXi IsolationForest::predict(const MatrixXd& X) const {
     VectorXd scores_sorted = scores;
     std::sort(scores_sorted.data(), scores_sorted.data() + scores_sorted.size());
     int threshold_idx = static_cast<int>((1.0 - contamination_) * scores_sorted.size());
+    threshold_idx = std::max(0, std::min(threshold_idx, static_cast<int>(scores_sorted.size()) - 1));
     double threshold = scores_sorted(threshold_idx);
     
     VectorXi predictions = VectorXi::Zero(X.rows());
@@ -239,6 +243,9 @@ double LocalOutlierFactor::local_reachability_density(const MatrixXd& X, int sam
 }
 
 Estimator& LocalOutlierFactor::fit(const MatrixXd& X, const VectorXd& y) {
+    if (n_neighbors_ <= 0) {
+        throw std::invalid_argument("n_neighbors must be positive");
+    }
     validation::check_X(X);
     
     X_fitted_ = X;
@@ -331,4 +338,3 @@ Estimator& LocalOutlierFactor::set_params(const Params& params) {
 
 } // namespace outlier_detection
 } // namespace auroraml
-

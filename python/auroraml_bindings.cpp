@@ -2,6 +2,8 @@
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 #include <pybind11/eigen.h>
+#include <pybind11/functional.h>
+#include <map>
 
 #include "auroraml/base.hpp"
 #include "auroraml/random.hpp"
@@ -16,6 +18,7 @@
 #include "auroraml/pca.hpp"
 #include "auroraml/dbscan.hpp"
 #include "auroraml/truncated_svd.hpp"
+#include "auroraml/decomposition_extended.hpp"
 #include "auroraml/lda.hpp"
 #include "auroraml/agglomerative.hpp"
 #include "auroraml/svm.hpp"
@@ -26,11 +29,15 @@
 #include "auroraml/catboost.hpp"
 #include "auroraml/pipeline.hpp"
 #include "auroraml/compose.hpp"
+#include "auroraml/neural_network.hpp"
 #include "auroraml/feature_selection.hpp"
 #include "auroraml/impute.hpp"
 #include "auroraml/utils.hpp"
 #include "auroraml/inspection.hpp"
 #include "auroraml/ensemble_wrappers.hpp"
+#include "auroraml/dummy.hpp"
+#include "auroraml/covariance.hpp"
+#include "auroraml/meta_estimators.hpp"
 #include "auroraml/calibration.hpp"
 #include "auroraml/isotonic.hpp"
 #include "auroraml/discriminant_analysis.hpp"
@@ -43,6 +50,14 @@
 #include "auroraml/cluster_extended.hpp"
 
 namespace py = pybind11;
+
+static auroraml::Params params_from_kwargs(const py::kwargs& kwargs) {
+    auroraml::Params params;
+    for (auto item : kwargs) {
+        params[py::cast<std::string>(item.first)] = py::str(item.second);
+    }
+    return params;
+}
 
 // Helper function to convert numpy arrays to Eigen matrices
 template<typename T>
@@ -108,8 +123,16 @@ PYBIND11_MODULE(auroraml, m) {
     py::class_<auroraml::random::PCG64>(random_module, "PCG64")
         .def(py::init<uint64_t>(), py::arg("seed") = 0)
         .def("seed", &auroraml::random::PCG64::seed)
-        .def("uniform", &auroraml::random::PCG64::uniform)
-        .def("normal", &auroraml::random::PCG64::normal);
+        .def("uniform", &auroraml::random::PCG64::uniform, py::arg("low") = 0.0, py::arg("high") = 1.0)
+        .def("normal", &auroraml::random::PCG64::normal, py::arg("mean") = 0.0, py::arg("std") = 1.0)
+        .def("randint", &auroraml::random::PCG64::randint, py::arg("low"), py::arg("high"))
+        .def("get_state", &auroraml::random::PCG64::get_state)
+        .def("set_state", &auroraml::random::PCG64::set_state)
+        .def("get_params", &auroraml::random::PCG64::get_params)
+        .def("set_params", &auroraml::random::PCG64::set_params)
+        .def("set_params", [](auroraml::random::PCG64& self, py::kwargs kwargs) -> void {
+            self.set_params(params_from_kwargs(kwargs));
+        });
     
     // Linear models module
     py::module_ linear_module = m.def_submodule("linear_model", "Linear models");
@@ -175,6 +198,346 @@ PYBIND11_MODULE(auroraml, m) {
         .def("intercept", &auroraml::linear_model::LogisticRegression::intercept)
         .def("classes", &auroraml::linear_model::LogisticRegression::classes)
         .def("n_classes", &auroraml::linear_model::LogisticRegression::n_classes);
+
+    py::class_<auroraml::linear_model::Lars, auroraml::Estimator, auroraml::Regressor>(linear_module, "Lars")
+        .def(py::init<int, bool, int, double>(),
+             py::arg("n_nonzero_coefs") = 0, py::arg("fit_intercept") = true,
+             py::arg("max_iter") = 500, py::arg("eps") = 1e-3)
+        .def("fit", &auroraml::linear_model::Lars::fit)
+        .def("predict", &auroraml::linear_model::Lars::predict)
+        .def("get_params", &auroraml::linear_model::Lars::get_params)
+        .def("set_params", &auroraml::linear_model::Lars::set_params)
+        .def("is_fitted", &auroraml::linear_model::Lars::is_fitted)
+        .def("coef", &auroraml::linear_model::Lars::coef)
+        .def("intercept", &auroraml::linear_model::Lars::intercept);
+
+    py::class_<auroraml::linear_model::LarsCV, auroraml::Estimator, auroraml::Regressor>(linear_module, "LarsCV")
+        .def(py::init<int, bool, int, double>(),
+             py::arg("cv") = 5, py::arg("fit_intercept") = true,
+             py::arg("max_iter") = 500, py::arg("eps") = 1e-3)
+        .def("fit", &auroraml::linear_model::LarsCV::fit)
+        .def("predict", &auroraml::linear_model::LarsCV::predict)
+        .def("get_params", &auroraml::linear_model::LarsCV::get_params)
+        .def("set_params", &auroraml::linear_model::LarsCV::set_params)
+        .def("is_fitted", &auroraml::linear_model::LarsCV::is_fitted)
+        .def("best_n_nonzero_coefs", &auroraml::linear_model::LarsCV::best_n_nonzero_coefs)
+        .def("coef", &auroraml::linear_model::LarsCV::coef)
+        .def("intercept", &auroraml::linear_model::LarsCV::intercept);
+
+    py::class_<auroraml::linear_model::LassoLars, auroraml::Estimator, auroraml::Regressor>(linear_module, "LassoLars")
+        .def(py::init<double, bool, int, double>(),
+             py::arg("alpha") = 1.0, py::arg("fit_intercept") = true,
+             py::arg("max_iter") = 1000, py::arg("tol") = 1e-4)
+        .def("fit", &auroraml::linear_model::LassoLars::fit)
+        .def("predict", &auroraml::linear_model::LassoLars::predict)
+        .def("get_params", &auroraml::linear_model::LassoLars::get_params)
+        .def("set_params", &auroraml::linear_model::LassoLars::set_params)
+        .def("is_fitted", &auroraml::linear_model::LassoLars::is_fitted)
+        .def("coef", &auroraml::linear_model::LassoLars::coef)
+        .def("intercept", &auroraml::linear_model::LassoLars::intercept);
+
+    py::class_<auroraml::linear_model::LassoLarsCV, auroraml::Estimator, auroraml::Regressor>(linear_module, "LassoLarsCV")
+        .def(py::init<const std::vector<double>&, int, bool, int, double>(),
+             py::arg("alphas") = std::vector<double>{0.1, 1.0, 10.0}, py::arg("cv") = 5,
+             py::arg("fit_intercept") = true, py::arg("max_iter") = 1000, py::arg("tol") = 1e-4)
+        .def("fit", &auroraml::linear_model::LassoLarsCV::fit)
+        .def("predict", &auroraml::linear_model::LassoLarsCV::predict)
+        .def("get_params", &auroraml::linear_model::LassoLarsCV::get_params)
+        .def("set_params", &auroraml::linear_model::LassoLarsCV::set_params)
+        .def("is_fitted", &auroraml::linear_model::LassoLarsCV::is_fitted)
+        .def("best_alpha", &auroraml::linear_model::LassoLarsCV::best_alpha)
+        .def("coef", &auroraml::linear_model::LassoLarsCV::coef)
+        .def("intercept", &auroraml::linear_model::LassoLarsCV::intercept);
+
+    py::class_<auroraml::linear_model::LassoLarsIC, auroraml::Estimator, auroraml::Regressor>(linear_module, "LassoLarsIC")
+        .def(py::init<const std::vector<double>&, const std::string&, bool, int, double>(),
+             py::arg("alphas") = std::vector<double>{0.1, 1.0, 10.0}, py::arg("criterion") = "aic",
+             py::arg("fit_intercept") = true, py::arg("max_iter") = 1000, py::arg("tol") = 1e-4)
+        .def("fit", &auroraml::linear_model::LassoLarsIC::fit)
+        .def("predict", &auroraml::linear_model::LassoLarsIC::predict)
+        .def("get_params", &auroraml::linear_model::LassoLarsIC::get_params)
+        .def("set_params", &auroraml::linear_model::LassoLarsIC::set_params)
+        .def("is_fitted", &auroraml::linear_model::LassoLarsIC::is_fitted)
+        .def("best_alpha", &auroraml::linear_model::LassoLarsIC::best_alpha)
+        .def("coef", &auroraml::linear_model::LassoLarsIC::coef)
+        .def("intercept", &auroraml::linear_model::LassoLarsIC::intercept);
+
+    py::class_<auroraml::linear_model::OrthogonalMatchingPursuit, auroraml::Estimator, auroraml::Regressor>(linear_module, "OrthogonalMatchingPursuit")
+        .def(py::init<int, bool, int, double>(),
+             py::arg("n_nonzero_coefs") = 0, py::arg("fit_intercept") = true,
+             py::arg("max_iter") = 1000, py::arg("tol") = 1e-4)
+        .def("fit", &auroraml::linear_model::OrthogonalMatchingPursuit::fit)
+        .def("predict", &auroraml::linear_model::OrthogonalMatchingPursuit::predict)
+        .def("get_params", &auroraml::linear_model::OrthogonalMatchingPursuit::get_params)
+        .def("set_params", &auroraml::linear_model::OrthogonalMatchingPursuit::set_params)
+        .def("is_fitted", &auroraml::linear_model::OrthogonalMatchingPursuit::is_fitted)
+        .def("coef", &auroraml::linear_model::OrthogonalMatchingPursuit::coef)
+        .def("intercept", &auroraml::linear_model::OrthogonalMatchingPursuit::intercept);
+
+    py::class_<auroraml::linear_model::OrthogonalMatchingPursuitCV, auroraml::Estimator, auroraml::Regressor>(linear_module, "OrthogonalMatchingPursuitCV")
+        .def(py::init<int, bool, int, double>(),
+             py::arg("cv") = 5, py::arg("fit_intercept") = true,
+             py::arg("max_iter") = 1000, py::arg("tol") = 1e-4)
+        .def("fit", &auroraml::linear_model::OrthogonalMatchingPursuitCV::fit)
+        .def("predict", &auroraml::linear_model::OrthogonalMatchingPursuitCV::predict)
+        .def("get_params", &auroraml::linear_model::OrthogonalMatchingPursuitCV::get_params)
+        .def("set_params", &auroraml::linear_model::OrthogonalMatchingPursuitCV::set_params)
+        .def("is_fitted", &auroraml::linear_model::OrthogonalMatchingPursuitCV::is_fitted)
+        .def("best_n_nonzero_coefs", &auroraml::linear_model::OrthogonalMatchingPursuitCV::best_n_nonzero_coefs)
+        .def("coef", &auroraml::linear_model::OrthogonalMatchingPursuitCV::coef)
+        .def("intercept", &auroraml::linear_model::OrthogonalMatchingPursuitCV::intercept);
+
+    py::class_<auroraml::linear_model::RANSACRegressor, auroraml::Estimator, auroraml::Regressor>(linear_module, "RANSACRegressor")
+        .def(py::init<int, int, double, int, bool>(),
+             py::arg("max_trials") = 100, py::arg("min_samples") = -1,
+             py::arg("residual_threshold") = -1.0, py::arg("random_state") = -1,
+             py::arg("fit_intercept") = true)
+        .def("fit", &auroraml::linear_model::RANSACRegressor::fit)
+        .def("predict", &auroraml::linear_model::RANSACRegressor::predict)
+        .def("get_params", &auroraml::linear_model::RANSACRegressor::get_params)
+        .def("set_params", &auroraml::linear_model::RANSACRegressor::set_params)
+        .def("is_fitted", &auroraml::linear_model::RANSACRegressor::is_fitted)
+        .def("coef", &auroraml::linear_model::RANSACRegressor::coef)
+        .def("intercept", &auroraml::linear_model::RANSACRegressor::intercept);
+
+    py::class_<auroraml::linear_model::TheilSenRegressor, auroraml::Estimator, auroraml::Regressor>(linear_module, "TheilSenRegressor")
+        .def(py::init<int, int, bool>(),
+             py::arg("n_subsamples") = 100, py::arg("random_state") = -1, py::arg("fit_intercept") = true)
+        .def("fit", &auroraml::linear_model::TheilSenRegressor::fit)
+        .def("predict", &auroraml::linear_model::TheilSenRegressor::predict)
+        .def("get_params", &auroraml::linear_model::TheilSenRegressor::get_params)
+        .def("set_params", &auroraml::linear_model::TheilSenRegressor::set_params)
+        .def("is_fitted", &auroraml::linear_model::TheilSenRegressor::is_fitted)
+        .def("coef", &auroraml::linear_model::TheilSenRegressor::coef)
+        .def("intercept", &auroraml::linear_model::TheilSenRegressor::intercept);
+
+    py::class_<auroraml::linear_model::SGDRegressor, auroraml::Estimator, auroraml::Regressor>(linear_module, "SGDRegressor")
+        .def(py::init<const std::string&, const std::string&, double, double, bool, int, double, const std::string&, double, double, bool, int, double>(),
+             py::arg("loss") = "squared_loss", py::arg("penalty") = "l2", py::arg("alpha") = 0.0001,
+             py::arg("l1_ratio") = 0.15, py::arg("fit_intercept") = true, py::arg("max_iter") = 1000,
+             py::arg("tol") = 1e-3, py::arg("learning_rate") = "invscaling", py::arg("eta0") = 0.01,
+             py::arg("power_t") = 0.5, py::arg("shuffle") = true, py::arg("random_state") = -1,
+             py::arg("epsilon") = 0.1)
+        .def("fit", &auroraml::linear_model::SGDRegressor::fit)
+        .def("predict", &auroraml::linear_model::SGDRegressor::predict)
+        .def("get_params", &auroraml::linear_model::SGDRegressor::get_params)
+        .def("set_params", &auroraml::linear_model::SGDRegressor::set_params)
+        .def("is_fitted", &auroraml::linear_model::SGDRegressor::is_fitted)
+        .def("coef", &auroraml::linear_model::SGDRegressor::coef)
+        .def("intercept", &auroraml::linear_model::SGDRegressor::intercept);
+
+    py::class_<auroraml::linear_model::SGDClassifier, auroraml::Estimator, auroraml::Classifier>(linear_module, "SGDClassifier")
+        .def(py::init<const std::string&, const std::string&, double, double, bool, int, double, const std::string&, double, double, bool, int>(),
+             py::arg("loss") = "hinge", py::arg("penalty") = "l2", py::arg("alpha") = 0.0001,
+             py::arg("l1_ratio") = 0.15, py::arg("fit_intercept") = true, py::arg("max_iter") = 1000,
+             py::arg("tol") = 1e-3, py::arg("learning_rate") = "invscaling", py::arg("eta0") = 0.01,
+             py::arg("power_t") = 0.5, py::arg("shuffle") = true, py::arg("random_state") = -1)
+        .def("fit", &auroraml::linear_model::SGDClassifier::fit)
+        .def("predict", &auroraml::linear_model::SGDClassifier::predict_classes)
+        .def("predict_proba", &auroraml::linear_model::SGDClassifier::predict_proba)
+        .def("decision_function", &auroraml::linear_model::SGDClassifier::decision_function)
+        .def("get_params", &auroraml::linear_model::SGDClassifier::get_params)
+        .def("set_params", &auroraml::linear_model::SGDClassifier::set_params)
+        .def("is_fitted", &auroraml::linear_model::SGDClassifier::is_fitted)
+        .def("coef", &auroraml::linear_model::SGDClassifier::coef)
+        .def("intercept", &auroraml::linear_model::SGDClassifier::intercept)
+        .def("classes", &auroraml::linear_model::SGDClassifier::classes)
+        .def("n_classes", &auroraml::linear_model::SGDClassifier::n_classes);
+
+    py::class_<auroraml::linear_model::PassiveAggressiveRegressor, auroraml::Estimator, auroraml::Regressor>(linear_module, "PassiveAggressiveRegressor")
+        .def(py::init<double, double, bool, int, bool, int, const std::string&>(),
+             py::arg("C") = 1.0, py::arg("epsilon") = 0.1, py::arg("fit_intercept") = true,
+             py::arg("max_iter") = 1000, py::arg("shuffle") = true, py::arg("random_state") = -1,
+             py::arg("loss") = "epsilon_insensitive")
+        .def("fit", &auroraml::linear_model::PassiveAggressiveRegressor::fit)
+        .def("predict", &auroraml::linear_model::PassiveAggressiveRegressor::predict)
+        .def("get_params", &auroraml::linear_model::PassiveAggressiveRegressor::get_params)
+        .def("set_params", &auroraml::linear_model::PassiveAggressiveRegressor::set_params)
+        .def("is_fitted", &auroraml::linear_model::PassiveAggressiveRegressor::is_fitted)
+        .def("coef", &auroraml::linear_model::PassiveAggressiveRegressor::coef)
+        .def("intercept", &auroraml::linear_model::PassiveAggressiveRegressor::intercept);
+
+    py::class_<auroraml::linear_model::PassiveAggressiveClassifier, auroraml::Estimator, auroraml::Classifier>(linear_module, "PassiveAggressiveClassifier")
+        .def(py::init<double, bool, int, bool, int>(),
+             py::arg("C") = 1.0, py::arg("fit_intercept") = true,
+             py::arg("max_iter") = 1000, py::arg("shuffle") = true, py::arg("random_state") = -1)
+        .def("fit", &auroraml::linear_model::PassiveAggressiveClassifier::fit)
+        .def("predict", &auroraml::linear_model::PassiveAggressiveClassifier::predict_classes)
+        .def("predict_proba", &auroraml::linear_model::PassiveAggressiveClassifier::predict_proba)
+        .def("decision_function", &auroraml::linear_model::PassiveAggressiveClassifier::decision_function)
+        .def("get_params", &auroraml::linear_model::PassiveAggressiveClassifier::get_params)
+        .def("set_params", &auroraml::linear_model::PassiveAggressiveClassifier::set_params)
+        .def("is_fitted", &auroraml::linear_model::PassiveAggressiveClassifier::is_fitted)
+        .def("coef", &auroraml::linear_model::PassiveAggressiveClassifier::coef)
+        .def("intercept", &auroraml::linear_model::PassiveAggressiveClassifier::intercept)
+        .def("classes", &auroraml::linear_model::PassiveAggressiveClassifier::classes)
+        .def("n_classes", &auroraml::linear_model::PassiveAggressiveClassifier::n_classes);
+
+    py::class_<auroraml::linear_model::Perceptron, auroraml::Estimator, auroraml::Classifier>(linear_module, "Perceptron")
+        .def(py::init<bool, int, double, bool, int>(),
+             py::arg("fit_intercept") = true, py::arg("max_iter") = 1000, py::arg("tol") = 1e-3,
+             py::arg("shuffle") = true, py::arg("random_state") = -1)
+        .def("fit", &auroraml::linear_model::Perceptron::fit)
+        .def("predict", &auroraml::linear_model::Perceptron::predict_classes)
+        .def("predict_proba", &auroraml::linear_model::Perceptron::predict_proba)
+        .def("decision_function", &auroraml::linear_model::Perceptron::decision_function)
+        .def("get_params", &auroraml::linear_model::Perceptron::get_params)
+        .def("set_params", &auroraml::linear_model::Perceptron::set_params)
+        .def("is_fitted", &auroraml::linear_model::Perceptron::is_fitted)
+        .def("coef", &auroraml::linear_model::Perceptron::coef)
+        .def("intercept", &auroraml::linear_model::Perceptron::intercept)
+        .def("classes", &auroraml::linear_model::Perceptron::classes)
+        .def("n_classes", &auroraml::linear_model::Perceptron::n_classes);
+
+    py::class_<auroraml::linear_model::LogisticRegressionCV, auroraml::Estimator, auroraml::Classifier>(linear_module, "LogisticRegressionCV")
+        .def(py::init<const std::vector<double>&, int, const std::string&, bool, int, double, int>(),
+             py::arg("Cs") = std::vector<double>{0.1, 1.0, 10.0}, py::arg("cv") = 5,
+             py::arg("scoring") = "accuracy", py::arg("fit_intercept") = true,
+             py::arg("max_iter") = 100, py::arg("tol") = 1e-4, py::arg("random_state") = -1)
+        .def("fit", &auroraml::linear_model::LogisticRegressionCV::fit)
+        .def("predict", &auroraml::linear_model::LogisticRegressionCV::predict_classes)
+        .def("predict_proba", &auroraml::linear_model::LogisticRegressionCV::predict_proba)
+        .def("decision_function", &auroraml::linear_model::LogisticRegressionCV::decision_function)
+        .def("get_params", &auroraml::linear_model::LogisticRegressionCV::get_params)
+        .def("set_params", &auroraml::linear_model::LogisticRegressionCV::set_params)
+        .def("is_fitted", &auroraml::linear_model::LogisticRegressionCV::is_fitted)
+        .def("best_C", &auroraml::linear_model::LogisticRegressionCV::best_C)
+        .def("coef", &auroraml::linear_model::LogisticRegressionCV::coef)
+        .def("intercept", &auroraml::linear_model::LogisticRegressionCV::intercept)
+        .def("classes", &auroraml::linear_model::LogisticRegressionCV::classes)
+        .def("n_classes", &auroraml::linear_model::LogisticRegressionCV::n_classes);
+
+    py::class_<auroraml::linear_model::RidgeClassifier, auroraml::Estimator, auroraml::Classifier>(linear_module, "RidgeClassifier")
+        .def(py::init<double, bool>(), py::arg("alpha") = 1.0, py::arg("fit_intercept") = true)
+        .def("fit", &auroraml::linear_model::RidgeClassifier::fit)
+        .def("predict", &auroraml::linear_model::RidgeClassifier::predict_classes)
+        .def("predict_proba", &auroraml::linear_model::RidgeClassifier::predict_proba)
+        .def("decision_function", &auroraml::linear_model::RidgeClassifier::decision_function)
+        .def("get_params", &auroraml::linear_model::RidgeClassifier::get_params)
+        .def("set_params", &auroraml::linear_model::RidgeClassifier::set_params)
+        .def("is_fitted", &auroraml::linear_model::RidgeClassifier::is_fitted)
+        .def("coef", &auroraml::linear_model::RidgeClassifier::coef)
+        .def("intercept", &auroraml::linear_model::RidgeClassifier::intercept)
+        .def("classes", &auroraml::linear_model::RidgeClassifier::classes)
+        .def("n_classes", &auroraml::linear_model::RidgeClassifier::n_classes);
+
+    py::class_<auroraml::linear_model::RidgeClassifierCV, auroraml::Estimator, auroraml::Classifier>(linear_module, "RidgeClassifierCV")
+        .def(py::init<const std::vector<double>&, int, const std::string&, bool>(),
+             py::arg("alphas") = std::vector<double>{0.1, 1.0, 10.0}, py::arg("cv") = 5,
+             py::arg("scoring") = "accuracy", py::arg("fit_intercept") = true)
+        .def("fit", &auroraml::linear_model::RidgeClassifierCV::fit)
+        .def("predict", &auroraml::linear_model::RidgeClassifierCV::predict_classes)
+        .def("predict_proba", &auroraml::linear_model::RidgeClassifierCV::predict_proba)
+        .def("decision_function", &auroraml::linear_model::RidgeClassifierCV::decision_function)
+        .def("get_params", &auroraml::linear_model::RidgeClassifierCV::get_params)
+        .def("set_params", &auroraml::linear_model::RidgeClassifierCV::set_params)
+        .def("is_fitted", &auroraml::linear_model::RidgeClassifierCV::is_fitted)
+        .def("best_alpha", &auroraml::linear_model::RidgeClassifierCV::best_alpha)
+        .def("coef", &auroraml::linear_model::RidgeClassifierCV::coef)
+        .def("intercept", &auroraml::linear_model::RidgeClassifierCV::intercept)
+        .def("classes", &auroraml::linear_model::RidgeClassifierCV::classes)
+        .def("n_classes", &auroraml::linear_model::RidgeClassifierCV::n_classes);
+
+    py::class_<auroraml::linear_model::QuantileRegressor, auroraml::Estimator, auroraml::Regressor>(linear_module, "QuantileRegressor")
+        .def(py::init<double, double, bool, int, double, double>(),
+             py::arg("quantile") = 0.5, py::arg("alpha") = 0.0, py::arg("fit_intercept") = true,
+             py::arg("max_iter") = 1000, py::arg("tol") = 1e-4, py::arg("learning_rate") = 0.01)
+        .def("fit", &auroraml::linear_model::QuantileRegressor::fit)
+        .def("predict", &auroraml::linear_model::QuantileRegressor::predict)
+        .def("get_params", &auroraml::linear_model::QuantileRegressor::get_params)
+        .def("set_params", &auroraml::linear_model::QuantileRegressor::set_params)
+        .def("is_fitted", &auroraml::linear_model::QuantileRegressor::is_fitted)
+        .def("coef", &auroraml::linear_model::QuantileRegressor::coef)
+        .def("intercept", &auroraml::linear_model::QuantileRegressor::intercept);
+
+    py::class_<auroraml::linear_model::PoissonRegressor, auroraml::Estimator, auroraml::Regressor>(linear_module, "PoissonRegressor")
+        .def(py::init<double, bool, int, double, double>(),
+             py::arg("alpha") = 0.0, py::arg("fit_intercept") = true,
+             py::arg("max_iter") = 1000, py::arg("tol") = 1e-4, py::arg("learning_rate") = 0.01)
+        .def("fit", &auroraml::linear_model::PoissonRegressor::fit)
+        .def("predict", &auroraml::linear_model::PoissonRegressor::predict)
+        .def("get_params", &auroraml::linear_model::PoissonRegressor::get_params)
+        .def("set_params", &auroraml::linear_model::PoissonRegressor::set_params)
+        .def("is_fitted", &auroraml::linear_model::PoissonRegressor::is_fitted)
+        .def("coef", &auroraml::linear_model::PoissonRegressor::coef)
+        .def("intercept", &auroraml::linear_model::PoissonRegressor::intercept);
+
+    py::class_<auroraml::linear_model::GammaRegressor, auroraml::Estimator, auroraml::Regressor>(linear_module, "GammaRegressor")
+        .def(py::init<double, bool, int, double, double>(),
+             py::arg("alpha") = 0.0, py::arg("fit_intercept") = true,
+             py::arg("max_iter") = 1000, py::arg("tol") = 1e-4, py::arg("learning_rate") = 0.01)
+        .def("fit", &auroraml::linear_model::GammaRegressor::fit)
+        .def("predict", &auroraml::linear_model::GammaRegressor::predict)
+        .def("get_params", &auroraml::linear_model::GammaRegressor::get_params)
+        .def("set_params", &auroraml::linear_model::GammaRegressor::set_params)
+        .def("is_fitted", &auroraml::linear_model::GammaRegressor::is_fitted)
+        .def("coef", &auroraml::linear_model::GammaRegressor::coef)
+        .def("intercept", &auroraml::linear_model::GammaRegressor::intercept);
+
+    py::class_<auroraml::linear_model::TweedieRegressor, auroraml::Estimator, auroraml::Regressor>(linear_module, "TweedieRegressor")
+        .def(py::init<double, double, bool, int, double, double>(),
+             py::arg("power") = 1.5, py::arg("alpha") = 0.0, py::arg("fit_intercept") = true,
+             py::arg("max_iter") = 1000, py::arg("tol") = 1e-4, py::arg("learning_rate") = 0.01)
+        .def("fit", &auroraml::linear_model::TweedieRegressor::fit)
+        .def("predict", &auroraml::linear_model::TweedieRegressor::predict)
+        .def("get_params", &auroraml::linear_model::TweedieRegressor::get_params)
+        .def("set_params", &auroraml::linear_model::TweedieRegressor::set_params)
+        .def("is_fitted", &auroraml::linear_model::TweedieRegressor::is_fitted)
+        .def("coef", &auroraml::linear_model::TweedieRegressor::coef)
+        .def("intercept", &auroraml::linear_model::TweedieRegressor::intercept);
+
+    py::class_<auroraml::linear_model::MultiTaskLasso, auroraml::Estimator, auroraml::Regressor>(linear_module, "MultiTaskLasso")
+        .def(py::init<double, bool, int, double>(),
+             py::arg("alpha") = 1.0, py::arg("fit_intercept") = true,
+             py::arg("max_iter") = 1000, py::arg("tol") = 1e-4)
+        .def("fit", &auroraml::linear_model::MultiTaskLasso::fit)
+        .def("predict", &auroraml::linear_model::MultiTaskLasso::predict)
+        .def("get_params", &auroraml::linear_model::MultiTaskLasso::get_params)
+        .def("set_params", &auroraml::linear_model::MultiTaskLasso::set_params)
+        .def("is_fitted", &auroraml::linear_model::MultiTaskLasso::is_fitted)
+        .def("coef", &auroraml::linear_model::MultiTaskLasso::coef)
+        .def("intercept", &auroraml::linear_model::MultiTaskLasso::intercept);
+
+    py::class_<auroraml::linear_model::MultiTaskLassoCV, auroraml::Estimator, auroraml::Regressor>(linear_module, "MultiTaskLassoCV")
+        .def(py::init<const std::vector<double>&, int, bool, int, double>(),
+             py::arg("alphas") = std::vector<double>{0.1, 1.0, 10.0}, py::arg("cv") = 5,
+             py::arg("fit_intercept") = true, py::arg("max_iter") = 1000, py::arg("tol") = 1e-4)
+        .def("fit", &auroraml::linear_model::MultiTaskLassoCV::fit)
+        .def("predict", &auroraml::linear_model::MultiTaskLassoCV::predict)
+        .def("get_params", &auroraml::linear_model::MultiTaskLassoCV::get_params)
+        .def("set_params", &auroraml::linear_model::MultiTaskLassoCV::set_params)
+        .def("is_fitted", &auroraml::linear_model::MultiTaskLassoCV::is_fitted)
+        .def("best_alpha", &auroraml::linear_model::MultiTaskLassoCV::best_alpha)
+        .def("coef", &auroraml::linear_model::MultiTaskLassoCV::coef)
+        .def("intercept", &auroraml::linear_model::MultiTaskLassoCV::intercept);
+
+    py::class_<auroraml::linear_model::MultiTaskElasticNet, auroraml::Estimator, auroraml::Regressor>(linear_module, "MultiTaskElasticNet")
+        .def(py::init<double, double, bool, int, double>(),
+             py::arg("alpha") = 1.0, py::arg("l1_ratio") = 0.5, py::arg("fit_intercept") = true,
+             py::arg("max_iter") = 1000, py::arg("tol") = 1e-4)
+        .def("fit", &auroraml::linear_model::MultiTaskElasticNet::fit)
+        .def("predict", &auroraml::linear_model::MultiTaskElasticNet::predict)
+        .def("get_params", &auroraml::linear_model::MultiTaskElasticNet::get_params)
+        .def("set_params", &auroraml::linear_model::MultiTaskElasticNet::set_params)
+        .def("is_fitted", &auroraml::linear_model::MultiTaskElasticNet::is_fitted)
+        .def("coef", &auroraml::linear_model::MultiTaskElasticNet::coef)
+        .def("intercept", &auroraml::linear_model::MultiTaskElasticNet::intercept);
+
+    py::class_<auroraml::linear_model::MultiTaskElasticNetCV, auroraml::Estimator, auroraml::Regressor>(linear_module, "MultiTaskElasticNetCV")
+        .def(py::init<const std::vector<double>&, const std::vector<double>&, int, bool, int, double>(),
+             py::arg("alphas") = std::vector<double>{0.1, 1.0, 10.0},
+             py::arg("l1_ratios") = std::vector<double>{0.1, 0.5, 0.9},
+             py::arg("cv") = 5, py::arg("fit_intercept") = true,
+             py::arg("max_iter") = 1000, py::arg("tol") = 1e-4)
+        .def("fit", &auroraml::linear_model::MultiTaskElasticNetCV::fit)
+        .def("predict", &auroraml::linear_model::MultiTaskElasticNetCV::predict)
+        .def("get_params", &auroraml::linear_model::MultiTaskElasticNetCV::get_params)
+        .def("set_params", &auroraml::linear_model::MultiTaskElasticNetCV::set_params)
+        .def("is_fitted", &auroraml::linear_model::MultiTaskElasticNetCV::is_fitted)
+        .def("best_alpha", &auroraml::linear_model::MultiTaskElasticNetCV::best_alpha)
+        .def("best_l1_ratio", &auroraml::linear_model::MultiTaskElasticNetCV::best_l1_ratio)
+        .def("coef", &auroraml::linear_model::MultiTaskElasticNetCV::coef)
+        .def("intercept", &auroraml::linear_model::MultiTaskElasticNetCV::intercept);
     
     // Neighbors module
     py::module_ neighbors_module = m.def_submodule("neighbors", "Nearest neighbors");
@@ -204,6 +567,116 @@ PYBIND11_MODULE(auroraml, m) {
         .def("is_fitted", &auroraml::neighbors::KNeighborsRegressor::is_fitted)
         .def("save", &auroraml::neighbors::KNeighborsRegressor::save)
         .def("load", &auroraml::neighbors::KNeighborsRegressor::load);
+
+    auto nearest_neighbors_fit = [](auroraml::neighbors::NearestNeighbors& self, const auroraml::MatrixXd& X, py::object y_py = py::none()) -> auroraml::neighbors::NearestNeighbors& {
+        auroraml::VectorXd y_dummy = auroraml::VectorXd::Zero(X.rows());
+        if (!y_py.is_none()) {
+            y_dummy = y_py.cast<auroraml::VectorXd>();
+        }
+        self.fit(X, y_dummy);
+        return self;
+    };
+
+    py::class_<auroraml::neighbors::NearestNeighbors, auroraml::Estimator>(neighbors_module, "NearestNeighbors")
+        .def(py::init<int, double, std::string, std::string, double, int>(),
+             py::arg("n_neighbors") = 5, py::arg("radius") = 1.0, py::arg("algorithm") = "auto",
+             py::arg("metric") = "euclidean", py::arg("p") = 2.0, py::arg("n_jobs") = 1)
+        .def("fit", nearest_neighbors_fit, py::arg("X"), py::arg("y") = py::none())
+        .def("kneighbors", &auroraml::neighbors::NearestNeighbors::kneighbors,
+             py::arg("X"), py::arg("n_neighbors") = -1)
+        .def("radius_neighbors", &auroraml::neighbors::NearestNeighbors::radius_neighbors,
+             py::arg("X"), py::arg("radius") = -1.0)
+        .def("get_params", &auroraml::neighbors::NearestNeighbors::get_params)
+        .def("set_params", &auroraml::neighbors::NearestNeighbors::set_params)
+        .def("is_fitted", &auroraml::neighbors::NearestNeighbors::is_fitted);
+
+    py::class_<auroraml::neighbors::RadiusNeighborsClassifier, auroraml::Estimator, auroraml::Classifier>(neighbors_module, "RadiusNeighborsClassifier")
+        .def(py::init<double, std::string, std::string, std::string, double, int>(),
+             py::arg("radius") = 1.0, py::arg("weights") = "uniform", py::arg("algorithm") = "auto",
+             py::arg("metric") = "euclidean", py::arg("p") = 2, py::arg("n_jobs") = 1)
+        .def("fit", &auroraml::neighbors::RadiusNeighborsClassifier::fit)
+        .def("predict", &auroraml::neighbors::RadiusNeighborsClassifier::predict_classes)
+        .def("predict_proba", &auroraml::neighbors::RadiusNeighborsClassifier::predict_proba)
+        .def("decision_function", &auroraml::neighbors::RadiusNeighborsClassifier::decision_function)
+        .def("get_params", &auroraml::neighbors::RadiusNeighborsClassifier::get_params)
+        .def("set_params", &auroraml::neighbors::RadiusNeighborsClassifier::set_params)
+        .def("is_fitted", &auroraml::neighbors::RadiusNeighborsClassifier::is_fitted);
+
+    py::class_<auroraml::neighbors::RadiusNeighborsRegressor, auroraml::Estimator, auroraml::Regressor>(neighbors_module, "RadiusNeighborsRegressor")
+        .def(py::init<double, std::string, std::string, std::string, double, int>(),
+             py::arg("radius") = 1.0, py::arg("weights") = "uniform", py::arg("algorithm") = "auto",
+             py::arg("metric") = "euclidean", py::arg("p") = 2, py::arg("n_jobs") = 1)
+        .def("fit", &auroraml::neighbors::RadiusNeighborsRegressor::fit)
+        .def("predict", &auroraml::neighbors::RadiusNeighborsRegressor::predict)
+        .def("get_params", &auroraml::neighbors::RadiusNeighborsRegressor::get_params)
+        .def("set_params", &auroraml::neighbors::RadiusNeighborsRegressor::set_params)
+        .def("is_fitted", &auroraml::neighbors::RadiusNeighborsRegressor::is_fitted);
+
+    auto knn_transformer_fit = [](auroraml::neighbors::KNeighborsTransformer& self, const auroraml::MatrixXd& X, py::object y_py = py::none()) -> auroraml::neighbors::KNeighborsTransformer& {
+        auroraml::VectorXd y_dummy = auroraml::VectorXd::Zero(X.rows());
+        if (!y_py.is_none()) {
+            y_dummy = y_py.cast<auroraml::VectorXd>();
+        }
+        self.fit(X, y_dummy);
+        return self;
+    };
+    auto knn_transformer_fit_transform = [](auroraml::neighbors::KNeighborsTransformer& self, const auroraml::MatrixXd& X, py::object y_py = py::none()) {
+        auroraml::VectorXd y_dummy = auroraml::VectorXd::Zero(X.rows());
+        if (!y_py.is_none()) {
+            y_dummy = y_py.cast<auroraml::VectorXd>();
+        }
+        return self.fit_transform(X, y_dummy);
+    };
+
+    py::class_<auroraml::neighbors::KNeighborsTransformer, auroraml::Estimator, auroraml::Transformer>(neighbors_module, "KNeighborsTransformer")
+        .def(py::init<int, std::string, std::string, double, int>(),
+             py::arg("n_neighbors") = 5, py::arg("mode") = "distance",
+             py::arg("metric") = "euclidean", py::arg("p") = 2.0, py::arg("n_jobs") = 1)
+        .def("fit", knn_transformer_fit, py::arg("X"), py::arg("y") = py::none())
+        .def("transform", &auroraml::neighbors::KNeighborsTransformer::transform)
+        .def("inverse_transform", &auroraml::neighbors::KNeighborsTransformer::inverse_transform)
+        .def("fit_transform", knn_transformer_fit_transform, py::arg("X"), py::arg("y") = py::none())
+        .def("get_params", &auroraml::neighbors::KNeighborsTransformer::get_params)
+        .def("set_params", &auroraml::neighbors::KNeighborsTransformer::set_params)
+        .def("is_fitted", &auroraml::neighbors::KNeighborsTransformer::is_fitted);
+
+    auto radius_transformer_fit = [](auroraml::neighbors::RadiusNeighborsTransformer& self, const auroraml::MatrixXd& X, py::object y_py = py::none()) -> auroraml::neighbors::RadiusNeighborsTransformer& {
+        auroraml::VectorXd y_dummy = auroraml::VectorXd::Zero(X.rows());
+        if (!y_py.is_none()) {
+            y_dummy = y_py.cast<auroraml::VectorXd>();
+        }
+        self.fit(X, y_dummy);
+        return self;
+    };
+    auto radius_transformer_fit_transform = [](auroraml::neighbors::RadiusNeighborsTransformer& self, const auroraml::MatrixXd& X, py::object y_py = py::none()) {
+        auroraml::VectorXd y_dummy = auroraml::VectorXd::Zero(X.rows());
+        if (!y_py.is_none()) {
+            y_dummy = y_py.cast<auroraml::VectorXd>();
+        }
+        return self.fit_transform(X, y_dummy);
+    };
+
+    py::class_<auroraml::neighbors::RadiusNeighborsTransformer, auroraml::Estimator, auroraml::Transformer>(neighbors_module, "RadiusNeighborsTransformer")
+        .def(py::init<double, std::string, std::string, double, int>(),
+             py::arg("radius") = 1.0, py::arg("mode") = "distance",
+             py::arg("metric") = "euclidean", py::arg("p") = 2.0, py::arg("n_jobs") = 1)
+        .def("fit", radius_transformer_fit, py::arg("X"), py::arg("y") = py::none())
+        .def("transform", &auroraml::neighbors::RadiusNeighborsTransformer::transform)
+        .def("inverse_transform", &auroraml::neighbors::RadiusNeighborsTransformer::inverse_transform)
+        .def("fit_transform", radius_transformer_fit_transform, py::arg("X"), py::arg("y") = py::none())
+        .def("get_params", &auroraml::neighbors::RadiusNeighborsTransformer::get_params)
+        .def("set_params", &auroraml::neighbors::RadiusNeighborsTransformer::set_params)
+        .def("is_fitted", &auroraml::neighbors::RadiusNeighborsTransformer::is_fitted);
+
+    py::class_<auroraml::neighbors::NearestCentroid, auroraml::Estimator, auroraml::Classifier>(m, "NearestCentroid")
+        .def(py::init<std::string, double>(), py::arg("metric") = "euclidean", py::arg("p") = 2.0)
+        .def("fit", &auroraml::neighbors::NearestCentroid::fit)
+        .def("predict", &auroraml::neighbors::NearestCentroid::predict_classes)
+        .def("predict_proba", &auroraml::neighbors::NearestCentroid::predict_proba)
+        .def("decision_function", &auroraml::neighbors::NearestCentroid::decision_function)
+        .def("get_params", &auroraml::neighbors::NearestCentroid::get_params)
+        .def("set_params", &auroraml::neighbors::NearestCentroid::set_params)
+        .def("is_fitted", &auroraml::neighbors::NearestCentroid::is_fitted);
     
     // Tree module
     py::module_ tree_module = m.def_submodule("tree", "Decision trees");
@@ -299,13 +772,24 @@ PYBIND11_MODULE(auroraml, m) {
         .def(py::init<bool, bool>(), py::arg("with_mean") = true, py::arg("with_std") = true)
         .def("fit", &auroraml::preprocessing::StandardScaler::fit)
         .def("transform", &auroraml::preprocessing::StandardScaler::transform)
+        .def("transform", [](auroraml::preprocessing::StandardScaler& self, const auroraml::MatrixXd& X, const auroraml::VectorXd& y) {
+            (void)y;
+            return self.transform(X);
+        })
         .def("inverse_transform", &auroraml::preprocessing::StandardScaler::inverse_transform)
         .def("fit_transform", &auroraml::preprocessing::StandardScaler::fit_transform)
         .def("get_params", &auroraml::preprocessing::StandardScaler::get_params)
         .def("set_params", &auroraml::preprocessing::StandardScaler::set_params)
+        .def("set_params", [](auroraml::preprocessing::StandardScaler& self, py::kwargs kwargs) -> void {
+            self.set_params(params_from_kwargs(kwargs));
+        })
         .def("is_fitted", &auroraml::preprocessing::StandardScaler::is_fitted)
         .def("mean", &auroraml::preprocessing::StandardScaler::mean)
-        .def("scale", &auroraml::preprocessing::StandardScaler::scale);
+        .def("scale", &auroraml::preprocessing::StandardScaler::scale)
+        .def_property_readonly("mean_", &auroraml::preprocessing::StandardScaler::mean)
+        .def_property_readonly("scale_", &auroraml::preprocessing::StandardScaler::scale)
+        .def("save", &auroraml::preprocessing::StandardScaler::save)
+        .def("load", &auroraml::preprocessing::StandardScaler::load);
     
     py::class_<auroraml::preprocessing::MinMaxScaler, auroraml::Estimator, auroraml::Transformer>(preprocessing_module, "MinMaxScaler")
         .def(py::init<double, double>(), py::arg("feature_range_min") = 0.0, py::arg("feature_range_max") = 1.0)
@@ -315,6 +799,9 @@ PYBIND11_MODULE(auroraml, m) {
         .def("fit_transform", &auroraml::preprocessing::MinMaxScaler::fit_transform)
         .def("get_params", &auroraml::preprocessing::MinMaxScaler::get_params)
         .def("set_params", &auroraml::preprocessing::MinMaxScaler::set_params)
+        .def("set_params", [](auroraml::preprocessing::MinMaxScaler& self, py::kwargs kwargs) -> void {
+            self.set_params(params_from_kwargs(kwargs));
+        })
         .def("is_fitted", &auroraml::preprocessing::MinMaxScaler::is_fitted)
         .def("data_min", &auroraml::preprocessing::MinMaxScaler::data_min)
         .def("data_max", &auroraml::preprocessing::MinMaxScaler::data_max)
@@ -403,6 +890,34 @@ PYBIND11_MODULE(auroraml, m) {
     py::class_<auroraml::model_selection::BaseCrossValidator>(model_selection_module, "BaseCrossValidator")
         .def("split", &auroraml::model_selection::BaseCrossValidator::split)
         .def("get_n_splits", &auroraml::model_selection::BaseCrossValidator::get_n_splits);
+
+    auto param_map_from_py = [](const py::dict& param_dict) {
+        std::map<std::string, std::vector<std::string>> params;
+        for (auto item : param_dict) {
+            std::string key = py::cast<std::string>(item.first);
+            py::iterable values = py::cast<py::iterable>(item.second);
+            std::vector<std::string> vals;
+            for (auto v : values) {
+                vals.push_back(py::str(v));
+            }
+            params[key] = vals;
+        }
+        return params;
+    };
+
+    py::class_<auroraml::model_selection::ParameterGrid>(model_selection_module, "ParameterGrid")
+        .def(py::init([&](const py::dict& param_grid) {
+            return new auroraml::model_selection::ParameterGrid(param_map_from_py(param_grid));
+        }), py::arg("param_grid"))
+        .def("grid", &auroraml::model_selection::ParameterGrid::grid)
+        .def("size", &auroraml::model_selection::ParameterGrid::size);
+
+    py::class_<auroraml::model_selection::ParameterSampler>(model_selection_module, "ParameterSampler")
+        .def(py::init([&](const py::dict& param_distributions, int n_iter, int random_state) {
+            return new auroraml::model_selection::ParameterSampler(param_map_from_py(param_distributions), n_iter, random_state);
+        }), py::arg("param_distributions"), py::arg("n_iter") = 10, py::arg("random_state") = -1)
+        .def("samples", &auroraml::model_selection::ParameterSampler::samples)
+        .def("size", &auroraml::model_selection::ParameterSampler::size);
     
     model_selection_module.def("train_test_split", 
         [](const auroraml::MatrixXd& X, const auroraml::VectorXd& y, double test_size, double train_size, 
@@ -412,7 +927,7 @@ PYBIND11_MODULE(auroraml, m) {
         py::arg("X"), py::arg("y"), py::arg("test_size") = 0.25, py::arg("train_size") = -1,
         py::arg("random_state") = -1, py::arg("shuffle") = true, py::arg("stratify") = auroraml::VectorXd());
     
-    py::class_<auroraml::model_selection::KFold>(model_selection_module, "KFold", py::base<auroraml::model_selection::BaseCrossValidator>())
+    py::class_<auroraml::model_selection::KFold, auroraml::model_selection::BaseCrossValidator>(model_selection_module, "KFold")
         .def(py::init<int, bool, int>(), py::arg("n_splits") = 5, py::arg("shuffle") = false, py::arg("random_state") = -1)
         .def("split", [](const auroraml::model_selection::KFold& self, const auroraml::MatrixXd& X) {
             return self.split(X);
@@ -420,21 +935,96 @@ PYBIND11_MODULE(auroraml, m) {
         .def("split", [](const auroraml::model_selection::KFold& self, const auroraml::MatrixXd& X, const auroraml::VectorXd& y) {
             return self.split(X, y);
         })
-        .def("get_n_splits", &auroraml::model_selection::KFold::get_n_splits);
+        .def("get_n_splits", &auroraml::model_selection::KFold::get_n_splits)
+        .def("get_params", &auroraml::model_selection::KFold::get_params)
+        .def("set_params", &auroraml::model_selection::KFold::set_params);
 
-    py::class_<auroraml::model_selection::StratifiedKFold>(model_selection_module, "StratifiedKFold", py::base<auroraml::model_selection::BaseCrossValidator>())
+    py::class_<auroraml::model_selection::StratifiedKFold, auroraml::model_selection::BaseCrossValidator>(model_selection_module, "StratifiedKFold")
         .def(py::init<int, bool, int>(), py::arg("n_splits") = 5, py::arg("shuffle") = false, py::arg("random_state") = -1)
         .def("split", [](const auroraml::model_selection::StratifiedKFold& self, const auroraml::MatrixXd& X, const auroraml::VectorXd& y) {
             return self.split(X, y);
         })
-        .def("get_n_splits", &auroraml::model_selection::StratifiedKFold::get_n_splits);
+        .def("get_n_splits", &auroraml::model_selection::StratifiedKFold::get_n_splits)
+        .def("get_params", &auroraml::model_selection::StratifiedKFold::get_params)
+        .def("set_params", &auroraml::model_selection::StratifiedKFold::set_params);
 
     py::class_<auroraml::model_selection::GroupKFold>(model_selection_module, "GroupKFold")
         .def(py::init<int>(), py::arg("n_splits") = 5)
         .def("split", [](const auroraml::model_selection::GroupKFold& self, const auroraml::MatrixXd& X, const auroraml::VectorXd& y, const auroraml::VectorXd& groups) {
             return self.split(X, y, groups);
         })
-        .def("get_n_splits", &auroraml::model_selection::GroupKFold::get_n_splits);
+        .def("get_n_splits", &auroraml::model_selection::GroupKFold::get_n_splits)
+        .def("get_params", &auroraml::model_selection::GroupKFold::get_params)
+        .def("set_params", &auroraml::model_selection::GroupKFold::set_params);
+
+    py::class_<auroraml::model_selection::RepeatedKFold, auroraml::model_selection::BaseCrossValidator>(model_selection_module, "RepeatedKFold")
+        .def(py::init<int, int, int>(), py::arg("n_splits") = 5, py::arg("n_repeats") = 10, py::arg("random_state") = -1)
+        .def("split", [](const auroraml::model_selection::RepeatedKFold& self, const auroraml::MatrixXd& X, const auroraml::VectorXd& y) {
+            return self.split(X, y);
+        })
+        .def("get_n_splits", &auroraml::model_selection::RepeatedKFold::get_n_splits)
+        .def("get_params", &auroraml::model_selection::RepeatedKFold::get_params)
+        .def("set_params", &auroraml::model_selection::RepeatedKFold::set_params);
+
+    py::class_<auroraml::model_selection::RepeatedStratifiedKFold, auroraml::model_selection::BaseCrossValidator>(model_selection_module, "RepeatedStratifiedKFold")
+        .def(py::init<int, int, int>(), py::arg("n_splits") = 5, py::arg("n_repeats") = 10, py::arg("random_state") = -1)
+        .def("split", [](const auroraml::model_selection::RepeatedStratifiedKFold& self, const auroraml::MatrixXd& X, const auroraml::VectorXd& y) {
+            return self.split(X, y);
+        })
+        .def("get_n_splits", &auroraml::model_selection::RepeatedStratifiedKFold::get_n_splits)
+        .def("get_params", &auroraml::model_selection::RepeatedStratifiedKFold::get_params)
+        .def("set_params", &auroraml::model_selection::RepeatedStratifiedKFold::set_params);
+
+    py::class_<auroraml::model_selection::ShuffleSplit, auroraml::model_selection::BaseCrossValidator>(model_selection_module, "ShuffleSplit")
+        .def(py::init<int, double, double, int>(), py::arg("n_splits") = 10, py::arg("test_size") = 0.1, py::arg("train_size") = -1.0, py::arg("random_state") = -1)
+        .def("split", [](const auroraml::model_selection::ShuffleSplit& self, const auroraml::MatrixXd& X) {
+            return self.split(X);
+        })
+        .def("get_n_splits", &auroraml::model_selection::ShuffleSplit::get_n_splits)
+        .def("get_params", &auroraml::model_selection::ShuffleSplit::get_params)
+        .def("set_params", &auroraml::model_selection::ShuffleSplit::set_params);
+
+    py::class_<auroraml::model_selection::StratifiedShuffleSplit, auroraml::model_selection::BaseCrossValidator>(model_selection_module, "StratifiedShuffleSplit")
+        .def(py::init<int, double, double, int>(), py::arg("n_splits") = 10, py::arg("test_size") = 0.1, py::arg("train_size") = -1.0, py::arg("random_state") = -1)
+        .def("split", [](const auroraml::model_selection::StratifiedShuffleSplit& self, const auroraml::MatrixXd& X, const auroraml::VectorXd& y) {
+            return self.split(X, y);
+        })
+        .def("get_n_splits", &auroraml::model_selection::StratifiedShuffleSplit::get_n_splits)
+        .def("get_params", &auroraml::model_selection::StratifiedShuffleSplit::get_params)
+        .def("set_params", &auroraml::model_selection::StratifiedShuffleSplit::set_params);
+
+    py::class_<auroraml::model_selection::GroupShuffleSplit>(model_selection_module, "GroupShuffleSplit")
+        .def(py::init<int, double, double, int>(), py::arg("n_splits") = 5, py::arg("test_size") = 0.2, py::arg("train_size") = -1.0, py::arg("random_state") = -1)
+        .def("split", [](const auroraml::model_selection::GroupShuffleSplit& self, const auroraml::MatrixXd& X, const auroraml::VectorXd& y, const auroraml::VectorXd& groups) {
+            return self.split(X, y, groups);
+        })
+        .def("get_n_splits", &auroraml::model_selection::GroupShuffleSplit::get_n_splits)
+        .def("get_params", &auroraml::model_selection::GroupShuffleSplit::get_params)
+        .def("set_params", &auroraml::model_selection::GroupShuffleSplit::set_params);
+
+    py::class_<auroraml::model_selection::PredefinedSplit, auroraml::model_selection::BaseCrossValidator>(model_selection_module, "PredefinedSplit")
+        .def(py::init<const std::vector<int>&>(), py::arg("test_fold"))
+        .def("split", [](const auroraml::model_selection::PredefinedSplit& self, const auroraml::MatrixXd& X) {
+            return self.split(X);
+        })
+        .def("get_n_splits", &auroraml::model_selection::PredefinedSplit::get_n_splits)
+        .def("test_fold", &auroraml::model_selection::PredefinedSplit::test_fold);
+
+    py::class_<auroraml::model_selection::LeaveOneOut, auroraml::model_selection::BaseCrossValidator>(model_selection_module, "LeaveOneOut")
+        .def(py::init<>())
+        .def("split", [](const auroraml::model_selection::LeaveOneOut& self, const auroraml::MatrixXd& X) {
+            return self.split(X);
+        })
+        .def("get_n_splits", &auroraml::model_selection::LeaveOneOut::get_n_splits);
+
+    py::class_<auroraml::model_selection::LeavePOut, auroraml::model_selection::BaseCrossValidator>(model_selection_module, "LeavePOut")
+        .def(py::init<int>(), py::arg("p") = 2)
+        .def("split", [](const auroraml::model_selection::LeavePOut& self, const auroraml::MatrixXd& X) {
+            return self.split(X);
+        })
+        .def("get_n_splits", &auroraml::model_selection::LeavePOut::get_n_splits)
+        .def("get_params", &auroraml::model_selection::LeavePOut::get_params)
+        .def("set_params", &auroraml::model_selection::LeavePOut::set_params);
     
     // Helper function for cross_val_score
     auto cross_val_score_wrapper = [](py::object estimator, py::array_t<double> X_array, py::array_t<double> y_array, 
@@ -466,6 +1056,8 @@ PYBIND11_MODULE(auroraml, m) {
     
     model_selection_module.def("cross_val_score", cross_val_score_wrapper,
         py::arg("estimator"), py::arg("X"), py::arg("y"), py::arg("cv"), py::arg("scoring") = "accuracy");
+
+    model_selection_module.attr("LogisticRegressionCV") = linear_module.attr("LogisticRegressionCV");
     
     // Naive Bayes submodule
     py::module_ nb_module = m.def_submodule("naive_bayes", "Naive Bayes algorithms");
@@ -491,6 +1083,8 @@ PYBIND11_MODULE(auroraml, m) {
         .def("inverse_transform", &auroraml::cluster::KMeans::inverse_transform)
         .def("fit_transform", &auroraml::cluster::KMeans::fit_transform)
         .def("predict_labels", &auroraml::cluster::KMeans::predict_labels)
+        .def("cluster_centers", &auroraml::cluster::KMeans::cluster_centers)
+        .def("inertia", &auroraml::cluster::KMeans::inertia)
         .def("get_params", &auroraml::cluster::KMeans::get_params)
         .def("set_params", &auroraml::cluster::KMeans::set_params)
         .def("is_fitted", &auroraml::cluster::KMeans::is_fitted);
@@ -498,6 +1092,7 @@ PYBIND11_MODULE(auroraml, m) {
     py::class_<auroraml::cluster::DBSCAN, auroraml::Estimator>(cluster_module, "DBSCAN")
         .def(py::init<double,int>(), py::arg("eps")=0.5, py::arg("min_samples")=5)
         .def("fit", &auroraml::cluster::DBSCAN::fit)
+        .def("fit_predict", &auroraml::cluster::DBSCAN::fit_predict)
         .def("get_params", &auroraml::cluster::DBSCAN::get_params)
         .def("set_params", &auroraml::cluster::DBSCAN::set_params)
         .def("is_fitted", &auroraml::cluster::DBSCAN::is_fitted)
@@ -521,7 +1116,90 @@ PYBIND11_MODULE(auroraml, m) {
         .def("fit_transform", &auroraml::decomposition::PCA::fit_transform)
         .def("get_params", &auroraml::decomposition::PCA::get_params)
         .def("set_params", &auroraml::decomposition::PCA::set_params)
+        .def("set_params", [](auroraml::decomposition::PCA& self, py::kwargs kwargs) -> void {
+            self.set_params(params_from_kwargs(kwargs));
+        })
         .def("is_fitted", &auroraml::decomposition::PCA::is_fitted);
+
+    py::class_<auroraml::decomposition::KernelPCA, auroraml::Estimator, auroraml::Transformer>(decomp_module, "KernelPCA")
+        .def(py::init<int, std::string, double, double, double>(),
+             py::arg("n_components") = -1, py::arg("kernel") = "rbf",
+             py::arg("gamma") = 1.0, py::arg("degree") = 3.0, py::arg("coef0") = 1.0)
+        .def("fit", &auroraml::decomposition::KernelPCA::fit)
+        .def("transform", &auroraml::decomposition::KernelPCA::transform)
+        .def("inverse_transform", &auroraml::decomposition::KernelPCA::inverse_transform)
+        .def("fit_transform", &auroraml::decomposition::KernelPCA::fit_transform)
+        .def("get_params", &auroraml::decomposition::KernelPCA::get_params)
+        .def("set_params", &auroraml::decomposition::KernelPCA::set_params)
+        .def("is_fitted", &auroraml::decomposition::KernelPCA::is_fitted);
+
+    py::class_<auroraml::decomposition::IncrementalPCA, auroraml::Estimator, auroraml::Transformer>(decomp_module, "IncrementalPCA")
+        .def(py::init<int, bool, int>(), py::arg("n_components") = -1, py::arg("whiten") = false, py::arg("batch_size") = 0)
+        .def("fit", &auroraml::decomposition::IncrementalPCA::fit)
+        .def("partial_fit", &auroraml::decomposition::IncrementalPCA::partial_fit)
+        .def("transform", &auroraml::decomposition::IncrementalPCA::transform)
+        .def("inverse_transform", &auroraml::decomposition::IncrementalPCA::inverse_transform)
+        .def("fit_transform", &auroraml::decomposition::IncrementalPCA::fit_transform)
+        .def("get_params", &auroraml::decomposition::IncrementalPCA::get_params)
+        .def("set_params", &auroraml::decomposition::IncrementalPCA::set_params)
+        .def("is_fitted", &auroraml::decomposition::IncrementalPCA::is_fitted)
+        .def("components", &auroraml::decomposition::IncrementalPCA::components)
+        .def("explained_variance", &auroraml::decomposition::IncrementalPCA::explained_variance)
+        .def("explained_variance_ratio", &auroraml::decomposition::IncrementalPCA::explained_variance_ratio)
+        .def("mean", &auroraml::decomposition::IncrementalPCA::mean);
+
+    py::class_<auroraml::decomposition::SparsePCA, auroraml::Estimator, auroraml::Transformer>(decomp_module, "SparsePCA")
+        .def(py::init<int, double, int, double>(),
+             py::arg("n_components") = -1, py::arg("alpha") = 1.0, py::arg("max_iter") = 1000, py::arg("tol") = 1e-4)
+        .def("fit", &auroraml::decomposition::SparsePCA::fit)
+        .def("transform", &auroraml::decomposition::SparsePCA::transform)
+        .def("inverse_transform", &auroraml::decomposition::SparsePCA::inverse_transform)
+        .def("fit_transform", &auroraml::decomposition::SparsePCA::fit_transform)
+        .def("get_params", &auroraml::decomposition::SparsePCA::get_params)
+        .def("set_params", &auroraml::decomposition::SparsePCA::set_params)
+        .def("is_fitted", &auroraml::decomposition::SparsePCA::is_fitted)
+        .def("components", &auroraml::decomposition::SparsePCA::components);
+
+    py::class_<auroraml::decomposition::MiniBatchSparsePCA, auroraml::Estimator, auroraml::Transformer>(decomp_module, "MiniBatchSparsePCA")
+        .def(py::init<int, double, int, int, double, int>(),
+             py::arg("n_components") = -1, py::arg("alpha") = 1.0, py::arg("max_iter") = 1000,
+             py::arg("batch_size") = 100, py::arg("tol") = 1e-4, py::arg("random_state") = -1)
+        .def("fit", &auroraml::decomposition::MiniBatchSparsePCA::fit)
+        .def("transform", &auroraml::decomposition::MiniBatchSparsePCA::transform)
+        .def("inverse_transform", &auroraml::decomposition::MiniBatchSparsePCA::inverse_transform)
+        .def("fit_transform", &auroraml::decomposition::MiniBatchSparsePCA::fit_transform)
+        .def("get_params", &auroraml::decomposition::MiniBatchSparsePCA::get_params)
+        .def("set_params", &auroraml::decomposition::MiniBatchSparsePCA::set_params)
+        .def("is_fitted", &auroraml::decomposition::MiniBatchSparsePCA::is_fitted)
+        .def("components", &auroraml::decomposition::MiniBatchSparsePCA::components);
+
+    py::class_<auroraml::decomposition::FastICA, auroraml::Estimator, auroraml::Transformer>(decomp_module, "FastICA")
+        .def(py::init<int, std::string, std::string, int, double, int>(),
+             py::arg("n_components") = -1, py::arg("algorithm") = "parallel", py::arg("fun") = "logcosh",
+             py::arg("max_iter") = 200, py::arg("tol") = 1e-4, py::arg("random_state") = -1)
+        .def("fit", &auroraml::decomposition::FastICA::fit)
+        .def("transform", &auroraml::decomposition::FastICA::transform)
+        .def("inverse_transform", &auroraml::decomposition::FastICA::inverse_transform)
+        .def("fit_transform", &auroraml::decomposition::FastICA::fit_transform)
+        .def("get_params", &auroraml::decomposition::FastICA::get_params)
+        .def("set_params", &auroraml::decomposition::FastICA::set_params)
+        .def("is_fitted", &auroraml::decomposition::FastICA::is_fitted)
+        .def("components", &auroraml::decomposition::FastICA::components)
+        .def("mixing", &auroraml::decomposition::FastICA::mixing);
+
+    py::class_<auroraml::decomposition::FactorAnalysis, auroraml::Estimator, auroraml::Transformer>(decomp_module, "FactorAnalysis")
+        .def(py::init<int, double, int, int>(),
+             py::arg("n_components") = -1, py::arg("tol") = 1e-2, py::arg("max_iter") = 1000, py::arg("random_state") = -1)
+        .def("fit", &auroraml::decomposition::FactorAnalysis::fit)
+        .def("transform", &auroraml::decomposition::FactorAnalysis::transform)
+        .def("inverse_transform", &auroraml::decomposition::FactorAnalysis::inverse_transform)
+        .def("fit_transform", &auroraml::decomposition::FactorAnalysis::fit_transform)
+        .def("get_params", &auroraml::decomposition::FactorAnalysis::get_params)
+        .def("set_params", &auroraml::decomposition::FactorAnalysis::set_params)
+        .def("is_fitted", &auroraml::decomposition::FactorAnalysis::is_fitted)
+        .def("components", &auroraml::decomposition::FactorAnalysis::components)
+        .def("noise_variance", &auroraml::decomposition::FactorAnalysis::noise_variance)
+        .def("loglike", &auroraml::decomposition::FactorAnalysis::loglike);
 
     py::class_<auroraml::decomposition::TruncatedSVD, auroraml::Estimator, auroraml::Transformer>(decomp_module, "TruncatedSVD")
         .def(py::init<int>(), py::arg("n_components"))
@@ -531,10 +1209,66 @@ PYBIND11_MODULE(auroraml, m) {
         .def("fit_transform", &auroraml::decomposition::TruncatedSVD::fit_transform)
         .def("get_params", &auroraml::decomposition::TruncatedSVD::get_params)
         .def("set_params", &auroraml::decomposition::TruncatedSVD::set_params)
+        .def("set_params", [](auroraml::decomposition::TruncatedSVD& self, py::kwargs kwargs) -> void {
+            self.set_params(params_from_kwargs(kwargs));
+        })
         .def("is_fitted", &auroraml::decomposition::TruncatedSVD::is_fitted)
         .def("components", &auroraml::decomposition::TruncatedSVD::components)
         .def("singular_values", &auroraml::decomposition::TruncatedSVD::singular_values)
         .def("explained_variance", &auroraml::decomposition::TruncatedSVD::explained_variance);
+
+    py::class_<auroraml::decomposition::NMF, auroraml::Estimator, auroraml::Transformer>(decomp_module, "NMF")
+        .def(py::init<int, int, double, double, int>(),
+             py::arg("n_components") = 2, py::arg("max_iter") = 200, py::arg("tol") = 1e-4,
+             py::arg("alpha") = 0.0, py::arg("random_state") = -1)
+        .def("fit", &auroraml::decomposition::NMF::fit)
+        .def("transform", &auroraml::decomposition::NMF::transform)
+        .def("inverse_transform", &auroraml::decomposition::NMF::inverse_transform)
+        .def("fit_transform", &auroraml::decomposition::NMF::fit_transform)
+        .def("get_params", &auroraml::decomposition::NMF::get_params)
+        .def("set_params", &auroraml::decomposition::NMF::set_params)
+        .def("is_fitted", &auroraml::decomposition::NMF::is_fitted)
+        .def("components", &auroraml::decomposition::NMF::components);
+
+    py::class_<auroraml::decomposition::MiniBatchNMF, auroraml::Estimator, auroraml::Transformer>(decomp_module, "MiniBatchNMF")
+        .def(py::init<int, int, int, double, double, int>(),
+             py::arg("n_components") = 2, py::arg("max_iter") = 200, py::arg("batch_size") = 100,
+             py::arg("tol") = 1e-4, py::arg("alpha") = 0.0, py::arg("random_state") = -1)
+        .def("fit", &auroraml::decomposition::MiniBatchNMF::fit)
+        .def("transform", &auroraml::decomposition::MiniBatchNMF::transform)
+        .def("inverse_transform", &auroraml::decomposition::MiniBatchNMF::inverse_transform)
+        .def("fit_transform", &auroraml::decomposition::MiniBatchNMF::fit_transform)
+        .def("get_params", &auroraml::decomposition::MiniBatchNMF::get_params)
+        .def("set_params", &auroraml::decomposition::MiniBatchNMF::set_params)
+        .def("is_fitted", &auroraml::decomposition::MiniBatchNMF::is_fitted)
+        .def("components", &auroraml::decomposition::MiniBatchNMF::components);
+
+    py::class_<auroraml::decomposition::DictionaryLearning, auroraml::Estimator, auroraml::Transformer>(decomp_module, "DictionaryLearning")
+        .def(py::init<int, double, int, double, int>(),
+             py::arg("n_components") = 2, py::arg("alpha") = 1.0, py::arg("max_iter") = 100,
+             py::arg("tol") = 1e-4, py::arg("random_state") = -1)
+        .def("fit", &auroraml::decomposition::DictionaryLearning::fit)
+        .def("transform", &auroraml::decomposition::DictionaryLearning::transform)
+        .def("inverse_transform", &auroraml::decomposition::DictionaryLearning::inverse_transform)
+        .def("fit_transform", &auroraml::decomposition::DictionaryLearning::fit_transform)
+        .def("get_params", &auroraml::decomposition::DictionaryLearning::get_params)
+        .def("set_params", &auroraml::decomposition::DictionaryLearning::set_params)
+        .def("is_fitted", &auroraml::decomposition::DictionaryLearning::is_fitted)
+        .def("components", &auroraml::decomposition::DictionaryLearning::components)
+        .def("codes", &auroraml::decomposition::DictionaryLearning::codes);
+
+    py::class_<auroraml::decomposition::MiniBatchDictionaryLearning, auroraml::Estimator, auroraml::Transformer>(decomp_module, "MiniBatchDictionaryLearning")
+        .def(py::init<int, double, int, int, double, int>(),
+             py::arg("n_components") = 2, py::arg("alpha") = 1.0, py::arg("max_iter") = 100,
+             py::arg("batch_size") = 100, py::arg("tol") = 1e-4, py::arg("random_state") = -1)
+        .def("fit", &auroraml::decomposition::MiniBatchDictionaryLearning::fit)
+        .def("transform", &auroraml::decomposition::MiniBatchDictionaryLearning::transform)
+        .def("inverse_transform", &auroraml::decomposition::MiniBatchDictionaryLearning::inverse_transform)
+        .def("fit_transform", &auroraml::decomposition::MiniBatchDictionaryLearning::fit_transform)
+        .def("get_params", &auroraml::decomposition::MiniBatchDictionaryLearning::get_params)
+        .def("set_params", &auroraml::decomposition::MiniBatchDictionaryLearning::set_params)
+        .def("is_fitted", &auroraml::decomposition::MiniBatchDictionaryLearning::is_fitted)
+        .def("components", &auroraml::decomposition::MiniBatchDictionaryLearning::components);
 
     py::class_<auroraml::decomposition::LDA, auroraml::Estimator, auroraml::Transformer>(decomp_module, "LDA")
         .def(py::init<int>(), py::arg("n_components") = -1)
@@ -544,6 +1278,9 @@ PYBIND11_MODULE(auroraml, m) {
         .def("fit_transform", &auroraml::decomposition::LDA::fit_transform)
         .def("get_params", &auroraml::decomposition::LDA::get_params)
         .def("set_params", &auroraml::decomposition::LDA::set_params)
+        .def("set_params", [](auroraml::decomposition::LDA& self, py::kwargs kwargs) -> void {
+            self.set_params(params_from_kwargs(kwargs));
+        })
         .def("is_fitted", &auroraml::decomposition::LDA::is_fitted)
         .def("components", &auroraml::decomposition::LDA::components)
         .def("explained_variance", &auroraml::decomposition::LDA::explained_variance)
@@ -551,6 +1288,137 @@ PYBIND11_MODULE(auroraml, m) {
         .def("mean", &auroraml::decomposition::LDA::mean)
         .def("class_means", &auroraml::decomposition::LDA::class_means)
         .def("classes", &auroraml::decomposition::LDA::classes);
+
+    py::class_<auroraml::decomposition::LatentDirichletAllocation, auroraml::Estimator, auroraml::Transformer>(decomp_module, "LatentDirichletAllocation")
+        .def(py::init<int, int, double, double, int>(),
+             py::arg("n_components") = 10, py::arg("max_iter") = 10,
+             py::arg("doc_topic_prior") = 0.1, py::arg("topic_word_prior") = 0.01,
+             py::arg("random_state") = -1)
+        .def("fit", &auroraml::decomposition::LatentDirichletAllocation::fit)
+        .def("transform", &auroraml::decomposition::LatentDirichletAllocation::transform)
+        .def("inverse_transform", &auroraml::decomposition::LatentDirichletAllocation::inverse_transform)
+        .def("fit_transform", &auroraml::decomposition::LatentDirichletAllocation::fit_transform)
+        .def("get_params", &auroraml::decomposition::LatentDirichletAllocation::get_params)
+        .def("set_params", &auroraml::decomposition::LatentDirichletAllocation::set_params)
+        .def("is_fitted", &auroraml::decomposition::LatentDirichletAllocation::is_fitted)
+        .def("components", &auroraml::decomposition::LatentDirichletAllocation::components)
+        .def("doc_topic", &auroraml::decomposition::LatentDirichletAllocation::doc_topic);
+
+    // Covariance estimation
+    py::module_ covariance_module = m.def_submodule("covariance", "Covariance estimation");
+
+    auto empirical_cov_fit = [](auroraml::covariance::EmpiricalCovariance& self, const auroraml::MatrixXd& X, py::object y_py = py::none()) -> auroraml::covariance::EmpiricalCovariance& {
+        auroraml::VectorXd y = y_py.is_none() ? auroraml::VectorXd::Zero(X.rows()) : py::cast<auroraml::VectorXd>(y_py);
+        self.fit(X, y);
+        return self;
+    };
+    auto shrunk_cov_fit = [](auroraml::covariance::ShrunkCovariance& self, const auroraml::MatrixXd& X, py::object y_py = py::none()) -> auroraml::covariance::ShrunkCovariance& {
+        auroraml::VectorXd y = y_py.is_none() ? auroraml::VectorXd::Zero(X.rows()) : py::cast<auroraml::VectorXd>(y_py);
+        self.fit(X, y);
+        return self;
+    };
+    auto ledoit_cov_fit = [](auroraml::covariance::LedoitWolf& self, const auroraml::MatrixXd& X, py::object y_py = py::none()) -> auroraml::covariance::LedoitWolf& {
+        auroraml::VectorXd y = y_py.is_none() ? auroraml::VectorXd::Zero(X.rows()) : py::cast<auroraml::VectorXd>(y_py);
+        self.fit(X, y);
+        return self;
+    };
+    auto oas_cov_fit = [](auroraml::covariance::OAS& self, const auroraml::MatrixXd& X, py::object y_py = py::none()) -> auroraml::covariance::OAS& {
+        auroraml::VectorXd y = y_py.is_none() ? auroraml::VectorXd::Zero(X.rows()) : py::cast<auroraml::VectorXd>(y_py);
+        self.fit(X, y);
+        return self;
+    };
+    auto mcd_fit = [](auroraml::covariance::MinCovDet& self, const auroraml::MatrixXd& X, py::object y_py = py::none()) -> auroraml::covariance::MinCovDet& {
+        auroraml::VectorXd y = y_py.is_none() ? auroraml::VectorXd::Zero(X.rows()) : py::cast<auroraml::VectorXd>(y_py);
+        self.fit(X, y);
+        return self;
+    };
+    auto envelope_fit = [](auroraml::covariance::EllipticEnvelope& self, const auroraml::MatrixXd& X, py::object y_py = py::none()) -> auroraml::covariance::EllipticEnvelope& {
+        auroraml::VectorXd y = y_py.is_none() ? auroraml::VectorXd::Zero(X.rows()) : py::cast<auroraml::VectorXd>(y_py);
+        self.fit(X, y);
+        return self;
+    };
+
+    py::class_<auroraml::covariance::EmpiricalCovariance, auroraml::Estimator>(covariance_module, "EmpiricalCovariance")
+        .def(py::init<bool>(), py::arg("assume_centered") = false)
+        .def("fit", empirical_cov_fit, py::arg("X"), py::arg("y") = py::none())
+        .def("mahalanobis", &auroraml::covariance::EmpiricalCovariance::mahalanobis)
+        .def("score_samples", &auroraml::covariance::EmpiricalCovariance::score_samples)
+        .def("covariance", &auroraml::covariance::EmpiricalCovariance::covariance)
+        .def("location", &auroraml::covariance::EmpiricalCovariance::location)
+        .def("precision", &auroraml::covariance::EmpiricalCovariance::precision)
+        .def("get_params", &auroraml::covariance::EmpiricalCovariance::get_params)
+        .def("set_params", &auroraml::covariance::EmpiricalCovariance::set_params)
+        .def("is_fitted", &auroraml::covariance::EmpiricalCovariance::is_fitted);
+
+    py::class_<auroraml::covariance::ShrunkCovariance, auroraml::Estimator>(covariance_module, "ShrunkCovariance")
+        .def(py::init<double, bool>(), py::arg("shrinkage") = 0.1, py::arg("assume_centered") = false)
+        .def("fit", shrunk_cov_fit, py::arg("X"), py::arg("y") = py::none())
+        .def("mahalanobis", &auroraml::covariance::ShrunkCovariance::mahalanobis)
+        .def("score_samples", &auroraml::covariance::ShrunkCovariance::score_samples)
+        .def("covariance", &auroraml::covariance::ShrunkCovariance::covariance)
+        .def("location", &auroraml::covariance::ShrunkCovariance::location)
+        .def("precision", &auroraml::covariance::ShrunkCovariance::precision)
+        .def("shrinkage", &auroraml::covariance::ShrunkCovariance::shrinkage)
+        .def("get_params", &auroraml::covariance::ShrunkCovariance::get_params)
+        .def("set_params", &auroraml::covariance::ShrunkCovariance::set_params)
+        .def("is_fitted", &auroraml::covariance::ShrunkCovariance::is_fitted);
+
+    py::class_<auroraml::covariance::LedoitWolf, auroraml::Estimator>(covariance_module, "LedoitWolf")
+        .def(py::init<bool>(), py::arg("assume_centered") = false)
+        .def("fit", ledoit_cov_fit, py::arg("X"), py::arg("y") = py::none())
+        .def("mahalanobis", &auroraml::covariance::LedoitWolf::mahalanobis)
+        .def("score_samples", &auroraml::covariance::LedoitWolf::score_samples)
+        .def("covariance", &auroraml::covariance::LedoitWolf::covariance)
+        .def("location", &auroraml::covariance::LedoitWolf::location)
+        .def("precision", &auroraml::covariance::LedoitWolf::precision)
+        .def("shrinkage", &auroraml::covariance::LedoitWolf::shrinkage)
+        .def("get_params", &auroraml::covariance::LedoitWolf::get_params)
+        .def("set_params", &auroraml::covariance::LedoitWolf::set_params)
+        .def("is_fitted", &auroraml::covariance::LedoitWolf::is_fitted);
+
+    py::class_<auroraml::covariance::OAS, auroraml::Estimator>(covariance_module, "OAS")
+        .def(py::init<bool>(), py::arg("assume_centered") = false)
+        .def("fit", oas_cov_fit, py::arg("X"), py::arg("y") = py::none())
+        .def("mahalanobis", &auroraml::covariance::OAS::mahalanobis)
+        .def("score_samples", &auroraml::covariance::OAS::score_samples)
+        .def("covariance", &auroraml::covariance::OAS::covariance)
+        .def("location", &auroraml::covariance::OAS::location)
+        .def("precision", &auroraml::covariance::OAS::precision)
+        .def("shrinkage", &auroraml::covariance::OAS::shrinkage)
+        .def("get_params", &auroraml::covariance::OAS::get_params)
+        .def("set_params", &auroraml::covariance::OAS::set_params)
+        .def("is_fitted", &auroraml::covariance::OAS::is_fitted);
+
+    py::class_<auroraml::covariance::MinCovDet, auroraml::Estimator>(covariance_module, "MinCovDet")
+        .def(py::init<double, bool, int, double, int>(),
+             py::arg("support_fraction") = 0.75, py::arg("assume_centered") = false,
+             py::arg("max_iter") = 100, py::arg("tol") = 1e-3, py::arg("random_state") = -1)
+        .def("fit", mcd_fit, py::arg("X"), py::arg("y") = py::none())
+        .def("mahalanobis", &auroraml::covariance::MinCovDet::mahalanobis)
+        .def("score_samples", &auroraml::covariance::MinCovDet::score_samples)
+        .def("covariance", &auroraml::covariance::MinCovDet::covariance)
+        .def("location", &auroraml::covariance::MinCovDet::location)
+        .def("precision", &auroraml::covariance::MinCovDet::precision)
+        .def("support", &auroraml::covariance::MinCovDet::support)
+        .def("get_params", &auroraml::covariance::MinCovDet::get_params)
+        .def("set_params", &auroraml::covariance::MinCovDet::set_params)
+        .def("is_fitted", &auroraml::covariance::MinCovDet::is_fitted);
+
+    py::class_<auroraml::covariance::EllipticEnvelope, auroraml::Estimator>(covariance_module, "EllipticEnvelope")
+        .def(py::init<double, double, int, double, int>(),
+             py::arg("contamination") = 0.1, py::arg("support_fraction") = 0.75,
+             py::arg("max_iter") = 100, py::arg("tol") = 1e-3, py::arg("random_state") = -1)
+        .def("fit", envelope_fit, py::arg("X"), py::arg("y") = py::none())
+        .def("predict", &auroraml::covariance::EllipticEnvelope::predict)
+        .def("decision_function", &auroraml::covariance::EllipticEnvelope::decision_function)
+        .def("score_samples", &auroraml::covariance::EllipticEnvelope::score_samples)
+        .def("covariance", &auroraml::covariance::EllipticEnvelope::covariance)
+        .def("location", &auroraml::covariance::EllipticEnvelope::location)
+        .def("precision", &auroraml::covariance::EllipticEnvelope::precision)
+        .def("threshold", &auroraml::covariance::EllipticEnvelope::threshold)
+        .def("get_params", &auroraml::covariance::EllipticEnvelope::get_params)
+        .def("set_params", &auroraml::covariance::EllipticEnvelope::set_params)
+        .def("is_fitted", &auroraml::covariance::EllipticEnvelope::is_fitted);
 
     // SVM
     py::module_ svm_module = m.def_submodule("svm", "Support Vector Machines");
@@ -578,6 +1446,133 @@ PYBIND11_MODULE(auroraml, m) {
         .def("coef", &auroraml::svm::SVR::coef)
         .def("intercept", &auroraml::svm::SVR::intercept);
 
+    py::class_<auroraml::svm::LinearSVR, auroraml::Estimator, auroraml::Regressor>(svm_module, "LinearSVR")
+        .def(py::init<double,double,int,double,int>(), 
+             py::arg("C")=1.0, py::arg("epsilon")=0.1, py::arg("max_iter")=1000, 
+             py::arg("lr")=0.01, py::arg("random_state")=-1)
+        .def("fit", &auroraml::svm::LinearSVR::fit)
+        .def("predict", &auroraml::svm::LinearSVR::predict)
+        .def("get_params", &auroraml::svm::LinearSVR::get_params)
+        .def("set_params", &auroraml::svm::LinearSVR::set_params)
+        .def("is_fitted", &auroraml::svm::LinearSVR::is_fitted)
+        .def("coef", &auroraml::svm::LinearSVR::coef)
+        .def("intercept", &auroraml::svm::LinearSVR::intercept);
+
+    py::class_<auroraml::svm::NuSVC, auroraml::Estimator, auroraml::Classifier>(svm_module, "NuSVC")
+        .def(py::init<double,int,double,int>(), 
+             py::arg("nu")=0.5, py::arg("max_iter")=1000, 
+             py::arg("lr")=0.01, py::arg("random_state")=-1)
+        .def("fit", &auroraml::svm::NuSVC::fit)
+        .def("predict", &auroraml::svm::NuSVC::predict_classes)
+        .def("predict_proba", &auroraml::svm::NuSVC::predict_proba)
+        .def("decision_function", &auroraml::svm::NuSVC::decision_function)
+        .def("get_params", &auroraml::svm::NuSVC::get_params)
+        .def("set_params", &auroraml::svm::NuSVC::set_params)
+        .def("is_fitted", &auroraml::svm::NuSVC::is_fitted)
+        .def("classes", &auroraml::svm::NuSVC::classes);
+
+    py::class_<auroraml::svm::NuSVR, auroraml::Estimator, auroraml::Regressor>(svm_module, "NuSVR")
+        .def(py::init<double,double,int,double,int>(), 
+             py::arg("nu")=0.5, py::arg("C")=1.0, py::arg("max_iter")=1000, 
+             py::arg("lr")=0.01, py::arg("random_state")=-1)
+        .def("fit", &auroraml::svm::NuSVR::fit)
+        .def("predict", &auroraml::svm::NuSVR::predict)
+        .def("get_params", &auroraml::svm::NuSVR::get_params)
+        .def("set_params", &auroraml::svm::NuSVR::set_params)
+        .def("is_fitted", &auroraml::svm::NuSVR::is_fitted)
+        .def("coef", &auroraml::svm::NuSVR::coef)
+        .def("intercept", &auroraml::svm::NuSVR::intercept);
+
+    py::class_<auroraml::svm::OneClassSVM, auroraml::Estimator>(svm_module, "OneClassSVM")
+        .def(py::init<double,double,const std::string&,int,double,int>(), 
+             py::arg("nu")=0.5, py::arg("gamma")=1.0, py::arg("kernel")="rbf", 
+             py::arg("max_iter")=1000, py::arg("lr")=0.01, py::arg("random_state")=-1)
+        .def("fit", &auroraml::svm::OneClassSVM::fit, py::arg("X"), py::arg("y")=auroraml::VectorXd())
+        .def("predict", &auroraml::svm::OneClassSVM::predict)
+        .def("decision_function", &auroraml::svm::OneClassSVM::decision_function)
+        .def("score_samples", &auroraml::svm::OneClassSVM::score_samples)
+        .def("get_params", &auroraml::svm::OneClassSVM::get_params)
+        .def("set_params", &auroraml::svm::OneClassSVM::set_params)
+        .def("is_fitted", &auroraml::svm::OneClassSVM::is_fitted)
+        .def("get_threshold", &auroraml::svm::OneClassSVM::get_threshold);
+
+    // Minimal SVC wrapper: supports only linear kernel via LinearSVC
+    class SVCWrapper : public auroraml::Estimator, public auroraml::Classifier {
+    private:
+        std::unique_ptr<auroraml::svm::LinearSVC> linear_impl_;
+        std::string kernel_;
+        double C_;
+        int max_iter_;
+        double lr_;
+        int random_state_;
+    public:
+        SVCWrapper(const std::string& kernel = "rbf", double C = 1.0, int max_iter = 1000, double lr = 0.01, int random_state = -1)
+            : kernel_(kernel), C_(C), max_iter_(max_iter), lr_(lr), random_state_(random_state) {
+            if (kernel_ == "linear") {
+                linear_impl_ = std::make_unique<auroraml::svm::LinearSVC>(C_, max_iter_, lr_, random_state_);
+            }
+        }
+        auroraml::Estimator& fit(const auroraml::MatrixXd& X, const auroraml::VectorXd& y) override {
+            if (kernel_ != "linear") {
+                throw std::runtime_error("SVC currently supports kernel=\"linear\" only");
+            }
+            return linear_impl_->fit(X, y);
+        }
+        auroraml::VectorXi predict_classes(const auroraml::MatrixXd& X) const override {
+            if (!linear_impl_) throw std::runtime_error("SVC not fitted");
+            return linear_impl_->predict_classes(X);
+        }
+        auroraml::MatrixXd predict_proba(const auroraml::MatrixXd& X) const override {
+            if (!linear_impl_) throw std::runtime_error("SVC not fitted");
+            return linear_impl_->predict_proba(X);
+        }
+        auroraml::VectorXd decision_function(const auroraml::MatrixXd& X) const override {
+            if (!linear_impl_) throw std::runtime_error("SVC not fitted");
+            return linear_impl_->decision_function(X);
+        }
+        auroraml::Params get_params() const override {
+            auroraml::Params p;
+            p["kernel"] = kernel_;
+            p["C"] = std::to_string(C_);
+            p["max_iter"] = std::to_string(max_iter_);
+            p["lr"] = std::to_string(lr_);
+            p["random_state"] = std::to_string(random_state_);
+            return p;
+        }
+        auroraml::Estimator& set_params(const auroraml::Params& params) override {
+            auto it = params.find("kernel");
+            if (it != params.end()) kernel_ = it->second;
+            it = params.find("C");
+            if (it != params.end()) C_ = std::stod(it->second);
+            it = params.find("max_iter");
+            if (it != params.end()) max_iter_ = std::stoi(it->second);
+            it = params.find("lr");
+            if (it != params.end()) lr_ = std::stod(it->second);
+            it = params.find("random_state");
+            if (it != params.end()) random_state_ = std::stoi(it->second);
+            if (kernel_ == "linear") {
+                linear_impl_ = std::make_unique<auroraml::svm::LinearSVC>(C_, max_iter_, lr_, random_state_);
+            } else {
+                linear_impl_.reset();
+            }
+            return *this;
+        }
+        bool is_fitted() const override {
+            return linear_impl_ && linear_impl_->is_fitted();
+        }
+    };
+
+    py::class_<SVCWrapper, auroraml::Estimator, auroraml::Classifier>(svm_module, "SVC")
+        .def(py::init<const std::string&, double, int, double, int>(),
+             py::arg("kernel") = "rbf", py::arg("C") = 1.0, py::arg("max_iter") = 1000,
+             py::arg("lr") = 0.01, py::arg("random_state") = -1)
+        .def("fit", &SVCWrapper::fit)
+        .def("predict", &SVCWrapper::predict_classes)
+        .def("predict_proba", &SVCWrapper::predict_proba)
+        .def("decision_function", &SVCWrapper::decision_function)
+        .def("get_params", &SVCWrapper::get_params)
+        .def("set_params", &SVCWrapper::set_params);
+
     // RandomForest
     py::module_ rf_module = m.def_submodule("ensemble", "Ensemble methods");
     py::class_<auroraml::ensemble::RandomForestClassifier, auroraml::Estimator, auroraml::Classifier>(rf_module, "RandomForestClassifier")
@@ -601,6 +1596,33 @@ PYBIND11_MODULE(auroraml, m) {
         .def("is_fitted", &auroraml::ensemble::RandomForestRegressor::is_fitted)
         .def("save", &auroraml::ensemble::RandomForestRegressor::save)
         .def("load", &auroraml::ensemble::RandomForestRegressor::load);
+
+    py::class_<auroraml::ensemble::DummyClassifier, auroraml::Estimator, auroraml::Classifier>(rf_module, "DummyClassifier")
+        .def(py::init<const std::string&>(), py::arg("strategy") = "most_frequent")
+        .def("fit", &auroraml::ensemble::DummyClassifier::fit)
+        .def("predict", &auroraml::ensemble::DummyClassifier::predict_classes)
+        .def("predict_proba", &auroraml::ensemble::DummyClassifier::predict_proba)
+        .def("decision_function", &auroraml::ensemble::DummyClassifier::decision_function)
+        .def("get_params", &auroraml::ensemble::DummyClassifier::get_params)
+        .def("set_params", &auroraml::ensemble::DummyClassifier::set_params)
+        .def("set_params", [](auroraml::ensemble::DummyClassifier& self, py::kwargs kwargs) -> void {
+            self.set_params(params_from_kwargs(kwargs));
+        })
+        .def("is_fitted", &auroraml::ensemble::DummyClassifier::is_fitted)
+        .def("classes", &auroraml::ensemble::DummyClassifier::classes);
+
+    py::class_<auroraml::ensemble::DummyRegressor, auroraml::Estimator, auroraml::Regressor>(rf_module, "DummyRegressor")
+        .def(py::init<const std::string&, double, double>(),
+             py::arg("strategy") = "mean", py::arg("quantile") = 0.5, py::arg("constant") = 0.0)
+        .def("fit", &auroraml::ensemble::DummyRegressor::fit)
+        .def("predict", &auroraml::ensemble::DummyRegressor::predict)
+        .def("get_params", &auroraml::ensemble::DummyRegressor::get_params)
+        .def("set_params", &auroraml::ensemble::DummyRegressor::set_params)
+        .def("set_params", [](auroraml::ensemble::DummyRegressor& self, py::kwargs kwargs) -> void {
+            self.set_params(params_from_kwargs(kwargs));
+        })
+        .def("is_fitted", &auroraml::ensemble::DummyRegressor::is_fitted)
+        .def("statistic", &auroraml::ensemble::DummyRegressor::statistic);
 
     // Gradient Boosting
     py::module_ gb_module = m.def_submodule("gradient_boosting", "Gradient Boosting algorithms");
@@ -648,6 +1670,9 @@ PYBIND11_MODULE(auroraml, m) {
         .def("decision_function", &auroraml::ensemble::AdaBoostClassifier::decision_function)
         .def("get_params", &auroraml::ensemble::AdaBoostClassifier::get_params)
         .def("set_params", &auroraml::ensemble::AdaBoostClassifier::set_params)
+        .def("set_params", [](auroraml::ensemble::AdaBoostClassifier& self, py::kwargs kwargs) -> void {
+            self.set_params(params_from_kwargs(kwargs));
+        })
         .def("is_fitted", &auroraml::ensemble::AdaBoostClassifier::is_fitted)
         .def("classes", &auroraml::ensemble::AdaBoostClassifier::classes);
 
@@ -659,6 +1684,9 @@ PYBIND11_MODULE(auroraml, m) {
         .def("predict", &auroraml::ensemble::AdaBoostRegressor::predict)
         .def("get_params", &auroraml::ensemble::AdaBoostRegressor::get_params)
         .def("set_params", &auroraml::ensemble::AdaBoostRegressor::set_params)
+        .def("set_params", [](auroraml::ensemble::AdaBoostRegressor& self, py::kwargs kwargs) -> void {
+            self.set_params(params_from_kwargs(kwargs));
+        })
         .def("is_fitted", &auroraml::ensemble::AdaBoostRegressor::is_fitted);
 
     // XGBoost
@@ -676,6 +1704,9 @@ PYBIND11_MODULE(auroraml, m) {
         .def("decision_function", &auroraml::ensemble::XGBClassifier::decision_function)
         .def("get_params", &auroraml::ensemble::XGBClassifier::get_params)
         .def("set_params", &auroraml::ensemble::XGBClassifier::set_params)
+        .def("set_params", [](auroraml::ensemble::XGBClassifier& self, py::kwargs kwargs) -> void {
+            self.set_params(params_from_kwargs(kwargs));
+        })
         .def("is_fitted", &auroraml::ensemble::XGBClassifier::is_fitted)
         .def("classes", &auroraml::ensemble::XGBClassifier::classes);
 
@@ -690,6 +1721,9 @@ PYBIND11_MODULE(auroraml, m) {
         .def("predict", &auroraml::ensemble::XGBRegressor::predict)
         .def("get_params", &auroraml::ensemble::XGBRegressor::get_params)
         .def("set_params", &auroraml::ensemble::XGBRegressor::set_params)
+        .def("set_params", [](auroraml::ensemble::XGBRegressor& self, py::kwargs kwargs) -> void {
+            self.set_params(params_from_kwargs(kwargs));
+        })
         .def("is_fitted", &auroraml::ensemble::XGBRegressor::is_fitted);
 
     // CatBoost
@@ -706,6 +1740,9 @@ PYBIND11_MODULE(auroraml, m) {
         .def("decision_function", &auroraml::ensemble::CatBoostClassifier::decision_function)
         .def("get_params", &auroraml::ensemble::CatBoostClassifier::get_params)
         .def("set_params", &auroraml::ensemble::CatBoostClassifier::set_params)
+        .def("set_params", [](auroraml::ensemble::CatBoostClassifier& self, py::kwargs kwargs) -> void {
+            self.set_params(params_from_kwargs(kwargs));
+        })
         .def("is_fitted", &auroraml::ensemble::CatBoostClassifier::is_fitted)
         .def("classes", &auroraml::ensemble::CatBoostClassifier::classes);
 
@@ -719,6 +1756,9 @@ PYBIND11_MODULE(auroraml, m) {
         .def("predict", &auroraml::ensemble::CatBoostRegressor::predict)
         .def("get_params", &auroraml::ensemble::CatBoostRegressor::get_params)
         .def("set_params", &auroraml::ensemble::CatBoostRegressor::set_params)
+        .def("set_params", [](auroraml::ensemble::CatBoostRegressor& self, py::kwargs kwargs) -> void {
+            self.set_params(params_from_kwargs(kwargs));
+        })
         .def("is_fitted", &auroraml::ensemble::CatBoostRegressor::is_fitted);
 
     py::class_<auroraml::model_selection::GridSearchCV>(model_selection_module, "GridSearchCV")
@@ -728,7 +1768,10 @@ PYBIND11_MODULE(auroraml, m) {
         .def("fit", &auroraml::model_selection::GridSearchCV::fit)
         .def("predict", &auroraml::model_selection::GridSearchCV::predict)
         .def("best_params", &auroraml::model_selection::GridSearchCV::best_params)
-        .def("best_score", &auroraml::model_selection::GridSearchCV::best_score);
+        .def("best_score", &auroraml::model_selection::GridSearchCV::best_score)
+        .def("get_params", &auroraml::model_selection::GridSearchCV::get_params)
+        .def("set_params", &auroraml::model_selection::GridSearchCV::set_params)
+        .def("get_n_splits", &auroraml::model_selection::GridSearchCV::get_n_splits);
     
     py::class_<auroraml::model_selection::RandomizedSearchCV>(model_selection_module, "RandomizedSearchCV")
         .def(py::init<auroraml::Estimator&, const std::vector<auroraml::Params>&, const auroraml::model_selection::BaseCrossValidator&, std::string, int, int, bool>(),
@@ -737,7 +1780,50 @@ PYBIND11_MODULE(auroraml, m) {
         .def("fit", &auroraml::model_selection::RandomizedSearchCV::fit)
         .def("predict", &auroraml::model_selection::RandomizedSearchCV::predict)
         .def("best_params", &auroraml::model_selection::RandomizedSearchCV::best_params)
-        .def("best_score", &auroraml::model_selection::RandomizedSearchCV::best_score);
+        .def("best_score", &auroraml::model_selection::RandomizedSearchCV::best_score)
+        .def("get_params", &auroraml::model_selection::RandomizedSearchCV::get_params)
+        .def("set_params", &auroraml::model_selection::RandomizedSearchCV::set_params)
+        .def("get_n_splits", &auroraml::model_selection::RandomizedSearchCV::get_n_splits);
+
+    py::class_<auroraml::model_selection::HalvingRandomSearchCV>(model_selection_module, "HalvingRandomSearchCV")
+        .def(py::init([&](auroraml::Estimator& estimator, const py::dict& param_distributions,
+                          auroraml::model_selection::BaseCrossValidator& cv, const std::string& scoring,
+                          int n_candidates, int factor, int min_resources, bool aggressive_elimination,
+                          int random_state, int n_jobs, bool verbose) {
+            return new auroraml::model_selection::HalvingRandomSearchCV(
+                estimator, param_map_from_py(param_distributions), cv, scoring, n_candidates, factor,
+                min_resources, aggressive_elimination, random_state, n_jobs, verbose);
+        }),
+             py::arg("estimator"), py::arg("param_distributions"), py::arg("cv"), py::arg("scoring") = "accuracy",
+             py::arg("n_candidates") = 10, py::arg("factor") = 3, py::arg("min_resources") = 1,
+             py::arg("aggressive_elimination") = false, py::arg("random_state") = -1,
+             py::arg("n_jobs") = 1, py::arg("verbose") = false)
+        .def("fit", &auroraml::model_selection::HalvingRandomSearchCV::fit)
+        .def("predict", &auroraml::model_selection::HalvingRandomSearchCV::predict)
+        .def("best_params", &auroraml::model_selection::HalvingRandomSearchCV::best_params)
+        .def("best_score", &auroraml::model_selection::HalvingRandomSearchCV::best_score)
+        .def("get_params", &auroraml::model_selection::HalvingRandomSearchCV::get_params)
+        .def("set_params", &auroraml::model_selection::HalvingRandomSearchCV::set_params)
+        .def("is_fitted", &auroraml::model_selection::HalvingRandomSearchCV::is_fitted)
+        .def("get_n_splits", &auroraml::model_selection::HalvingRandomSearchCV::get_n_splits);
+
+    py::class_<auroraml::model_selection::TimeSeriesSplit, auroraml::model_selection::BaseCrossValidator>(model_selection_module, "TimeSeriesSplit")
+        .def(py::init<int, int, int, int>(), py::arg("n_splits") = 5, py::arg("max_train_size") = -1, py::arg("test_size") = -1, py::arg("gap") = 0)
+        .def("split", [](const auroraml::model_selection::TimeSeriesSplit& self, const auroraml::MatrixXd& X, const auroraml::VectorXd& y) {
+            auto splits = self.split(X, y);
+            py::list result;
+            for (const auto& split : splits) {
+                py::tuple split_tuple = py::make_tuple(
+                    py::array_t<int>(split.first.size(), split.first.data()),
+                    py::array_t<int>(split.second.size(), split.second.data())
+                );
+                result.append(split_tuple);
+            }
+            return result;
+        }, py::arg("X"), py::arg("y") = auroraml::VectorXd())
+        .def("get_n_splits", &auroraml::model_selection::TimeSeriesSplit::get_n_splits)
+        .def("get_params", &auroraml::model_selection::TimeSeriesSplit::get_params)
+        .def("set_params", &auroraml::model_selection::TimeSeriesSplit::set_params);
     
     // Pipeline module
     py::module_ pipeline_module = m.def_submodule("pipeline", "Pipeline and FeatureUnion utilities");
@@ -876,21 +1962,18 @@ PYBIND11_MODULE(auroraml, m) {
         .def("is_fitted", &auroraml::feature_selection::VarianceThreshold::is_fitted)
         .def("get_support", &auroraml::feature_selection::VarianceThreshold::get_support);
     
+    auto score_func_from_py = [](py::object score_func_py) {
+        return [score_func_py](const auroraml::VectorXd& X_feature, const auroraml::VectorXd& y) {
+            py::array_t<double> X_arr = py::cast(X_feature);
+            py::array_t<double> y_arr = py::cast(y);
+            py::object result = score_func_py(X_arr, y_arr);
+            return py::cast<double>(result);
+        };
+    };
+
     // Helper lambda to create SelectKBest with scoring function
-    auto selectkbest_init = [](py::object score_func_py, int k = 10) {
-        // Create a C++ function wrapper for the Python scoring function
-        std::function<double(const auroraml::VectorXd&, const auroraml::VectorXd&)> score_func =
-            [score_func_py](const auroraml::VectorXd& X_feature, const auroraml::VectorXd& y) {
-                // Convert Eigen vectors to numpy arrays
-                py::array_t<double> X_arr = py::cast(X_feature);
-                py::array_t<double> y_arr = py::cast(y);
-                
-                // Call Python scoring function
-                py::object result = score_func_py(X_arr, y_arr);
-                return py::cast<double>(result);
-            };
-        
-        return new auroraml::feature_selection::SelectKBest(score_func, k);
+    auto selectkbest_init = [&](py::object score_func_py, int k = 10) {
+        return new auroraml::feature_selection::SelectKBest(score_func_from_py(score_func_py), k);
     };
     
     py::class_<auroraml::feature_selection::SelectKBest, auroraml::Estimator, auroraml::Transformer>(feature_selection_module, "SelectKBest")
@@ -905,16 +1988,8 @@ PYBIND11_MODULE(auroraml, m) {
         .def("scores", &auroraml::feature_selection::SelectKBest::scores);
     
     // Helper lambda to create SelectPercentile with scoring function
-    auto selectpercentile_init = [](py::object score_func_py, int percentile = 10) {
-        std::function<double(const auroraml::VectorXd&, const auroraml::VectorXd&)> score_func =
-            [score_func_py](const auroraml::VectorXd& X_feature, const auroraml::VectorXd& y) {
-                py::array_t<double> X_arr = py::cast(X_feature);
-                py::array_t<double> y_arr = py::cast(y);
-                py::object result = score_func_py(X_arr, y_arr);
-                return py::cast<double>(result);
-            };
-        
-        return new auroraml::feature_selection::SelectPercentile(score_func, percentile);
+    auto selectpercentile_init = [&](py::object score_func_py, int percentile = 10) {
+        return new auroraml::feature_selection::SelectPercentile(score_func_from_py(score_func_py), percentile);
     };
     
     py::class_<auroraml::feature_selection::SelectPercentile, auroraml::Estimator, auroraml::Transformer>(feature_selection_module, "SelectPercentile")
@@ -927,6 +2002,108 @@ PYBIND11_MODULE(auroraml, m) {
         .def("is_fitted", &auroraml::feature_selection::SelectPercentile::is_fitted)
         .def("get_support", &auroraml::feature_selection::SelectPercentile::get_support)
         .def("scores", &auroraml::feature_selection::SelectPercentile::scores);
+
+    auto selectfpr_init = [&](py::object score_func_py, double alpha = 0.05) {
+        return new auroraml::feature_selection::SelectFpr(score_func_from_py(score_func_py), alpha);
+    };
+    auto selectfdr_init = [&](py::object score_func_py, double alpha = 0.05) {
+        return new auroraml::feature_selection::SelectFdr(score_func_from_py(score_func_py), alpha);
+    };
+    auto selectfwe_init = [&](py::object score_func_py, double alpha = 0.05) {
+        return new auroraml::feature_selection::SelectFwe(score_func_from_py(score_func_py), alpha);
+    };
+    auto generic_univariate_init = [&](py::object score_func_py, const std::string& mode, double param) {
+        return new auroraml::feature_selection::GenericUnivariateSelect(score_func_from_py(score_func_py), mode, param);
+    };
+
+    py::class_<auroraml::feature_selection::SelectFpr, auroraml::Estimator, auroraml::Transformer>(feature_selection_module, "SelectFpr")
+        .def(py::init(selectfpr_init), py::arg("score_func"), py::arg("alpha") = 0.05)
+        .def("fit", &auroraml::feature_selection::SelectFpr::fit)
+        .def("transform", &auroraml::feature_selection::SelectFpr::transform)
+        .def("fit_transform", &auroraml::feature_selection::SelectFpr::fit_transform)
+        .def("get_params", &auroraml::feature_selection::SelectFpr::get_params)
+        .def("set_params", &auroraml::feature_selection::SelectFpr::set_params)
+        .def("is_fitted", &auroraml::feature_selection::SelectFpr::is_fitted)
+        .def("get_support", &auroraml::feature_selection::SelectFpr::get_support)
+        .def("scores", &auroraml::feature_selection::SelectFpr::scores);
+
+    py::class_<auroraml::feature_selection::SelectFdr, auroraml::Estimator, auroraml::Transformer>(feature_selection_module, "SelectFdr")
+        .def(py::init(selectfdr_init), py::arg("score_func"), py::arg("alpha") = 0.05)
+        .def("fit", &auroraml::feature_selection::SelectFdr::fit)
+        .def("transform", &auroraml::feature_selection::SelectFdr::transform)
+        .def("fit_transform", &auroraml::feature_selection::SelectFdr::fit_transform)
+        .def("get_params", &auroraml::feature_selection::SelectFdr::get_params)
+        .def("set_params", &auroraml::feature_selection::SelectFdr::set_params)
+        .def("is_fitted", &auroraml::feature_selection::SelectFdr::is_fitted)
+        .def("get_support", &auroraml::feature_selection::SelectFdr::get_support)
+        .def("scores", &auroraml::feature_selection::SelectFdr::scores);
+
+    py::class_<auroraml::feature_selection::SelectFwe, auroraml::Estimator, auroraml::Transformer>(feature_selection_module, "SelectFwe")
+        .def(py::init(selectfwe_init), py::arg("score_func"), py::arg("alpha") = 0.05)
+        .def("fit", &auroraml::feature_selection::SelectFwe::fit)
+        .def("transform", &auroraml::feature_selection::SelectFwe::transform)
+        .def("fit_transform", &auroraml::feature_selection::SelectFwe::fit_transform)
+        .def("get_params", &auroraml::feature_selection::SelectFwe::get_params)
+        .def("set_params", &auroraml::feature_selection::SelectFwe::set_params)
+        .def("is_fitted", &auroraml::feature_selection::SelectFwe::is_fitted)
+        .def("get_support", &auroraml::feature_selection::SelectFwe::get_support)
+        .def("scores", &auroraml::feature_selection::SelectFwe::scores);
+
+    py::class_<auroraml::feature_selection::GenericUnivariateSelect, auroraml::Estimator, auroraml::Transformer>(feature_selection_module, "GenericUnivariateSelect")
+        .def(py::init(generic_univariate_init), py::arg("score_func"), py::arg("mode") = "percentile", py::arg("param") = 10.0)
+        .def("fit", &auroraml::feature_selection::GenericUnivariateSelect::fit)
+        .def("transform", &auroraml::feature_selection::GenericUnivariateSelect::transform)
+        .def("fit_transform", &auroraml::feature_selection::GenericUnivariateSelect::fit_transform)
+        .def("get_params", &auroraml::feature_selection::GenericUnivariateSelect::get_params)
+        .def("set_params", &auroraml::feature_selection::GenericUnivariateSelect::set_params)
+        .def("is_fitted", &auroraml::feature_selection::GenericUnivariateSelect::is_fitted)
+        .def("get_support", &auroraml::feature_selection::GenericUnivariateSelect::get_support)
+        .def("scores", &auroraml::feature_selection::GenericUnivariateSelect::scores);
+
+    py::class_<auroraml::feature_selection::SelectFromModel, auroraml::Estimator, auroraml::Transformer>(feature_selection_module, "SelectFromModel")
+        .def(py::init<auroraml::Estimator&, double, int>(), py::arg("estimator"), py::arg("threshold") = 0.0, py::arg("max_features") = -1)
+        .def("fit", &auroraml::feature_selection::SelectFromModel::fit)
+        .def("transform", &auroraml::feature_selection::SelectFromModel::transform)
+        .def("fit_transform", &auroraml::feature_selection::SelectFromModel::fit_transform)
+        .def("get_params", &auroraml::feature_selection::SelectFromModel::get_params)
+        .def("set_params", &auroraml::feature_selection::SelectFromModel::set_params)
+        .def("is_fitted", &auroraml::feature_selection::SelectFromModel::is_fitted)
+        .def("get_support", &auroraml::feature_selection::SelectFromModel::get_support)
+        .def("importances", &auroraml::feature_selection::SelectFromModel::importances);
+
+    py::class_<auroraml::feature_selection::RFE, auroraml::Estimator, auroraml::Transformer>(feature_selection_module, "RFE")
+        .def(py::init<auroraml::Estimator&, int, int>(), py::arg("estimator"), py::arg("n_features_to_select") = -1, py::arg("step") = 1)
+        .def("fit", &auroraml::feature_selection::RFE::fit)
+        .def("transform", &auroraml::feature_selection::RFE::transform)
+        .def("fit_transform", &auroraml::feature_selection::RFE::fit_transform)
+        .def("get_params", &auroraml::feature_selection::RFE::get_params)
+        .def("set_params", &auroraml::feature_selection::RFE::set_params)
+        .def("is_fitted", &auroraml::feature_selection::RFE::is_fitted)
+        .def("get_support", &auroraml::feature_selection::RFE::get_support);
+
+    py::class_<auroraml::feature_selection::RFECV, auroraml::Estimator, auroraml::Transformer>(feature_selection_module, "RFECV")
+        .def(py::init<auroraml::Estimator&, auroraml::model_selection::BaseCrossValidator&, int, std::string, int>(),
+             py::arg("estimator"), py::arg("cv"), py::arg("step") = 1, py::arg("scoring") = "accuracy",
+             py::arg("min_features_to_select") = 1)
+        .def("fit", &auroraml::feature_selection::RFECV::fit)
+        .def("transform", &auroraml::feature_selection::RFECV::transform)
+        .def("fit_transform", &auroraml::feature_selection::RFECV::fit_transform)
+        .def("get_params", &auroraml::feature_selection::RFECV::get_params)
+        .def("set_params", &auroraml::feature_selection::RFECV::set_params)
+        .def("is_fitted", &auroraml::feature_selection::RFECV::is_fitted)
+        .def("get_support", &auroraml::feature_selection::RFECV::get_support);
+
+    py::class_<auroraml::feature_selection::SequentialFeatureSelector, auroraml::Estimator, auroraml::Transformer>(feature_selection_module, "SequentialFeatureSelector")
+        .def(py::init<auroraml::Estimator&, auroraml::model_selection::BaseCrossValidator&, int, std::string, std::string>(),
+             py::arg("estimator"), py::arg("cv"), py::arg("n_features_to_select") = -1,
+             py::arg("direction") = "forward", py::arg("scoring") = "accuracy")
+        .def("fit", &auroraml::feature_selection::SequentialFeatureSelector::fit)
+        .def("transform", &auroraml::feature_selection::SequentialFeatureSelector::transform)
+        .def("fit_transform", &auroraml::feature_selection::SequentialFeatureSelector::fit_transform)
+        .def("get_params", &auroraml::feature_selection::SequentialFeatureSelector::get_params)
+        .def("set_params", &auroraml::feature_selection::SequentialFeatureSelector::set_params)
+        .def("is_fitted", &auroraml::feature_selection::SequentialFeatureSelector::is_fitted)
+        .def("get_support", &auroraml::feature_selection::SequentialFeatureSelector::get_support);
     
     // Scoring functions
     py::module_ scores_module = feature_selection_module.def_submodule("scores", "Scoring functions");
@@ -979,6 +2156,26 @@ PYBIND11_MODULE(auroraml, m) {
         .def("get_params", &auroraml::impute::IterativeImputer::get_params)
         .def("set_params", &auroraml::impute::IterativeImputer::set_params)
         .def("is_fitted", &auroraml::impute::IterativeImputer::is_fitted);
+
+    auto missing_indicator_fit = [](auroraml::impute::MissingIndicator& self, const auroraml::MatrixXd& X, py::object y_py = py::none()) -> auroraml::impute::MissingIndicator& {
+        auroraml::VectorXd y = y_py.is_none() ? auroraml::VectorXd::Zero(X.rows()) : py::cast<auroraml::VectorXd>(y_py);
+        self.fit(X, y);
+        return self;
+    };
+    auto missing_indicator_fit_transform = [](auroraml::impute::MissingIndicator& self, const auroraml::MatrixXd& X, py::object y_py = py::none()) {
+        auroraml::VectorXd y = y_py.is_none() ? auroraml::VectorXd::Zero(X.rows()) : py::cast<auroraml::VectorXd>(y_py);
+        return self.fit_transform(X, y);
+    };
+
+    py::class_<auroraml::impute::MissingIndicator, auroraml::Estimator, auroraml::Transformer>(impute_module, "MissingIndicator")
+        .def(py::init<const std::string&>(), py::arg("features") = "missing-only")
+        .def("fit", missing_indicator_fit, py::arg("X"), py::arg("y") = py::none())
+        .def("transform", &auroraml::impute::MissingIndicator::transform)
+        .def("fit_transform", missing_indicator_fit_transform, py::arg("X"), py::arg("y") = py::none())
+        .def("get_params", &auroraml::impute::MissingIndicator::get_params)
+        .def("set_params", &auroraml::impute::MissingIndicator::set_params)
+        .def("is_fitted", &auroraml::impute::MissingIndicator::is_fitted)
+        .def("features", &auroraml::impute::MissingIndicator::features);
     
     // Utils module
     py::module_ utils_module = m.def_submodule("utils", "Utility functions");
@@ -1264,7 +2461,126 @@ PYBIND11_MODULE(auroraml, m) {
         .def("predict", &auroraml::outlier_detection::LocalOutlierFactor::predict)
         .def("decision_function", &auroraml::outlier_detection::LocalOutlierFactor::decision_function)
         .def("fit_predict", &auroraml::outlier_detection::LocalOutlierFactor::fit_predict);
-    
+
+    outlier_module.attr("EllipticEnvelope") = covariance_module.attr("EllipticEnvelope");
+
+    // Meta-estimators
+    py::module_ meta_module = m.def_submodule("meta", "Meta-estimators");
+
+    auto classifier_factory_from_py = [](py::function factory) {
+        return [factory]() -> std::shared_ptr<auroraml::Classifier> {
+            py::gil_scoped_acquire gil;
+            py::object obj = factory();
+            auto* ptr = obj.cast<auroraml::Classifier*>();
+            return std::shared_ptr<auroraml::Classifier>(ptr, [obj](auroraml::Classifier*) mutable {
+                py::gil_scoped_acquire gil;
+                obj = py::object();
+            });
+        };
+    };
+
+    auto regressor_factory_from_py = [](py::function factory) {
+        return [factory]() -> std::shared_ptr<auroraml::Regressor> {
+            py::gil_scoped_acquire gil;
+            py::object obj = factory();
+            auto* ptr = obj.cast<auroraml::Regressor*>();
+            return std::shared_ptr<auroraml::Regressor>(ptr, [obj](auroraml::Regressor*) mutable {
+                py::gil_scoped_acquire gil;
+                obj = py::object();
+            });
+        };
+    };
+
+    py::class_<auroraml::meta::OneVsRestClassifier, auroraml::Estimator, auroraml::Classifier>(meta_module, "OneVsRestClassifier")
+        .def(py::init([classifier_factory_from_py](py::function factory, int n_jobs) {
+            return new auroraml::meta::OneVsRestClassifier(classifier_factory_from_py(factory), n_jobs);
+        }), py::arg("estimator_factory"), py::arg("n_jobs") = 1)
+        .def("fit", &auroraml::meta::OneVsRestClassifier::fit)
+        .def("predict", &auroraml::meta::OneVsRestClassifier::predict_classes)
+        .def("predict_proba", &auroraml::meta::OneVsRestClassifier::predict_proba)
+        .def("decision_function", &auroraml::meta::OneVsRestClassifier::decision_function)
+        .def("get_params", &auroraml::meta::OneVsRestClassifier::get_params)
+        .def("set_params", &auroraml::meta::OneVsRestClassifier::set_params)
+        .def("classes", &auroraml::meta::OneVsRestClassifier::classes)
+        .def("is_fitted", &auroraml::meta::OneVsRestClassifier::is_fitted);
+
+    py::class_<auroraml::meta::OneVsOneClassifier, auroraml::Estimator, auroraml::Classifier>(meta_module, "OneVsOneClassifier")
+        .def(py::init([classifier_factory_from_py](py::function factory, int n_jobs) {
+            return new auroraml::meta::OneVsOneClassifier(classifier_factory_from_py(factory), n_jobs);
+        }), py::arg("estimator_factory"), py::arg("n_jobs") = 1)
+        .def("fit", &auroraml::meta::OneVsOneClassifier::fit)
+        .def("predict", &auroraml::meta::OneVsOneClassifier::predict_classes)
+        .def("predict_proba", &auroraml::meta::OneVsOneClassifier::predict_proba)
+        .def("decision_function", &auroraml::meta::OneVsOneClassifier::decision_function)
+        .def("get_params", &auroraml::meta::OneVsOneClassifier::get_params)
+        .def("set_params", &auroraml::meta::OneVsOneClassifier::set_params)
+        .def("classes", &auroraml::meta::OneVsOneClassifier::classes)
+        .def("is_fitted", &auroraml::meta::OneVsOneClassifier::is_fitted);
+
+    py::class_<auroraml::meta::OutputCodeClassifier, auroraml::Estimator, auroraml::Classifier>(meta_module, "OutputCodeClassifier")
+        .def(py::init([classifier_factory_from_py](py::function factory, int code_size, int random_state) {
+            return new auroraml::meta::OutputCodeClassifier(classifier_factory_from_py(factory), code_size, random_state);
+        }), py::arg("estimator_factory"), py::arg("code_size") = 0, py::arg("random_state") = -1)
+        .def("fit", &auroraml::meta::OutputCodeClassifier::fit)
+        .def("predict", &auroraml::meta::OutputCodeClassifier::predict_classes)
+        .def("predict_proba", &auroraml::meta::OutputCodeClassifier::predict_proba)
+        .def("decision_function", &auroraml::meta::OutputCodeClassifier::decision_function)
+        .def("get_params", &auroraml::meta::OutputCodeClassifier::get_params)
+        .def("set_params", &auroraml::meta::OutputCodeClassifier::set_params)
+        .def("classes", &auroraml::meta::OutputCodeClassifier::classes)
+        .def("code_book", &auroraml::meta::OutputCodeClassifier::code_book)
+        .def("is_fitted", &auroraml::meta::OutputCodeClassifier::is_fitted);
+
+    py::class_<auroraml::meta::MultiOutputClassifier, auroraml::Estimator>(meta_module, "MultiOutputClassifier")
+        .def(py::init([classifier_factory_from_py](py::function factory) {
+            return new auroraml::meta::MultiOutputClassifier(classifier_factory_from_py(factory));
+        }), py::arg("estimator_factory"))
+        .def("fit", py::overload_cast<const auroraml::MatrixXd&, const auroraml::VectorXd&>(&auroraml::meta::MultiOutputClassifier::fit))
+        .def("fit", py::overload_cast<const auroraml::MatrixXd&, const auroraml::MatrixXd&>(&auroraml::meta::MultiOutputClassifier::fit))
+        .def("predict", &auroraml::meta::MultiOutputClassifier::predict)
+        .def("predict_proba", &auroraml::meta::MultiOutputClassifier::predict_proba)
+        .def("get_params", &auroraml::meta::MultiOutputClassifier::get_params)
+        .def("set_params", &auroraml::meta::MultiOutputClassifier::set_params)
+        .def("n_outputs", &auroraml::meta::MultiOutputClassifier::n_outputs)
+        .def("is_fitted", &auroraml::meta::MultiOutputClassifier::is_fitted);
+
+    py::class_<auroraml::meta::MultiOutputRegressor, auroraml::Estimator>(meta_module, "MultiOutputRegressor")
+        .def(py::init([regressor_factory_from_py](py::function factory) {
+            return new auroraml::meta::MultiOutputRegressor(regressor_factory_from_py(factory));
+        }), py::arg("estimator_factory"))
+        .def("fit", py::overload_cast<const auroraml::MatrixXd&, const auroraml::VectorXd&>(&auroraml::meta::MultiOutputRegressor::fit))
+        .def("fit", py::overload_cast<const auroraml::MatrixXd&, const auroraml::MatrixXd&>(&auroraml::meta::MultiOutputRegressor::fit))
+        .def("predict", &auroraml::meta::MultiOutputRegressor::predict)
+        .def("get_params", &auroraml::meta::MultiOutputRegressor::get_params)
+        .def("set_params", &auroraml::meta::MultiOutputRegressor::set_params)
+        .def("n_outputs", &auroraml::meta::MultiOutputRegressor::n_outputs)
+        .def("is_fitted", &auroraml::meta::MultiOutputRegressor::is_fitted);
+
+    py::class_<auroraml::meta::ClassifierChain, auroraml::Estimator>(meta_module, "ClassifierChain")
+        .def(py::init([classifier_factory_from_py](py::function factory, const std::vector<int>& order) {
+            return new auroraml::meta::ClassifierChain(classifier_factory_from_py(factory), order);
+        }), py::arg("estimator_factory"), py::arg("order") = std::vector<int>{})
+        .def("fit", py::overload_cast<const auroraml::MatrixXd&, const auroraml::VectorXd&>(&auroraml::meta::ClassifierChain::fit))
+        .def("fit", py::overload_cast<const auroraml::MatrixXd&, const auroraml::MatrixXd&>(&auroraml::meta::ClassifierChain::fit))
+        .def("predict", &auroraml::meta::ClassifierChain::predict)
+        .def("predict_proba", &auroraml::meta::ClassifierChain::predict_proba)
+        .def("get_params", &auroraml::meta::ClassifierChain::get_params)
+        .def("set_params", &auroraml::meta::ClassifierChain::set_params)
+        .def("order", &auroraml::meta::ClassifierChain::order)
+        .def("is_fitted", &auroraml::meta::ClassifierChain::is_fitted);
+
+    py::class_<auroraml::meta::RegressorChain, auroraml::Estimator>(meta_module, "RegressorChain")
+        .def(py::init([regressor_factory_from_py](py::function factory, const std::vector<int>& order) {
+            return new auroraml::meta::RegressorChain(regressor_factory_from_py(factory), order);
+        }), py::arg("estimator_factory"), py::arg("order") = std::vector<int>{})
+        .def("fit", py::overload_cast<const auroraml::MatrixXd&, const auroraml::VectorXd&>(&auroraml::meta::RegressorChain::fit))
+        .def("fit", py::overload_cast<const auroraml::MatrixXd&, const auroraml::MatrixXd&>(&auroraml::meta::RegressorChain::fit))
+        .def("predict", &auroraml::meta::RegressorChain::predict)
+        .def("get_params", &auroraml::meta::RegressorChain::get_params)
+        .def("set_params", &auroraml::meta::RegressorChain::set_params)
+        .def("order", &auroraml::meta::RegressorChain::order)
+        .def("is_fitted", &auroraml::meta::RegressorChain::is_fitted);
+
     // Mixture module
     py::module_ mixture_module = m.def_submodule("mixture", "Mixture models");
     
@@ -1369,4 +2685,140 @@ PYBIND11_MODULE(auroraml, m) {
         .def("predict", &auroraml::cluster::MiniBatchKMeans::predict)
         .def("cluster_centers", &auroraml::cluster::MiniBatchKMeans::cluster_centers)
         .def("labels", &auroraml::cluster::MiniBatchKMeans::labels);
+
+    py::class_<auroraml::cluster::MeanShift, auroraml::Estimator>(cluster_module, "MeanShift")
+        .def(py::init<double, const std::vector<auroraml::VectorXd>&, bool, int, bool, int>(), 
+             py::arg("bandwidth") = -1.0, py::arg("seeds") = std::vector<auroraml::VectorXd>(), 
+             py::arg("bin_seeding") = false, py::arg("min_bin_freq") = 1, 
+             py::arg("cluster_all") = true, py::arg("max_iter") = 300)
+        .def("fit", [](auroraml::cluster::MeanShift& self, const auroraml::MatrixXd& X, py::object y) -> auroraml::cluster::MeanShift& {
+            auroraml::VectorXd y_vec = y.is_none() ? auroraml::VectorXd() : y.cast<auroraml::VectorXd>();
+            return static_cast<auroraml::cluster::MeanShift&>(self.fit(X, y_vec));
+        }, py::arg("X"), py::arg("y") = py::none(), py::return_value_policy::reference)
+        .def("fit_predict", &auroraml::cluster::MeanShift::fit_predict)
+        .def("predict", &auroraml::cluster::MeanShift::predict)
+        .def("cluster_centers", &auroraml::cluster::MeanShift::cluster_centers)
+        .def("labels", &auroraml::cluster::MeanShift::labels)
+        .def("get_params", &auroraml::cluster::MeanShift::get_params)
+        .def("set_params", &auroraml::cluster::MeanShift::set_params)
+        .def("is_fitted", &auroraml::cluster::MeanShift::is_fitted);
+
+    py::class_<auroraml::cluster::OPTICS, auroraml::Estimator>(cluster_module, "OPTICS")
+        .def(py::init<int, double, const std::string&, double>(), 
+             py::arg("min_samples") = 5, py::arg("max_eps") = std::numeric_limits<double>::infinity(), 
+             py::arg("metric") = "euclidean", py::arg("eps") = -1.0)
+        .def("fit", [](auroraml::cluster::OPTICS& self, const auroraml::MatrixXd& X, py::object y) -> auroraml::cluster::OPTICS& {
+            auroraml::VectorXd y_vec = y.is_none() ? auroraml::VectorXd() : y.cast<auroraml::VectorXd>();
+            return static_cast<auroraml::cluster::OPTICS&>(self.fit(X, y_vec));
+        }, py::arg("X"), py::arg("y") = py::none(), py::return_value_policy::reference)
+        .def("fit_predict", &auroraml::cluster::OPTICS::fit_predict)
+        .def("predict", &auroraml::cluster::OPTICS::predict)
+        .def("labels", &auroraml::cluster::OPTICS::labels)
+        .def("reachability", &auroraml::cluster::OPTICS::reachability)
+        .def("ordering", &auroraml::cluster::OPTICS::ordering)
+        .def("core_distances", &auroraml::cluster::OPTICS::core_distances)
+        .def("get_params", &auroraml::cluster::OPTICS::get_params)
+        .def("set_params", &auroraml::cluster::OPTICS::set_params)
+        .def("is_fitted", &auroraml::cluster::OPTICS::is_fitted);
+
+    py::class_<auroraml::cluster::Birch, auroraml::Estimator>(cluster_module, "Birch")
+        .def(py::init<int, double, int>(), 
+             py::arg("n_clusters") = 8, py::arg("threshold") = 0.5, py::arg("branching_factor") = 50)
+        .def("fit", [](auroraml::cluster::Birch& self, const auroraml::MatrixXd& X, py::object y) -> auroraml::cluster::Birch& {
+            auroraml::VectorXd y_vec = y.is_none() ? auroraml::VectorXd() : y.cast<auroraml::VectorXd>();
+            return static_cast<auroraml::cluster::Birch&>(self.fit(X, y_vec));
+        }, py::arg("X"), py::arg("y") = py::none(), py::return_value_policy::reference)
+        .def("fit_predict", &auroraml::cluster::Birch::fit_predict)
+        .def("predict", &auroraml::cluster::Birch::predict)
+        .def("labels", &auroraml::cluster::Birch::labels)
+        .def("subcluster_centers", &auroraml::cluster::Birch::subcluster_centers)
+        .def("get_params", &auroraml::cluster::Birch::get_params)
+        .def("set_params", &auroraml::cluster::Birch::set_params)
+        .def("is_fitted", &auroraml::cluster::Birch::is_fitted);
+
+    // Neural Network
+    py::module_ neural_network_module = m.def_submodule("neural_network", "Neural Network algorithms");
+    
+    py::enum_<auroraml::neural_network::ActivationFunction>(neural_network_module, "ActivationFunction")
+        .value("RELU", auroraml::neural_network::ActivationFunction::RELU)
+        .value("TANH", auroraml::neural_network::ActivationFunction::TANH)
+        .value("LOGISTIC", auroraml::neural_network::ActivationFunction::LOGISTIC)
+        .value("IDENTITY", auroraml::neural_network::ActivationFunction::IDENTITY);
+        
+    py::enum_<auroraml::neural_network::Solver>(neural_network_module, "Solver")
+        .value("LBFGS", auroraml::neural_network::Solver::LBFGS)
+        .value("SGD", auroraml::neural_network::Solver::SGD)
+        .value("ADAM", auroraml::neural_network::Solver::ADAM);
+
+    py::class_<auroraml::neural_network::MLPClassifier, auroraml::Estimator, auroraml::Classifier>(neural_network_module, "MLPClassifier")
+        .def(py::init<const std::vector<int>&, auroraml::neural_network::ActivationFunction, auroraml::neural_network::Solver,
+                      double, int, double, int, int, double, bool, bool, double, bool, bool, double, double, double, double, int>(),
+             py::arg("hidden_layer_sizes") = std::vector<int>{100},
+             py::arg("activation") = auroraml::neural_network::ActivationFunction::RELU,
+             py::arg("solver") = auroraml::neural_network::Solver::ADAM,
+             py::arg("alpha") = 0.0001,
+             py::arg("batch_size") = 200,
+             py::arg("learning_rate") = 0.001,
+             py::arg("max_iter") = 200,
+             py::arg("random_state") = -1,
+             py::arg("tol") = 1e-4,
+             py::arg("verbose") = false,
+             py::arg("warm_start") = false,
+             py::arg("momentum") = 0.9,
+             py::arg("nesterovs_momentum") = true,
+             py::arg("early_stopping") = false,
+             py::arg("validation_fraction") = 0.1,
+             py::arg("beta_1") = 0.9,
+             py::arg("beta_2") = 0.999,
+             py::arg("epsilon") = 1e-8,
+             py::arg("n_iter_no_change") = 10)
+        .def("fit", &auroraml::neural_network::MLPClassifier::fit)
+        .def("predict", &auroraml::neural_network::MLPClassifier::predict_classes)
+        .def("predict_proba", &auroraml::neural_network::MLPClassifier::predict_proba)
+        .def("decision_function", &auroraml::neural_network::MLPClassifier::decision_function)
+        .def("alpha", &auroraml::neural_network::MLPClassifier::alpha)
+        .def("learning_rate", &auroraml::neural_network::MLPClassifier::learning_rate)
+        .def("max_iter", &auroraml::neural_network::MLPClassifier::max_iter)
+        .def("hidden_layer_sizes", &auroraml::neural_network::MLPClassifier::hidden_layer_sizes)
+        .def("loss_curve", &auroraml::neural_network::MLPClassifier::loss_curve)
+        .def("n_iter", &auroraml::neural_network::MLPClassifier::n_iter)
+        .def("classes", &auroraml::neural_network::MLPClassifier::classes)
+        .def("n_classes", &auroraml::neural_network::MLPClassifier::n_classes)
+        .def("get_params", &auroraml::neural_network::MLPClassifier::get_params)
+        .def("set_params", &auroraml::neural_network::MLPClassifier::set_params)
+        .def("is_fitted", &auroraml::neural_network::MLPClassifier::is_fitted);
+
+    py::class_<auroraml::neural_network::MLPRegressor, auroraml::Estimator, auroraml::Regressor>(neural_network_module, "MLPRegressor")
+        .def(py::init<const std::vector<int>&, auroraml::neural_network::ActivationFunction, auroraml::neural_network::Solver,
+                      double, int, double, int, int, double, bool, bool, double, bool, bool, double, double, double, double, int>(),
+             py::arg("hidden_layer_sizes") = std::vector<int>{100},
+             py::arg("activation") = auroraml::neural_network::ActivationFunction::RELU,
+             py::arg("solver") = auroraml::neural_network::Solver::ADAM,
+             py::arg("alpha") = 0.0001,
+             py::arg("batch_size") = 200,
+             py::arg("learning_rate") = 0.001,
+             py::arg("max_iter") = 200,
+             py::arg("random_state") = -1,
+             py::arg("tol") = 1e-4,
+             py::arg("verbose") = false,
+             py::arg("warm_start") = false,
+             py::arg("momentum") = 0.9,
+             py::arg("nesterovs_momentum") = true,
+             py::arg("early_stopping") = false,
+             py::arg("validation_fraction") = 0.1,
+             py::arg("beta_1") = 0.9,
+             py::arg("beta_2") = 0.999,
+             py::arg("epsilon") = 1e-8,
+             py::arg("n_iter_no_change") = 10)
+        .def("fit", &auroraml::neural_network::MLPRegressor::fit)
+        .def("predict", &auroraml::neural_network::MLPRegressor::predict)
+        .def("alpha", &auroraml::neural_network::MLPRegressor::alpha)
+        .def("learning_rate", &auroraml::neural_network::MLPRegressor::learning_rate)
+        .def("max_iter", &auroraml::neural_network::MLPRegressor::max_iter)
+        .def("hidden_layer_sizes", &auroraml::neural_network::MLPRegressor::hidden_layer_sizes)
+        .def("loss_curve", &auroraml::neural_network::MLPRegressor::loss_curve)
+        .def("n_iter", &auroraml::neural_network::MLPRegressor::n_iter)
+        .def("get_params", &auroraml::neural_network::MLPRegressor::get_params)
+        .def("set_params", &auroraml::neural_network::MLPRegressor::set_params)
+        .def("is_fitted", &auroraml::neural_network::MLPRegressor::is_fitted);
 }

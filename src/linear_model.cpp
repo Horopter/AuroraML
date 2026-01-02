@@ -52,7 +52,7 @@ VectorXd LinearRegression::predict(const MatrixXd& X) const {
     }
     
     if (X.cols() != coef_.size()) {
-        throw std::invalid_argument("X must have the same number of features as training data");
+        throw std::runtime_error("X must have the same number of features as training data");
     }
     
     VectorXd predictions = X * coef_;
@@ -109,6 +109,9 @@ Ridge::Ridge(double alpha, bool fit_intercept, bool copy_X, int n_jobs)
       fit_intercept_(fit_intercept), copy_X_(copy_X), n_jobs_(n_jobs) {}
 
 Estimator& Ridge::fit(const MatrixXd& X, const VectorXd& y) {
+    if (alpha_ <= 0.0) {
+        throw std::invalid_argument("alpha must be positive");
+    }
     validation::check_X_y(X, y);
     
     MatrixXd X_work = copy_X_ ? X : X;
@@ -149,7 +152,7 @@ VectorXd Ridge::predict(const MatrixXd& X) const {
     }
     
     if (X.cols() != coef_.size()) {
-        throw std::invalid_argument("X must have the same number of features as training data");
+        throw std::runtime_error("X must have the same number of features as training data");
     }
     
     VectorXd predictions = X * coef_;
@@ -210,6 +213,9 @@ Lasso::Lasso(double alpha, bool fit_intercept, bool copy_X, int n_jobs)
       fit_intercept_(fit_intercept), copy_X_(copy_X), n_jobs_(n_jobs) {}
 
 Estimator& Lasso::fit(const MatrixXd& X, const VectorXd& y) {
+    if (alpha_ <= 0.0) {
+        throw std::invalid_argument("alpha must be positive");
+    }
     validation::check_X_y(X, y);
     
     // Simplified implementation - just use Ridge for now
@@ -249,7 +255,7 @@ VectorXd Lasso::predict(const MatrixXd& X) const {
     }
     
     if (X.cols() != coef_.size()) {
-        throw std::invalid_argument("X must have the same number of features as training data");
+        throw std::runtime_error("X must have the same number of features as training data");
     }
     
     VectorXd predictions = X * coef_;
@@ -289,6 +295,12 @@ ElasticNet::ElasticNet(double alpha, double l1_ratio, bool fit_intercept, bool c
       max_iter_(max_iter), tol_(tol) {}
 
 Estimator& ElasticNet::fit(const MatrixXd& X, const VectorXd& y) {
+    if (alpha_ <= 0.0) {
+        throw std::invalid_argument("alpha must be positive");
+    }
+    if (l1_ratio_ < 0.0 || l1_ratio_ > 1.0) {
+        throw std::invalid_argument("l1_ratio must be between 0 and 1");
+    }
     validation::check_X_y(X, y);
     
     MatrixXd X_work = copy_X_ ? X : X;
@@ -359,7 +371,7 @@ VectorXd ElasticNet::predict(const MatrixXd& X) const {
     }
     
     if (X.cols() != coef_.size()) {
-        throw std::invalid_argument("X must have the same number of features as training data");
+        throw std::runtime_error("X must have the same number of features as training data");
     }
     
     VectorXd predictions = X * coef_;
@@ -411,6 +423,9 @@ static double sigmoid(double z) {
 }
 
 Estimator& LogisticRegression::fit(const MatrixXd& X, const VectorXd& y) {
+    if (C_ <= 0.0) {
+        throw std::invalid_argument("C must be positive");
+    }
     validation::check_X_y(X, y);
     
     // Find unique classes
@@ -538,7 +553,7 @@ VectorXd LogisticRegression::decision_function(const MatrixXd& X) const {
     }
     
     if (X.cols() != coef_.size()) {
-        throw std::invalid_argument("X must have the same number of features as training data");
+        throw std::runtime_error("X must have the same number of features as training data");
     }
     
     VectorXd decision = X * coef_;

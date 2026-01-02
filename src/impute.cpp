@@ -11,13 +11,15 @@ namespace impute {
 // KNNImputer implementation
 
 KNNImputer::KNNImputer(int n_neighbors, const std::string& metric)
-    : n_neighbors_(n_neighbors), metric_(metric), fitted_(false) {
-    if (n_neighbors <= 0) {
-        throw std::invalid_argument("n_neighbors must be positive");
-    }
-}
+    : n_neighbors_(n_neighbors), metric_(metric), fitted_(false) {}
 
 Estimator& KNNImputer::fit(const MatrixXd& X, const VectorXd& y) {
+    if (n_neighbors_ <= 0) {
+        throw std::invalid_argument("n_neighbors must be positive");
+    }
+    if (X.rows() == 0 || X.cols() == 0) {
+        throw std::invalid_argument("X cannot be empty");
+    }
     X_fitted_ = X;
     
     // Create missing mask (NaN values)
@@ -385,6 +387,80 @@ Estimator& IterativeImputer::set_params(const Params& params) {
     return *this;
 }
 
+MissingIndicator::MissingIndicator(const std::string& features)
+    : features_(features), fitted_(false), features_indices_() {
+    if (features_ != "missing-only" && features_ != "all") {
+        throw std::invalid_argument("features must be \"missing-only\" or \"all\"");
+    }
+}
+
+Estimator& MissingIndicator::fit(const MatrixXd& X, const VectorXd& y) {
+    validation::check_X(X);
+    if (features_ != "missing-only" && features_ != "all") {
+        throw std::invalid_argument("features must be \"missing-only\" or \"all\"");
+    }
+
+    features_indices_.clear();
+    if (features_ == "all") {
+        for (int j = 0; j < X.cols(); ++j) {
+            features_indices_.push_back(j);
+        }
+    } else {
+        for (int j = 0; j < X.cols(); ++j) {
+            bool has_missing = false;
+            for (int i = 0; i < X.rows(); ++i) {
+                if (std::isnan(X(i, j))) {
+                    has_missing = true;
+                    break;
+                }
+            }
+            if (has_missing) {
+                features_indices_.push_back(j);
+            }
+        }
+    }
+
+    fitted_ = true;
+    return *this;
+}
+
+MatrixXd MissingIndicator::transform(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("MissingIndicator must be fitted before transform");
+    }
+    MatrixXd indicators(X.rows(), static_cast<int>(features_indices_.size()));
+    for (int i = 0; i < X.rows(); ++i) {
+        for (size_t k = 0; k < features_indices_.size(); ++k) {
+            int col = features_indices_[k];
+            indicators(i, static_cast<int>(k)) = std::isnan(X(i, col)) ? 1.0 : 0.0;
+        }
+    }
+    return indicators;
+}
+
+MatrixXd MissingIndicator::inverse_transform(const MatrixXd& X) const {
+    return X;
+}
+
+MatrixXd MissingIndicator::fit_transform(const MatrixXd& X, const VectorXd& y) {
+    fit(X, y);
+    return transform(X);
+}
+
+Params MissingIndicator::get_params() const {
+    Params params;
+    params["features"] = features_;
+    return params;
+}
+
+Estimator& MissingIndicator::set_params(const Params& params) {
+    std::string features = utils::get_param_string(params, "features", features_);
+    if (features != "missing-only" && features != "all") {
+        throw std::invalid_argument("features must be \"missing-only\" or \"all\"");
+    }
+    features_ = features;
+    return *this;
+}
+
 } // namespace impute
 } // namespace auroraml
-

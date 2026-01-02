@@ -4,6 +4,10 @@ project(auroraml)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(POLICY CMP0148)
+    cmake_policy(SET CMP0148 NEW)
+endif()
+
 # Find Eigen3
 find_package(Eigen3 REQUIRED)
 
@@ -25,13 +29,13 @@ find_package(GTest QUIET)
 include_directories(include)
 
 # Collect all source files
-file(GLOB_RECURSE AURORAML_SOURCES "src/*.cpp")
+file(GLOB_RECURSE AURORAML_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 
 # Create the core library
 add_library(auroraml_core STATIC ${AURORAML_SOURCES})
 
 # Find and configure OpenMP
-find_package(OpenMP)
+find_package(OpenMP QUIET)
 if(OpenMP_CXX_FOUND)
     target_link_libraries(auroraml_core PUBLIC OpenMP::OpenMP_CXX)
     target_compile_options(auroraml_core PUBLIC ${OpenMP_CXX_FLAGS})

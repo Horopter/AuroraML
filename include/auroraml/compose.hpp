@@ -118,7 +118,7 @@ public:
      * @param X Training data
      * @param y Target values (will be transformed)
      */
-    Estimator& fit(const MatrixXd& X, const VectorXd& y);
+    Estimator& fit(const MatrixXd& X, const VectorXd& y) override;
     
     /**
      * Predict and inverse-transform the predictions
@@ -128,17 +128,17 @@ public:
     /**
      * Get parameters
      */
-    Params get_params() const;
+    Params get_params() const override;
     
     /**
      * Set parameters
      */
-    Estimator& set_params(const Params& params);
+    Estimator& set_params(const Params& params) override;
     
     /**
      * Check if TransformedTargetRegressor is fitted
      */
-    bool is_fitted() const { return fitted_; }
+    bool is_fitted() const override { return fitted_; }
     
     /**
      * Get the underlying regressor
@@ -153,4 +153,3 @@ public:
 
 } // namespace compose
 } // namespace auroraml
-

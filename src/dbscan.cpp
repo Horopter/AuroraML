@@ -40,6 +40,11 @@ Estimator& DBSCAN::fit(const MatrixXd& X, const VectorXd& y) {
     return *this;
 }
 
+VectorXi DBSCAN::fit_predict(const MatrixXd& X) {
+    fit(X, VectorXd());
+    return labels_;
+}
+
 Estimator& DBSCAN::set_params(const Params& params) {
     eps_ = utils::get_param_double(params, "eps", eps_);
     min_samples_ = utils::get_param_int(params, "min_samples", min_samples_);
@@ -76,5 +81,4 @@ void DBSCAN::expand_cluster(const MatrixXd& X, int idx, int cluster_id, std::vec
 
 } // namespace cluster
 } // namespace cxml
-
 

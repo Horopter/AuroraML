@@ -8,6 +8,7 @@
 #include <set>
 #include <limits>
 #include <functional>
+#include <fstream>
 
 namespace auroraml {
 namespace preprocessing {
@@ -113,6 +114,52 @@ Estimator& StandardScaler::set_params(const Params& params) {
 
 bool StandardScaler::is_fitted() const {
     return fitted_;
+}
+
+void StandardScaler::save(const std::string& filepath) const {
+    std::ofstream ofs(filepath, std::ios::binary);
+    if (!ofs.is_open()) {
+        throw std::runtime_error("Could not open file for saving: " + filepath);
+    }
+    ofs.write(reinterpret_cast<const char*>(&fitted_), sizeof(fitted_));
+    ofs.write(reinterpret_cast<const char*>(&with_mean_), sizeof(with_mean_));
+    ofs.write(reinterpret_cast<const char*>(&with_std_), sizeof(with_std_));
+    int mean_size = mean_.size();
+    ofs.write(reinterpret_cast<const char*>(&mean_size), sizeof(mean_size));
+    if (mean_size > 0) {
+        ofs.write(reinterpret_cast<const char*>(mean_.data()), mean_size * sizeof(double));
+    }
+    int scale_size = scale_.size();
+    ofs.write(reinterpret_cast<const char*>(&scale_size), sizeof(scale_size));
+    if (scale_size > 0) {
+        ofs.write(reinterpret_cast<const char*>(scale_.data()), scale_size * sizeof(double));
+    }
+}
+
+void StandardScaler::load(const std::string& filepath) {
+    std::ifstream ifs(filepath, std::ios::binary);
+    if (!ifs.is_open()) {
+        throw std::runtime_error("Could not open file for loading: " + filepath);
+    }
+    ifs.read(reinterpret_cast<char*>(&fitted_), sizeof(fitted_));
+    ifs.read(reinterpret_cast<char*>(&with_mean_), sizeof(with_mean_));
+    ifs.read(reinterpret_cast<char*>(&with_std_), sizeof(with_std_));
+    int mean_size = 0;
+    ifs.read(reinterpret_cast<char*>(&mean_size), sizeof(mean_size));
+    if (mean_size > 0) {
+        mean_.resize(mean_size);
+        ifs.read(reinterpret_cast<char*>(mean_.data()), mean_size * sizeof(double));
+    } else {
+        mean_.resize(0);
+    }
+    int scale_size = 0;
+    ifs.read(reinterpret_cast<char*>(&scale_size), sizeof(scale_size));
+    if (scale_size > 0) {
+        scale_.resize(scale_size);
+        ifs.read(reinterpret_cast<char*>(scale_.data()), scale_size * sizeof(double));
+    } else {
+        scale_.resize(0);
+    }
 }
 
 // MinMaxScaler implementation
@@ -295,7 +342,10 @@ MatrixXd LabelEncoder::inverse_transform(const MatrixXd& X) const {
 
 MatrixXd LabelEncoder::fit_transform(const MatrixXd& X, const VectorXd& y) {
     fit(X, y);
-    return transform(X);
+    VectorXi encoded = transform(y);
+    MatrixXd result(encoded.size(), 1);
+    result.col(0) = encoded.cast<double>();
+    return result;
 }
 
 Params LabelEncoder::get_params() const {

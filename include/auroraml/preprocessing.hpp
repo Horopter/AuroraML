@@ -31,6 +31,8 @@ public:
     Params get_params() const override;
     Estimator& set_params(const Params& params) override;
     bool is_fitted() const override;
+    void save(const std::string& filepath) const;
+    void load(const std::string& filepath);
     
     VectorXd mean() const { return mean_; }
     VectorXd scale() const { return scale_; }

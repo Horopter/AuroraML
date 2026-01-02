@@ -20,6 +20,7 @@ public:
         : eps_(eps), min_samples_(min_samples) {}
 
     Estimator& fit(const MatrixXd& X, const VectorXd& y = VectorXd()) override;
+    VectorXi fit_predict(const MatrixXd& X);
     Params get_params() const override {
         return {{"eps", std::to_string(eps_)}, {"min_samples", std::to_string(min_samples_)}};
     }
@@ -38,5 +39,4 @@ private:
 
 } // namespace cluster
 } // namespace cxml
-
 

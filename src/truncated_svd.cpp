@@ -14,7 +14,7 @@ Estimator& TruncatedSVD::fit(const MatrixXd& X, const VectorXd& y) {
     }
     Eigen::BDCSVD<MatrixXd> svd(X, Eigen::ComputeThinU | Eigen::ComputeThinV);
     singular_values_ = svd.singularValues().head(n_components_);
-    components_ = svd.matrixV().leftCols(n_components_);
+    components_ = svd.matrixV().leftCols(n_components_).transpose();
     
     // Calculate explained variance (singular values squared)
     explained_variance_ = singular_values_.array().square();
@@ -26,15 +26,15 @@ Estimator& TruncatedSVD::fit(const MatrixXd& X, const VectorXd& y) {
 MatrixXd TruncatedSVD::transform(const MatrixXd& X) const {
     if (!fitted_) throw std::runtime_error("TruncatedSVD must be fitted before transform");
     validation::check_X(X);
-    if (X.cols() != components_.rows()) throw std::invalid_argument("Feature mismatch in TruncatedSVD::transform");
-    return X * components_;
+    if (X.cols() != components_.cols()) throw std::runtime_error("Feature mismatch in TruncatedSVD::transform");
+    return X * components_.transpose();
 }
 
 MatrixXd TruncatedSVD::inverse_transform(const MatrixXd& X) const {
     if (!fitted_) throw std::runtime_error("TruncatedSVD must be fitted before inverse_transform");
     validation::check_X(X);
-    if (X.cols() != components_.cols()) throw std::invalid_argument("Component mismatch in TruncatedSVD::inverse_transform");
-    return X * components_.transpose();
+    if (X.cols() != components_.rows()) throw std::runtime_error("Component mismatch in TruncatedSVD::inverse_transform");
+    return X * components_;
 }
 
 MatrixXd TruncatedSVD::fit_transform(const MatrixXd& X, const VectorXd& y) {
@@ -49,5 +49,4 @@ Estimator& TruncatedSVD::set_params(const Params& params) {
 
 } // namespace decomposition
 } // namespace cxml
-
 

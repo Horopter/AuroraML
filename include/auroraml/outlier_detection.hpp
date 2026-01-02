@@ -3,6 +3,7 @@
 #include "base.hpp"
 #include "tree.hpp"
 #include "neighbors.hpp"
+#include "covariance.hpp"
 #include <vector>
 #include <random>
 
@@ -30,6 +31,7 @@ public:
         double contamination = 0.1,
         int random_state = -1
     );
+    IsolationForest(int n_estimators, double contamination, int random_state = -1);
     
     Estimator& fit(const MatrixXd& X, const VectorXd& y) override;
     VectorXi predict(const MatrixXd& X) const;
@@ -78,6 +80,7 @@ private:
     double reachability_distance(const MatrixXd& X, int a, int b, int k) const;
 };
 
+using EllipticEnvelope = covariance::EllipticEnvelope;
+
 } // namespace outlier_detection
 } // namespace auroraml
-

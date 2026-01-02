@@ -77,8 +77,11 @@ std::pair<MatrixXd, VectorXd> resample(const MatrixXd& X, const VectorXd& y, int
     }
     
     int n = X.rows();
+    if (n == 0 || X.cols() == 0) {
+        throw std::invalid_argument("X and y cannot be empty");
+    }
     if (n_samples <= 0) {
-        n_samples = n;
+        throw std::invalid_argument("n_samples must be positive");
     }
     
     // Initialize random number generator
@@ -324,4 +327,3 @@ int safe_index(int idx, int size) {
 
 } // namespace utils
 } // namespace auroraml
-

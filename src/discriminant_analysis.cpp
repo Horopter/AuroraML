@@ -20,6 +20,9 @@ Estimator& QuadraticDiscriminantAnalysis::fit(const MatrixXd& X, const VectorXd&
     for (int i = 0; i < y.size(); ++i) {
         unique_classes_set.insert(static_cast<int>(y(i)));
     }
+    if (unique_classes_set.size() < 2) {
+        throw std::invalid_argument("QuadraticDiscriminantAnalysis requires at least 2 classes");
+    }
     
     classes_.resize(unique_classes_set.size());
     n_classes_ = unique_classes_set.size();
@@ -172,4 +175,3 @@ Estimator& QuadraticDiscriminantAnalysis::set_params(const Params& params) {
 
 } // namespace discriminant_analysis
 } // namespace auroraml
-

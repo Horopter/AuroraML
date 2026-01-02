@@ -105,6 +105,31 @@ private:
     bool check_convergence(const MatrixXd& X_old, const MatrixXd& X_new) const;
 };
 
+/**
+ * MissingIndicator - Indicator for missing values
+ *
+ * Similar to scikit-learn's MissingIndicator, generates binary features
+ * indicating the presence of missing values in each selected column.
+ */
+class MissingIndicator : public Estimator, public Transformer {
+private:
+    std::string features_;
+    bool fitted_;
+    std::vector<int> features_indices_;
+
+public:
+    explicit MissingIndicator(const std::string& features = "missing-only");
+
+    Estimator& fit(const MatrixXd& X, const VectorXd& y) override;
+    MatrixXd transform(const MatrixXd& X) const override;
+    MatrixXd inverse_transform(const MatrixXd& X) const override;
+    MatrixXd fit_transform(const MatrixXd& X, const VectorXd& y) override;
+    Params get_params() const override;
+    Estimator& set_params(const Params& params) override;
+    bool is_fitted() const override { return fitted_; }
+
+    const std::vector<int>& features() const { return features_indices_; }
+};
+
 } // namespace impute
 } // namespace auroraml
-
