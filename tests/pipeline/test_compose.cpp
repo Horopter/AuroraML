@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
-#include "auroraml/compose.hpp"
-#include "auroraml/preprocessing.hpp"
-#include "auroraml/linear_model.hpp"
+#include "ingenuityml/compose.hpp"
+#include "ingenuityml/preprocessing.hpp"
+#include "ingenuityml/linear_model.hpp"
 #include <Eigen/Dense>
 #include <memory>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class ComposeTest : public ::testing::Test {
@@ -96,7 +96,7 @@ TEST_F(ComposeTest, TransformedTargetRegressorNotFitted) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

@@ -1,11 +1,11 @@
-#include "auroraml/impute.hpp"
-#include "auroraml/linear_model.hpp"
+#include "ingenuityml/impute.hpp"
+#include "ingenuityml/linear_model.hpp"
 #include <limits>
 #include <algorithm>
 #include <numeric>
 #include <cmath>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace impute {
 
 // KNNImputer implementation
@@ -463,4 +463,4 @@ Estimator& MissingIndicator::set_params(const Params& params) {
 }
 
 } // namespace impute
-} // namespace auroraml
+} // namespace ingenuityml

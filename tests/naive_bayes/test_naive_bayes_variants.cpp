@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
-#include "auroraml/naive_bayes_variants.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/naive_bayes_variants.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class NaiveBayesVariantsTest : public ::testing::Test {
@@ -85,7 +85,7 @@ TEST_F(NaiveBayesVariantsTest, BernoulliNBNotFitted) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

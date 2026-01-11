@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/dbscan.hpp"
+#include "ingenuityml/dbscan.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class DBSCANTest : public ::testing::Test {
@@ -108,7 +108,7 @@ TEST_F(DBSCANTest, DBSCANNegativeMinSamples) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

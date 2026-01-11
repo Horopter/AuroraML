@@ -6,7 +6,7 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import auroraml
+import ingenuityml
 import random
 
 class TestMetaEstimators(unittest.TestCase):
@@ -33,43 +33,43 @@ class TestMetaEstimators(unittest.TestCase):
         self.Y_reg[:, 1] = self.X.mean(axis=1)
 
     def test_one_vs_rest(self):
-        model = auroraml.meta.OneVsRestClassifier(lambda: auroraml.naive_bayes.GaussianNB())
+        model = ingenuityml.meta.OneVsRestClassifier(lambda: ingenuityml.naive_bayes.GaussianNB())
         model.fit(self.X, self.y_class)
         preds = model.predict(self.X)
         self.assertEqual(preds.shape[0], self.X.shape[0])
 
     def test_one_vs_one(self):
-        model = auroraml.meta.OneVsOneClassifier(lambda: auroraml.naive_bayes.GaussianNB())
+        model = ingenuityml.meta.OneVsOneClassifier(lambda: ingenuityml.naive_bayes.GaussianNB())
         model.fit(self.X, self.y_class)
         preds = model.predict(self.X)
         self.assertEqual(preds.shape[0], self.X.shape[0])
 
     def test_output_code(self):
-        model = auroraml.meta.OutputCodeClassifier(lambda: auroraml.naive_bayes.GaussianNB(), code_size=5, random_state=42)
+        model = ingenuityml.meta.OutputCodeClassifier(lambda: ingenuityml.naive_bayes.GaussianNB(), code_size=5, random_state=42)
         model.fit(self.X, self.y_class)
         preds = model.predict(self.X)
         self.assertEqual(preds.shape[0], self.X.shape[0])
 
     def test_multioutput_classifier(self):
-        model = auroraml.meta.MultiOutputClassifier(lambda: auroraml.naive_bayes.GaussianNB())
+        model = ingenuityml.meta.MultiOutputClassifier(lambda: ingenuityml.naive_bayes.GaussianNB())
         model.fit(self.X, self.Y_multi)
         preds = model.predict(self.X)
         self.assertEqual(preds.shape, (self.X.shape[0], 2))
 
     def test_classifier_chain(self):
-        model = auroraml.meta.ClassifierChain(lambda: auroraml.naive_bayes.GaussianNB())
+        model = ingenuityml.meta.ClassifierChain(lambda: ingenuityml.naive_bayes.GaussianNB())
         model.fit(self.X, self.Y_multi)
         preds = model.predict(self.X)
         self.assertEqual(preds.shape, (self.X.shape[0], 2))
 
     def test_multioutput_regressor(self):
-        model = auroraml.meta.MultiOutputRegressor(lambda: auroraml.linear_model.LinearRegression())
+        model = ingenuityml.meta.MultiOutputRegressor(lambda: ingenuityml.linear_model.LinearRegression())
         model.fit(self.X, self.Y_reg)
         preds = model.predict(self.X)
         self.assertEqual(preds.shape, (self.X.shape[0], 2))
 
     def test_regressor_chain(self):
-        model = auroraml.meta.RegressorChain(lambda: auroraml.linear_model.LinearRegression())
+        model = ingenuityml.meta.RegressorChain(lambda: ingenuityml.linear_model.LinearRegression())
         model.fit(self.X, self.Y_reg)
         preds = model.predict(self.X)
         self.assertEqual(preds.shape, (self.X.shape[0], 2))

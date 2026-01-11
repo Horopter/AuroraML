@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
-#include "auroraml/discriminant_analysis.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/discriminant_analysis.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class DiscriminantAnalysisTest : public ::testing::Test {
@@ -90,7 +90,7 @@ TEST_F(DiscriminantAnalysisTest, QuadraticDiscriminantAnalysisSingleClass) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

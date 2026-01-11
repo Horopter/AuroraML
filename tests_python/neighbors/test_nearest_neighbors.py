@@ -19,9 +19,9 @@ class TestNearestNeighbors(unittest.TestCase):
         self.y_dummy = np.zeros(self.X.shape[0]).astype(np.float64)
 
     def test_kneighbors(self):
-        import auroraml.neighbors as aml_neighbors
+        import ingenuityml.neighbors as ing_neighbors
 
-        model = aml_neighbors.NearestNeighbors(n_neighbors=3, radius=1.0)
+        model = ing_neighbors.NearestNeighbors(n_neighbors=3, radius=1.0)
         model.fit(self.X, self.y_dummy)
         distances, indices = model.kneighbors(self.X_test)
 
@@ -31,9 +31,9 @@ class TestNearestNeighbors(unittest.TestCase):
         self.assertTrue(np.all(indices < self.X.shape[0]))
 
     def test_radius_neighbors(self):
-        import auroraml.neighbors as aml_neighbors
+        import ingenuityml.neighbors as ing_neighbors
 
-        model = aml_neighbors.NearestNeighbors(n_neighbors=3, radius=1.0)
+        model = ing_neighbors.NearestNeighbors(n_neighbors=3, radius=1.0)
         model.fit(self.X, self.y_dummy)
         distances, indices = model.radius_neighbors(self.X_test, radius=1.0)
 
@@ -45,18 +45,18 @@ class TestNearestNeighbors(unittest.TestCase):
                 self.assertGreaterEqual(d, 0.0)
 
     def test_not_fitted(self):
-        import auroraml.neighbors as aml_neighbors
+        import ingenuityml.neighbors as ing_neighbors
 
-        model = aml_neighbors.NearestNeighbors(n_neighbors=3, radius=1.0)
+        model = ing_neighbors.NearestNeighbors(n_neighbors=3, radius=1.0)
         with self.assertRaises((RuntimeError, ValueError)):
             model.kneighbors(self.X_test)
         with self.assertRaises((RuntimeError, ValueError)):
             model.radius_neighbors(self.X_test, radius=1.0)
 
     def test_wrong_feature_count(self):
-        import auroraml.neighbors as aml_neighbors
+        import ingenuityml.neighbors as ing_neighbors
 
-        model = aml_neighbors.NearestNeighbors(n_neighbors=3, radius=1.0)
+        model = ing_neighbors.NearestNeighbors(n_neighbors=3, radius=1.0)
         model.fit(self.X, self.y_dummy)
         X_wrong = np.random.randn(10, 6).astype(np.float64)
         with self.assertRaises((RuntimeError, ValueError)):

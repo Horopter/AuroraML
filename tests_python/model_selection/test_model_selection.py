@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import random
 """
-Test Suite for AuroraML Model Selection
+Test Suite for IngenuityML Model Selection
 Tests train_test_split, KFold, StratifiedKFold, GroupKFold, cross_val_score, GridSearchCV, RandomizedSearchCV
 """
 
@@ -24,9 +24,9 @@ class TestTrainTestSplit(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic train_test_split functionality"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
-        X_train, X_test, y_train, y_test = aml_ms.train_test_split(
+        X_train, X_test, y_train, y_test = ing_ms.train_test_split(
             self.X, self.y, test_size=0.25, random_state=42
         )
         
@@ -42,11 +42,11 @@ class TestTrainTestSplit(unittest.TestCase):
         
     def test_different_test_sizes(self):
         """Test with different test sizes"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
         test_sizes = [0.1, 0.2, 0.3, 0.5]
         for test_size in test_sizes:
-            X_train, X_test, y_train, y_test = aml_ms.train_test_split(
+            X_train, X_test, y_train, y_test = ing_ms.train_test_split(
                 self.X, self.y, test_size=test_size, random_state=42
             )
             
@@ -55,13 +55,13 @@ class TestTrainTestSplit(unittest.TestCase):
             
     def test_random_state(self):
         """Test that random_state produces consistent results"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
         # Same random state should produce same split
-        X_train1, X_test1, y_train1, y_test1 = aml_ms.train_test_split(
+        X_train1, X_test1, y_train1, y_test1 = ing_ms.train_test_split(
             self.X, self.y, test_size=0.25, random_state=42
         )
-        X_train2, X_test2, y_train2, y_test2 = aml_ms.train_test_split(
+        X_train2, X_test2, y_train2, y_test2 = ing_ms.train_test_split(
             self.X, self.y, test_size=0.25, random_state=42
         )
         
@@ -72,14 +72,14 @@ class TestTrainTestSplit(unittest.TestCase):
         
     def test_edge_cases(self):
         """Test edge cases"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
         # Test with single sample
         X_single = self.X[:1]
         y_single = self.y[:1]
         
         with self.assertRaises(ValueError):
-            aml_ms.train_test_split(X_single, y_single, test_size=0.5)
+            ing_ms.train_test_split(X_single, y_single, test_size=0.5)
 
 class TestKFold(unittest.TestCase):
     """Test KFold cross-validation"""
@@ -92,9 +92,9 @@ class TestKFold(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic KFold functionality"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
-        kfold = aml_ms.KFold(n_splits=5, shuffle=True, random_state=42)
+        kfold = ing_ms.KFold(n_splits=5, shuffle=True, random_state=42)
         splits = list(kfold.split(self.X))
         
         self.assertEqual(len(splits), 5)
@@ -109,29 +109,29 @@ class TestKFold(unittest.TestCase):
             
     def test_different_n_splits(self):
         """Test with different n_splits values"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
         n_splits_values = [3, 5, 10]
         for n_splits in n_splits_values:
-            kfold = aml_ms.KFold(n_splits=n_splits, shuffle=True, random_state=42)
+            kfold = ing_ms.KFold(n_splits=n_splits, shuffle=True, random_state=42)
             splits = list(kfold.split(self.X))
             
             self.assertEqual(len(splits), n_splits)
             
     def test_no_shuffle(self):
         """Test KFold without shuffle"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
-        kfold = aml_ms.KFold(n_splits=5, shuffle=False)
+        kfold = ing_ms.KFold(n_splits=5, shuffle=False)
         splits = list(kfold.split(self.X))
         
         self.assertEqual(len(splits), 5)
         
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
-        kfold = aml_ms.KFold(n_splits=5, shuffle=True, random_state=42)
+        kfold = ing_ms.KFold(n_splits=5, shuffle=True, random_state=42)
         
         # Test default parameters
         params = kfold.get_params()
@@ -154,9 +154,9 @@ class TestStratifiedKFold(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic StratifiedKFold functionality"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
-        skfold = aml_ms.StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+        skfold = ing_ms.StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
         splits = list(skfold.split(self.X, self.y))
         
         self.assertEqual(len(splits), 5)
@@ -167,13 +167,13 @@ class TestStratifiedKFold(unittest.TestCase):
             
     def test_stratification(self):
         """Test that stratification maintains class distribution"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
         # Create imbalanced dataset
         y_imbalanced = np.concatenate([np.zeros(80), np.ones(20)])
         X_imbalanced = np.random.randn(100, 4).astype(np.float64)
         
-        skfold = aml_ms.StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+        skfold = ing_ms.StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
         splits = list(skfold.split(X_imbalanced, y_imbalanced))
         
         for train_idx, val_idx in splits:
@@ -196,9 +196,9 @@ class TestGroupKFold(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic GroupKFold functionality"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
-        gkfold = aml_ms.GroupKFold(n_splits=5)
+        gkfold = ing_ms.GroupKFold(n_splits=5)
         splits = list(gkfold.split(self.X, self.y, groups=self.groups))
         
         self.assertEqual(len(splits), 5)
@@ -221,14 +221,14 @@ class TestCrossValScore(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic cross_val_score functionality"""
-        import auroraml.model_selection as aml_ms
-        import auroraml.linear_model as aml_lm
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.model_selection as ing_ms
+        import ingenuityml.linear_model as ing_lm
+        import ingenuityml.metrics as ing_metrics
         
-        model = aml_lm.LinearRegression()
-        kfold = aml_ms.KFold(n_splits=5, shuffle=True, random_state=42)
+        model = ing_lm.LinearRegression()
+        kfold = ing_ms.KFold(n_splits=5, shuffle=True, random_state=42)
         
-        scores = aml_ms.cross_val_score(model, self.X, self.y, cv=kfold, scoring='accuracy')
+        scores = ing_ms.cross_val_score(model, self.X, self.y, cv=kfold, scoring='accuracy')
         
         self.assertEqual(len(scores), 5)
         self.assertTrue(np.all(scores >= 0))
@@ -236,17 +236,17 @@ class TestCrossValScore(unittest.TestCase):
         
     def test_different_scoring(self):
         """Test with different scoring metrics"""
-        import auroraml.model_selection as aml_ms
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.model_selection as ing_ms
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.LinearRegression()
-        kfold = aml_ms.KFold(n_splits=3, shuffle=True, random_state=42)
+        model = ing_lm.LinearRegression()
+        kfold = ing_ms.KFold(n_splits=3, shuffle=True, random_state=42)
         
         # Test with different scoring methods
         scoring_methods = ['accuracy', 'precision', 'recall', 'f1']
         
         for scoring in scoring_methods:
-            scores = aml_ms.cross_val_score(model, self.X, self.y, cv=kfold, scoring=scoring)
+            scores = ing_ms.cross_val_score(model, self.X, self.y, cv=kfold, scoring=scoring)
             self.assertEqual(len(scores), 3)
             self.assertTrue(np.all(scores >= 0))
             self.assertTrue(np.all(scores <= 1))
@@ -262,14 +262,14 @@ class TestGridSearchCV(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic GridSearchCV functionality"""
-        import auroraml.model_selection as aml_ms
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.model_selection as ing_ms
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.Ridge()
+        model = ing_lm.Ridge()
         param_grid = [{'alpha': '0.1'}, {'alpha': '1.0'}, {'alpha': '10.0'}]
-        kfold = aml_ms.KFold(n_splits=3, shuffle=True, random_state=42)
+        kfold = ing_ms.KFold(n_splits=3, shuffle=True, random_state=42)
         
-        grid_search = aml_ms.GridSearchCV(
+        grid_search = ing_ms.GridSearchCV(
             model, param_grid, cv=kfold, scoring='accuracy'
         )
         
@@ -286,14 +286,14 @@ class TestGridSearchCV(unittest.TestCase):
         
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.model_selection as aml_ms
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.model_selection as ing_ms
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.Ridge()
+        model = ing_lm.Ridge()
         param_grid = [{'alpha': '0.1'}, {'alpha': '1.0'}]
-        kfold = aml_ms.KFold(n_splits=3)
+        kfold = ing_ms.KFold(n_splits=3)
         
-        grid_search = aml_ms.GridSearchCV(model, param_grid, cv=kfold)
+        grid_search = ing_ms.GridSearchCV(model, param_grid, cv=kfold)
         
         # Test default parameters
         params = grid_search.get_params()
@@ -314,14 +314,14 @@ class TestRandomizedSearchCV(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic RandomizedSearchCV functionality"""
-        import auroraml.model_selection as aml_ms
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.model_selection as ing_ms
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.Ridge()
+        model = ing_lm.Ridge()
         param_distributions = [{'alpha': '0.1'}, {'alpha': '1.0'}, {'alpha': '10.0'}]
-        kfold = aml_ms.KFold(n_splits=3, shuffle=True, random_state=42)
+        kfold = ing_ms.KFold(n_splits=3, shuffle=True, random_state=42)
         
-        random_search = aml_ms.RandomizedSearchCV(
+        random_search = ing_ms.RandomizedSearchCV(
             model, param_distributions, n_iter=3, cv=kfold, scoring='accuracy'
         )
         
@@ -340,10 +340,10 @@ class TestParameterGrid(unittest.TestCase):
     """Test ParameterGrid"""
 
     def test_basic_functionality(self):
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
 
         param_grid = {'alpha': [0.1, 1.0], 'fit_intercept': [0, 1]}
-        grid = aml_ms.ParameterGrid(param_grid)
+        grid = ing_ms.ParameterGrid(param_grid)
 
         self.assertEqual(grid.size(), 4)
         combos = grid.grid()
@@ -356,10 +356,10 @@ class TestParameterSampler(unittest.TestCase):
     """Test ParameterSampler"""
 
     def test_basic_functionality(self):
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
 
         param_dist = {'alpha': [0.1, 1.0, 10.0], 'fit_intercept': [0, 1]}
-        sampler = aml_ms.ParameterSampler(param_dist, n_iter=5, random_state=42)
+        sampler = ing_ms.ParameterSampler(param_dist, n_iter=5, random_state=42)
 
         self.assertEqual(sampler.size(), 5)
         samples = sampler.samples()
@@ -377,9 +377,9 @@ class TestRepeatedKFold(unittest.TestCase):
         self.y = np.random.randint(0, 2, 60).astype(np.int32)
 
     def test_basic_functionality(self):
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
 
-        rkfold = aml_ms.RepeatedKFold(n_splits=3, n_repeats=2, random_state=42)
+        rkfold = ing_ms.RepeatedKFold(n_splits=3, n_repeats=2, random_state=42)
         splits = list(rkfold.split(self.X, self.y))
 
         self.assertEqual(len(splits), 6)
@@ -393,9 +393,9 @@ class TestRepeatedStratifiedKFold(unittest.TestCase):
         self.y = np.random.randint(0, 2, 60).astype(np.int32)
 
     def test_basic_functionality(self):
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
 
-        rskfold = aml_ms.RepeatedStratifiedKFold(n_splits=3, n_repeats=2, random_state=42)
+        rskfold = ing_ms.RepeatedStratifiedKFold(n_splits=3, n_repeats=2, random_state=42)
         splits = list(rskfold.split(self.X, self.y))
 
         self.assertEqual(len(splits), 6)
@@ -408,9 +408,9 @@ class TestShuffleSplit(unittest.TestCase):
         self.X = np.random.randn(100, 4).astype(np.float64)
 
     def test_basic_functionality(self):
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
 
-        ss = aml_ms.ShuffleSplit(n_splits=4, test_size=0.2, random_state=42)
+        ss = ing_ms.ShuffleSplit(n_splits=4, test_size=0.2, random_state=42)
         splits = list(ss.split(self.X))
 
         self.assertEqual(len(splits), 4)
@@ -427,9 +427,9 @@ class TestStratifiedShuffleSplit(unittest.TestCase):
         self.y = np.random.randint(0, 2, 100).astype(np.int32)
 
     def test_basic_functionality(self):
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
 
-        sss = aml_ms.StratifiedShuffleSplit(n_splits=4, test_size=0.2, random_state=42)
+        sss = ing_ms.StratifiedShuffleSplit(n_splits=4, test_size=0.2, random_state=42)
         splits = list(sss.split(self.X, self.y))
 
         self.assertEqual(len(splits), 4)
@@ -447,9 +447,9 @@ class TestGroupShuffleSplit(unittest.TestCase):
         self.groups = np.random.randint(0, 10, 100)
 
     def test_basic_functionality(self):
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
 
-        gss = aml_ms.GroupShuffleSplit(n_splits=3, test_size=0.2, random_state=42)
+        gss = ing_ms.GroupShuffleSplit(n_splits=3, test_size=0.2, random_state=42)
         splits = list(gss.split(self.X, self.y, groups=self.groups))
 
         self.assertEqual(len(splits), 3)
@@ -466,13 +466,13 @@ class TestPredefinedSplit(unittest.TestCase):
         self.X = np.random.randn(100, 4).astype(np.float64)
 
     def test_basic_functionality(self):
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
 
         test_fold = [-1] * 100
         for i in range(40):
             test_fold[i] = 0 if i < 20 else 1
 
-        ps = aml_ms.PredefinedSplit(test_fold)
+        ps = ing_ms.PredefinedSplit(test_fold)
         self.assertEqual(ps.get_n_splits(), 2)
         splits = list(ps.split(self.X))
 
@@ -489,9 +489,9 @@ class TestLeaveOneOut(unittest.TestCase):
         self.X = np.random.randn(6, 3).astype(np.float64)
 
     def test_basic_functionality(self):
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
 
-        loo = aml_ms.LeaveOneOut()
+        loo = ing_ms.LeaveOneOut()
         splits = list(loo.split(self.X))
 
         self.assertEqual(len(splits), 6)
@@ -507,9 +507,9 @@ class TestLeavePOut(unittest.TestCase):
         self.X = np.random.randn(6, 3).astype(np.float64)
 
     def test_basic_functionality(self):
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
 
-        lpo = aml_ms.LeavePOut(p=2)
+        lpo = ing_ms.LeavePOut(p=2)
         splits = list(lpo.split(self.X))
 
         self.assertEqual(len(splits), 15)
@@ -526,16 +526,44 @@ class TestHalvingRandomSearchCV(unittest.TestCase):
         self.y = (self.X[:, 0] + self.X[:, 1] > 0).astype(np.int32)
 
     def test_basic_functionality(self):
-        import auroraml.model_selection as aml_ms
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.model_selection as ing_ms
+        import ingenuityml.linear_model as ing_lm
 
-        model = aml_lm.LogisticRegression()
+        model = ing_lm.LogisticRegression()
         param_distributions = {'C': [0.1, 1.0]}
-        kfold = aml_ms.KFold(n_splits=3, shuffle=True, random_state=42)
+        kfold = ing_ms.KFold(n_splits=3, shuffle=True, random_state=42)
 
-        halving = aml_ms.HalvingRandomSearchCV(
+        halving = ing_ms.HalvingRandomSearchCV(
             model, param_distributions, cv=kfold, scoring='accuracy',
             n_candidates=2, factor=2, min_resources=20, random_state=42
+        )
+        halving.fit(self.X, self.y)
+
+        self.assertTrue(halving.is_fitted())
+        best_params = halving.best_params()
+        self.assertIn('C', best_params)
+        self.assertGreaterEqual(halving.best_score(), 0.0)
+        self.assertLessEqual(halving.best_score(), 1.0)
+
+class TestHalvingGridSearchCV(unittest.TestCase):
+    """Test HalvingGridSearchCV"""
+
+    def setUp(self):
+        np.random.seed(42)
+        self.X = np.random.randn(40, 4).astype(np.float64)
+        self.y = (self.X[:, 0] + self.X[:, 1] > 0).astype(np.int32)
+
+    def test_basic_functionality(self):
+        import ingenuityml.model_selection as ing_ms
+        import ingenuityml.linear_model as ing_lm
+
+        model = ing_lm.LogisticRegression()
+        param_grid = [{'C': '0.1'}, {'C': '1.0'}]
+        kfold = ing_ms.KFold(n_splits=3, shuffle=True, random_state=42)
+
+        halving = ing_ms.HalvingGridSearchCV(
+            model, param_grid, cv=kfold, scoring='accuracy',
+            factor=2, min_resources=20
         )
         halving.fit(self.X, self.y)
 
@@ -556,24 +584,24 @@ class TestModelSelectionIntegration(unittest.TestCase):
         
     def test_cross_validation_workflow(self):
         """Test complete cross-validation workflow"""
-        import auroraml.model_selection as aml_ms
-        import auroraml.linear_model as aml_lm
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.model_selection as ing_ms
+        import ingenuityml.linear_model as ing_lm
+        import ingenuityml.metrics as ing_metrics
         
         # Split data
-        X_train, X_test, y_train, y_test = aml_ms.train_test_split(
+        X_train, X_test, y_train, y_test = ing_ms.train_test_split(
             self.X, self.y, test_size=0.2, random_state=42
         )
         
         # Cross-validation
-        model = aml_lm.LinearRegression()
-        kfold = aml_ms.KFold(n_splits=5, shuffle=True, random_state=42)
-        scores = aml_ms.cross_val_score(model, X_train, y_train, cv=kfold, scoring='accuracy')
+        model = ing_lm.LinearRegression()
+        kfold = ing_ms.KFold(n_splits=5, shuffle=True, random_state=42)
+        scores = ing_ms.cross_val_score(model, X_train, y_train, cv=kfold, scoring='accuracy')
         
         # Final evaluation
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
-        final_accuracy = aml_metrics.accuracy_score(y_test, y_pred)
+        final_accuracy = ing_metrics.accuracy_score(y_test, y_pred)
         
         # All should be reasonable
         self.assertGreater(np.mean(scores), 0.0)
@@ -581,15 +609,15 @@ class TestModelSelectionIntegration(unittest.TestCase):
         
     def test_hyperparameter_tuning_workflow(self):
         """Test complete hyperparameter tuning workflow"""
-        import auroraml.model_selection as aml_ms
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.model_selection as ing_ms
+        import ingenuityml.linear_model as ing_lm
         
         # Grid search
-        model = aml_lm.Ridge()
+        model = ing_lm.Ridge()
         param_grid = [{'alpha': '0.1'}, {'alpha': '1.0'}, {'alpha': '10.0'}]
-        kfold = aml_ms.KFold(n_splits=3, shuffle=True, random_state=42)
+        kfold = ing_ms.KFold(n_splits=3, shuffle=True, random_state=42)
         
-        grid_search = aml_ms.GridSearchCV(
+        grid_search = ing_ms.GridSearchCV(
             model, param_grid, cv=kfold, scoring='accuracy'
         )
         

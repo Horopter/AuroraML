@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML LogisticRegressionCV
+Test Suite for IngenuityML LogisticRegressionCV
 Tests LogisticRegressionCV with cross-validation
 """
 
@@ -26,9 +26,9 @@ class TestLogisticRegressionCV(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
-        model = aml_ms.LogisticRegressionCV(cv=5)
+        model = ing_ms.LogisticRegressionCV(cv=5)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -38,9 +38,9 @@ class TestLogisticRegressionCV(unittest.TestCase):
         
     def test_predict_proba(self):
         """Test probability prediction"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
-        model = aml_ms.LogisticRegressionCV(cv=5)
+        model = ing_ms.LogisticRegressionCV(cv=5)
         model.fit(self.X, self.y)
         probabilities = model.predict_proba(self.X_test)
         
@@ -51,38 +51,38 @@ class TestLogisticRegressionCV(unittest.TestCase):
         
     def test_custom_cv_folds(self):
         """Test with different CV fold values"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
         for cv in [3, 5, 10]:
-            model = aml_ms.LogisticRegressionCV(cv=cv)
+            model = ing_ms.LogisticRegressionCV(cv=cv)
             model.fit(self.X, self.y)
             predictions = model.predict(self.X_test)
             self.assertEqual(len(predictions), len(self.X_test))
             
     def test_custom_C_values(self):
         """Test with custom C values"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
         Cs = [0.01, 0.1, 1.0, 10.0]
-        model = aml_ms.LogisticRegressionCV(cv=5, Cs=Cs)
+        model = ing_ms.LogisticRegressionCV(cv=5, Cs=Cs)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         self.assertEqual(len(predictions), len(self.X_test))
         
     def test_get_params(self):
         """Test parameter retrieval"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
-        model = aml_ms.LogisticRegressionCV(cv=5)
+        model = ing_ms.LogisticRegressionCV(cv=5)
         params = model.get_params()
         self.assertIn('cv', params)
         self.assertIn('scoring', params)
         
     def test_is_fitted(self):
         """Test fitted state"""
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.model_selection as ing_ms
         
-        model = aml_ms.LogisticRegressionCV(cv=5)
+        model = ing_ms.LogisticRegressionCV(cv=5)
         self.assertFalse(model.is_fitted())
         model.fit(self.X, self.y)
         self.assertTrue(model.is_fitted())

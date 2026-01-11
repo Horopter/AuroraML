@@ -1,9 +1,9 @@
-#include "auroraml/truncated_svd.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/truncated_svd.hpp"
+#include "ingenuityml/base.hpp"
 #include <Eigen/SVD>
 #include <stdexcept>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace decomposition {
 
 Estimator& TruncatedSVD::fit(const MatrixXd& X, const VectorXd& y) {
@@ -48,5 +48,5 @@ Estimator& TruncatedSVD::set_params(const Params& params) {
 }
 
 } // namespace decomposition
-} // namespace cxml
+} // namespace ingenuityml
 

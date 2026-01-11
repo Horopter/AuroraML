@@ -1,10 +1,10 @@
-#include "auroraml/outlier_detection.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/outlier_detection.hpp"
+#include "ingenuityml/base.hpp"
 #include <random>
 #include <algorithm>
 #include <cmath>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace outlier_detection {
 
 // IsolationForest implementation
@@ -337,4 +337,4 @@ Estimator& LocalOutlierFactor::set_params(const Params& params) {
 }
 
 } // namespace outlier_detection
-} // namespace auroraml
+} // namespace ingenuityml

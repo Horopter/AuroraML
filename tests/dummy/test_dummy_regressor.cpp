@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/dummy.hpp"
+#include "ingenuityml/dummy.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class DummyRegressorTest : public ::testing::Test {
@@ -56,7 +56,7 @@ TEST_F(DummyRegressorTest, ConstantStrategy) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

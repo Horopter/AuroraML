@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
-#include "auroraml/inspection.hpp"
-#include "auroraml/tree.hpp"
-#include "auroraml/linear_model.hpp"
+#include "ingenuityml/inspection.hpp"
+#include "ingenuityml/tree.hpp"
+#include "ingenuityml/linear_model.hpp"
 #include <Eigen/Dense>
 #include <memory>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class InspectionTest : public ::testing::Test {
@@ -100,7 +100,7 @@ TEST_F(InspectionTest, PartialDependenceEmptyFeatures) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

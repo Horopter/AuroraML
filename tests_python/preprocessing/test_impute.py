@@ -6,7 +6,7 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import auroraml
+import ingenuityml
 import random
 
 class TestImpute(unittest.TestCase):
@@ -21,7 +21,7 @@ class TestImpute(unittest.TestCase):
 
     def test_knn_imputer(self):
         """Test KNNImputer"""
-        imputer = auroraml.impute.KNNImputer(n_neighbors=5)
+        imputer = ingenuityml.impute.KNNImputer(n_neighbors=5)
         imputer.fit(self.X, None)
         
         X_imputed = imputer.transform(self.X)
@@ -36,7 +36,7 @@ class TestImpute(unittest.TestCase):
 
     def test_iterative_imputer(self):
         """Test IterativeImputer"""
-        imputer = auroraml.impute.IterativeImputer(max_iter=10)
+        imputer = ingenuityml.impute.IterativeImputer(max_iter=10)
         imputer.fit(self.X, None)
         
         X_imputed = imputer.transform(self.X)
@@ -54,7 +54,7 @@ class TestImpute(unittest.TestCase):
         X = self.X.copy()
         X[:, 0] = np.nan
         
-        imputer = auroraml.impute.KNNImputer(n_neighbors=5)
+        imputer = ingenuityml.impute.KNNImputer(n_neighbors=5)
         X_imputed = imputer.fit_transform(X, None)
         
         # Should still work (uses column mean)
@@ -62,12 +62,12 @@ class TestImpute(unittest.TestCase):
 
     def test_missing_indicator(self):
         """Test MissingIndicator"""
-        indicator = auroraml.impute.MissingIndicator(features="missing-only")
+        indicator = ingenuityml.impute.MissingIndicator(features="missing-only")
         indicator.fit(self.X, None)
         indicators = indicator.transform(self.X)
         self.assertEqual(indicators.shape[0], self.X.shape[0])
 
-        indicator_all = auroraml.impute.MissingIndicator(features="all")
+        indicator_all = ingenuityml.impute.MissingIndicator(features="all")
         indicator_all.fit(self.X, None)
         indicators_all = indicator_all.transform(self.X)
         self.assertEqual(indicators_all.shape, self.X.shape)

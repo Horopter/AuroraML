@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/neighbors.hpp"
+#include "ingenuityml/neighbors.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class NeighborsTransformerTest : public ::testing::Test {
@@ -93,7 +93,7 @@ TEST_F(NeighborsTransformerTest, WrongFeatureCount) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class MetricsTest : public ::testing::Test {
@@ -749,7 +749,7 @@ TEST_F(MetricsTest, PinballScoreInvalidAlpha) {
 }
 
 } // namespace test
-} // namespace cxml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

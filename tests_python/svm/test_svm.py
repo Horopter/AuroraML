@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import random
 """
-Test Suite for AuroraML SVM
+Test Suite for IngenuityML SVM
 Tests LinearSVC algorithm
 """
 
@@ -26,9 +26,9 @@ class TestLinearSVC(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.svm as aml_svm
+        import ingenuityml.svm as ing_svm
         
-        model = aml_svm.LinearSVC(C=1.0, random_state=42)
+        model = ing_svm.LinearSVC(C=1.0, random_state=42)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -38,9 +38,9 @@ class TestLinearSVC(unittest.TestCase):
         
     def test_decision_function(self):
         """Test decision function"""
-        import auroraml.svm as aml_svm
+        import ingenuityml.svm as ing_svm
         
-        model = aml_svm.LinearSVC(C=1.0, random_state=42)
+        model = ing_svm.LinearSVC(C=1.0, random_state=42)
         model.fit(self.X, self.y)
         decision_scores = model.decision_function(self.X_test)
         
@@ -49,21 +49,21 @@ class TestLinearSVC(unittest.TestCase):
         
     def test_different_parameters(self):
         """Test with different parameters"""
-        import auroraml.svm as aml_svm
+        import ingenuityml.svm as ing_svm
         
         # Test different C values
         C_values = [0.1, 1.0, 10.0]
         for C in C_values:
-            model = aml_svm.LinearSVC(C=C, random_state=42)
+            model = ing_svm.LinearSVC(C=C, random_state=42)
             model.fit(self.X, self.y)
             predictions = model.predict(self.X_test)
             self.assertEqual(len(predictions), len(self.X_test))
             
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.svm as aml_svm
+        import ingenuityml.svm as ing_svm
         
-        model = aml_svm.LinearSVC(C=1.0, max_iter=1000, random_state=42)
+        model = ing_svm.LinearSVC(C=1.0, max_iter=1000, random_state=42)
         
         # Test default parameters
         params = model.get_params()
@@ -77,21 +77,21 @@ class TestLinearSVC(unittest.TestCase):
         
     def test_performance(self):
         """Test model performance"""
-        import auroraml.svm as aml_svm
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.svm as ing_svm
+        import ingenuityml.metrics as ing_metrics
         
-        model = aml_svm.LinearSVC(C=1.0, random_state=42)
+        model = ing_svm.LinearSVC(C=1.0, random_state=42)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X)
         
-        accuracy = aml_metrics.accuracy_score(self.y, predictions)
+        accuracy = ing_metrics.accuracy_score(self.y, predictions)
         self.assertGreater(accuracy, 0.5)  # Should be better than random
         
     def test_coefficients(self):
         """Test coefficient retrieval"""
-        import auroraml.svm as aml_svm
+        import ingenuityml.svm as ing_svm
         
-        model = aml_svm.LinearSVC(C=1.0, random_state=42)
+        model = ing_svm.LinearSVC(C=1.0, random_state=42)
         model.fit(self.X, self.y)
         
         # Check that coefficients are available
@@ -106,9 +106,9 @@ class TestLinearSVC(unittest.TestCase):
             
     def test_edge_cases(self):
         """Test edge cases"""
-        import auroraml.svm as aml_svm
+        import ingenuityml.svm as ing_svm
         
-        model = aml_svm.LinearSVC(C=1.0)
+        model = ing_svm.LinearSVC(C=1.0)
         
         # Test with single sample
         X_single = self.X[:1]
@@ -123,9 +123,9 @@ class TestLinearSVC(unittest.TestCase):
             
     def test_model_persistence(self):
         """Test model saving and loading"""
-        import auroraml.svm as aml_svm
+        import ingenuityml.svm as ing_svm
         
-        model = aml_svm.LinearSVC(C=1.0, random_state=42)
+        model = ing_svm.LinearSVC(C=1.0, random_state=42)
         model.fit(self.X, self.y)
         
         # Save model
@@ -133,7 +133,7 @@ class TestLinearSVC(unittest.TestCase):
         model.save(filename)
         
         # Load model
-        loaded_model = aml_svm.LinearSVC()
+        loaded_model = ing_svm.LinearSVC()
         loaded_model.load(filename)
         
         # Compare predictions
@@ -157,12 +157,12 @@ class TestLinearSVCIntegration(unittest.TestCase):
         
     def test_cross_validation_compatibility(self):
         """Test compatibility with cross-validation"""
-        import auroraml.svm as aml_svm
-        import auroraml.model_selection as aml_ms
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.svm as ing_svm
+        import ingenuityml.model_selection as ing_ms
+        import ingenuityml.metrics as ing_metrics
         
-        model = aml_svm.LinearSVC(C=1.0, random_state=42)
-        kfold = aml_ms.KFold(n_splits=5, shuffle=True, random_state=42)
+        model = ing_svm.LinearSVC(C=1.0, random_state=42)
+        kfold = ing_ms.KFold(n_splits=5, shuffle=True, random_state=42)
         
         scores = []
         for train_idx, val_idx in kfold.split(self.X):
@@ -171,7 +171,7 @@ class TestLinearSVCIntegration(unittest.TestCase):
             
             model.fit(X_train, y_train)
             predictions = model.predict(X_val)
-            accuracy = aml_metrics.accuracy_score(y_val, predictions)
+            accuracy = ing_metrics.accuracy_score(y_val, predictions)
             scores.append(accuracy)
             
         mean_score = np.mean(scores)
@@ -179,14 +179,14 @@ class TestLinearSVCIntegration(unittest.TestCase):
         
     def test_hyperparameter_tuning(self):
         """Test hyperparameter tuning with GridSearchCV"""
-        import auroraml.svm as aml_svm
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.svm as ing_svm
+        import ingenuityml.model_selection as ing_ms
         
-        model = aml_svm.LinearSVC(random_state=42)
+        model = ing_svm.LinearSVC(random_state=42)
         param_grid = {'C': [0.1, 1.0, 10.0]}
-        kfold = aml_ms.KFold(n_splits=3, shuffle=True, random_state=42)
+        kfold = ing_ms.KFold(n_splits=3, shuffle=True, random_state=42)
         
-        grid_search = aml_ms.GridSearchCV(
+        grid_search = ing_ms.GridSearchCV(
             model, param_grid, cv=kfold, scoring='accuracy'
         )
         
@@ -200,9 +200,9 @@ class TestLinearSVCIntegration(unittest.TestCase):
         
     def test_decision_function_consistency(self):
         """Test consistency between decision_function and predict"""
-        import auroraml.svm as aml_svm
+        import ingenuityml.svm as ing_svm
         
-        model = aml_svm.LinearSVC(C=1.0, random_state=42)
+        model = ing_svm.LinearSVC(C=1.0, random_state=42)
         model.fit(self.X, self.y)
         
         decision_scores = model.decision_function(self.X_test)
@@ -214,35 +214,35 @@ class TestLinearSVCIntegration(unittest.TestCase):
         
     def test_different_class_distributions(self):
         """Test with different class distributions"""
-        import auroraml.svm as aml_svm
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.svm as ing_svm
+        import ingenuityml.metrics as ing_metrics
         
         # Create imbalanced dataset
         n_samples = 100
         X_imbalanced = np.random.randn(n_samples, 4).astype(np.float64)
         y_imbalanced = np.concatenate([np.zeros(80), np.ones(20)])
         
-        model = aml_svm.LinearSVC(C=1.0, random_state=42)
+        model = ing_svm.LinearSVC(C=1.0, random_state=42)
         model.fit(X_imbalanced, y_imbalanced)
         predictions = model.predict(X_imbalanced)
         
-        accuracy = aml_metrics.accuracy_score(y_imbalanced, predictions)
+        accuracy = ing_metrics.accuracy_score(y_imbalanced, predictions)
         self.assertGreater(accuracy, 0.5)
         
     def test_regularization_effect(self):
         """Test effect of regularization parameter C"""
-        import auroraml.svm as aml_svm
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.svm as ing_svm
+        import ingenuityml.metrics as ing_metrics
         
         # Test with different C values
         C_values = [0.1, 1.0, 10.0]
         accuracies = []
         
         for C in C_values:
-            model = aml_svm.LinearSVC(C=C, random_state=42)
+            model = ing_svm.LinearSVC(C=C, random_state=42)
             model.fit(self.X, self.y)
             predictions = model.predict(self.X)
-            accuracy = aml_metrics.accuracy_score(self.y, predictions)
+            accuracy = ing_metrics.accuracy_score(self.y, predictions)
             accuracies.append(accuracy)
             
         # All C values should give reasonable performance
@@ -251,10 +251,10 @@ class TestLinearSVCIntegration(unittest.TestCase):
     
     def test_convergence(self):
         """Test that model converges with sufficient iterations"""
-        import auroraml.svm as aml_svm
+        import ingenuityml.svm as ing_svm
         
         # Test with high max_iter to ensure convergence
-        model = aml_svm.LinearSVC(C=1.0, max_iter=10000, random_state=42)
+        model = ing_svm.LinearSVC(C=1.0, max_iter=10000, random_state=42)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -263,13 +263,13 @@ class TestLinearSVCIntegration(unittest.TestCase):
         
     def test_feature_importance(self):
         """Test that model can learn feature importance"""
-        import auroraml.svm as aml_svm
+        import ingenuityml.svm as ing_svm
         
         # Create data where first feature is most important
         X_important = np.random.randn(100, 4).astype(np.float64)
         y_important = (X_important[:, 0] > 0).astype(np.int32)
         
-        model = aml_svm.LinearSVC(C=1.0, random_state=42)
+        model = ing_svm.LinearSVC(C=1.0, random_state=42)
         model.fit(X_important, y_important)
         
         # Check that coefficients are available

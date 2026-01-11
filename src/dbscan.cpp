@@ -1,9 +1,9 @@
-#include "auroraml/dbscan.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/dbscan.hpp"
+#include "ingenuityml/base.hpp"
 #include <cmath>
 #include <queue>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace cluster {
 
 Estimator& DBSCAN::fit(const MatrixXd& X, const VectorXd& y) {
@@ -80,5 +80,5 @@ void DBSCAN::expand_cluster(const MatrixXd& X, int idx, int cluster_id, std::vec
 }
 
 } // namespace cluster
-} // namespace cxml
+} // namespace ingenuityml
 

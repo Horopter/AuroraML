@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "auroraml/random_forest.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/random_forest.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class RandomForestRegressorTest : public ::testing::Test {
@@ -90,7 +90,7 @@ TEST_F(RandomForestRegressorTest, RandomForestRegressorNegativeEstimators) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

@@ -1,9 +1,9 @@
-#include "auroraml/pipeline.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/pipeline.hpp"
+#include "ingenuityml/base.hpp"
 #include <stdexcept>
 #include <algorithm>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace pipeline {
 
 Pipeline::Pipeline(const std::vector<std::pair<std::string, std::shared_ptr<Estimator>>>& steps)
@@ -278,5 +278,5 @@ std::vector<std::string> FeatureUnion::get_transformer_names() const {
 }
 
 } // namespace pipeline
-} // namespace auroraml
+} // namespace ingenuityml
 

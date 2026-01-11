@@ -1,4 +1,4 @@
-#include "auroraml/pca.hpp"
+#include "ingenuityml/pca.hpp"
 #include <numeric>
 #include <functional>
 #include <random>
@@ -6,7 +6,7 @@
 #include <limits>
 #include <algorithm>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace decomposition {
 
 Estimator& PCA::fit(const MatrixXd& X, const VectorXd& y) {
@@ -717,4 +717,4 @@ Estimator& TSNE::set_params(const Params& params) {
 }
 
 } // namespace decomposition
-} // namespace cxml
+} // namespace ingenuityml

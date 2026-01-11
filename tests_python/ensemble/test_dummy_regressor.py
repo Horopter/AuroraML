@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML DummyRegressor
+Test Suite for IngenuityML DummyRegressor
 Tests DummyRegressor baseline strategies
 """
 
@@ -21,32 +21,32 @@ class TestDummyRegressor(unittest.TestCase):
         self.X_test = np.random.randn(10, 3).astype(np.float64)
 
     def test_mean_strategy(self):
-        import auroraml.ensemble as aml_ensemble
-        model = aml_ensemble.DummyRegressor(strategy="mean")
+        import ingenuityml.ensemble as ing_ensemble
+        model = ing_ensemble.DummyRegressor(strategy="mean")
         model.fit(self.X, self.y)
         preds = model.predict(self.X_test)
         self.assertEqual(len(preds), len(self.X_test))
         self.assertTrue(np.allclose(preds, np.mean(self.y)))
 
     def test_median_strategy(self):
-        import auroraml.ensemble as aml_ensemble
-        model = aml_ensemble.DummyRegressor(strategy="median")
+        import ingenuityml.ensemble as ing_ensemble
+        model = ing_ensemble.DummyRegressor(strategy="median")
         model.fit(self.X, self.y)
         preds = model.predict(self.X_test)
         self.assertEqual(len(preds), len(self.X_test))
         self.assertTrue(np.allclose(preds, np.median(self.y)))
 
     def test_quantile_strategy(self):
-        import auroraml.ensemble as aml_ensemble
-        model = aml_ensemble.DummyRegressor(strategy="quantile", quantile=0.25)
+        import ingenuityml.ensemble as ing_ensemble
+        model = ing_ensemble.DummyRegressor(strategy="quantile", quantile=0.25)
         model.fit(self.X, self.y)
         preds = model.predict(self.X_test)
         self.assertEqual(len(preds), len(self.X_test))
         self.assertTrue(np.allclose(preds, np.quantile(self.y, 0.25)))
 
     def test_constant_strategy(self):
-        import auroraml.ensemble as aml_ensemble
-        model = aml_ensemble.DummyRegressor(strategy="constant", constant=2.5)
+        import ingenuityml.ensemble as ing_ensemble
+        model = ing_ensemble.DummyRegressor(strategy="constant", constant=2.5)
         model.fit(self.X, self.y)
         preds = model.predict(self.X_test)
         self.assertEqual(len(preds), len(self.X_test))

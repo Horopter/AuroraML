@@ -14,9 +14,9 @@ build_path = os.path.join(os.path.dirname(__file__), "..", "build")
 sys.path.insert(0, build_path)
 
 try:
-    import auroraml
+    import ingenuityml
 except ImportError as e:
-    print(f"Failed to import auroraml: {e}")
+    print(f"Failed to import ingenuityml: {e}")
     print(f"Python path: {sys.path}")
     sys.exit(1)
 
@@ -34,7 +34,7 @@ class TestLinearSVR(unittest.TestCase):
 
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        model = auroraml.svm.LinearSVR(C=1.0, epsilon=0.1, max_iter=100)
+        model = ingenuityml.svm.LinearSVR(C=1.0, epsilon=0.1, max_iter=100)
         model.fit(self.X_small, self.y_small)
 
         self.assertTrue(model.is_fitted())
@@ -47,7 +47,7 @@ class TestLinearSVR(unittest.TestCase):
 
     def test_parameters(self):
         """Test parameter getter and setter"""
-        model = auroraml.svm.LinearSVR(C=2.0, epsilon=0.2)
+        model = ingenuityml.svm.LinearSVR(C=2.0, epsilon=0.2)
 
         # Test parameter access
         params = model.get_params()
@@ -71,7 +71,7 @@ class TestLinearSVR(unittest.TestCase):
 
         for params in parameters:
             with self.subTest(params=params):
-                model = auroraml.svm.LinearSVR(**params, max_iter=50)
+                model = ingenuityml.svm.LinearSVR(**params, max_iter=50)
                 model.fit(self.X_small, self.y_small)
 
                 self.assertTrue(model.is_fitted())
@@ -80,7 +80,7 @@ class TestLinearSVR(unittest.TestCase):
 
     def test_not_fitted_predict(self):
         """Test predict without fitting - should raise error"""
-        model = auroraml.svm.LinearSVR()
+        model = ingenuityml.svm.LinearSVR()
 
         with self.assertRaises(RuntimeError):
             model.predict(self.X_small)
@@ -88,7 +88,7 @@ class TestLinearSVR(unittest.TestCase):
     def test_performance(self):
         """Test model performance on a simple regression task"""
         # Linear relationship
-        model = auroraml.svm.LinearSVR(C=1.0, epsilon=0.1, max_iter=200)
+        model = ingenuityml.svm.LinearSVR(C=1.0, epsilon=0.1, max_iter=200)
         model.fit(self.X, self.y)
 
         predictions = model.predict(self.X)
@@ -111,7 +111,7 @@ class TestNuSVC(unittest.TestCase):
 
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        model = auroraml.svm.NuSVC(nu=0.5, max_iter=100)
+        model = ingenuityml.svm.NuSVC(nu=0.5, max_iter=100)
         model.fit(self.X_small, self.y_small)
 
         self.assertTrue(model.is_fitted())
@@ -126,7 +126,7 @@ class TestNuSVC(unittest.TestCase):
 
     def test_predict_proba(self):
         """Test predict_proba method"""
-        model = auroraml.svm.NuSVC(nu=0.5, max_iter=100)
+        model = ingenuityml.svm.NuSVC(nu=0.5, max_iter=100)
         model.fit(self.X_small, self.y_small)
 
         proba = model.predict_proba(self.X_small)
@@ -145,7 +145,7 @@ class TestNuSVC(unittest.TestCase):
 
     def test_decision_function(self):
         """Test decision_function method"""
-        model = auroraml.svm.NuSVC(nu=0.5, max_iter=100)
+        model = ingenuityml.svm.NuSVC(nu=0.5, max_iter=100)
         model.fit(self.X_small, self.y_small)
 
         decision_scores = model.decision_function(self.X_small)
@@ -155,7 +155,7 @@ class TestNuSVC(unittest.TestCase):
 
     def test_classes_property(self):
         """Test classes property"""
-        model = auroraml.svm.NuSVC()
+        model = ingenuityml.svm.NuSVC()
         model.fit(self.X_small, self.y_small)
 
         classes = model.classes()
@@ -168,7 +168,7 @@ class TestNuSVC(unittest.TestCase):
 
         for nu in nu_values:
             with self.subTest(nu=nu):
-                model = auroraml.svm.NuSVC(nu=nu, max_iter=50)
+                model = ingenuityml.svm.NuSVC(nu=nu, max_iter=50)
                 model.fit(self.X_small, self.y_small)
 
                 self.assertTrue(model.is_fitted())
@@ -181,13 +181,13 @@ class TestNuSVC(unittest.TestCase):
 
         for nu in invalid_nu_values:
             with self.subTest(nu=nu):
-                model = auroraml.svm.NuSVC(nu=nu)
+                model = ingenuityml.svm.NuSVC(nu=nu)
                 with self.assertRaises(ValueError):
                     model.fit(self.X_small, self.y_small)
 
     def test_not_fitted_predict(self):
         """Test predict without fitting - should raise error"""
-        model = auroraml.svm.NuSVC()
+        model = ingenuityml.svm.NuSVC()
 
         with self.assertRaises(RuntimeError):
             model.predict(self.X_small)
@@ -197,6 +197,30 @@ class TestNuSVC(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             model.decision_function(self.X_small)
+
+class TestSVC(unittest.TestCase):
+    def setUp(self):
+        np.random.seed(42)
+        self.X = np.random.randn(60, 2)
+        self.y = (self.X[:, 0] * self.X[:, 0] + self.X[:, 1] > 0.5).astype(int)
+
+    def test_rbf_kernel(self):
+        model = ingenuityml.svm.SVC(kernel="rbf", C=1.0, gamma=0.5)
+        model.fit(self.X, self.y)
+        self.assertTrue(model.is_fitted())
+
+        preds = model.predict(self.X)
+        self.assertEqual(len(preds), len(self.y))
+
+        proba = model.predict_proba(self.X)
+        self.assertEqual(proba.shape[0], len(self.y))
+        self.assertEqual(proba.shape[1], len(model.classes()))
+
+    def test_poly_kernel(self):
+        model = ingenuityml.svm.SVC(kernel="poly", C=1.0, gamma=0.5, degree=2.0, coef0=1.0)
+        model.fit(self.X, self.y)
+        scores = model.decision_function(self.X)
+        self.assertEqual(len(scores), len(self.y))
 
 
 class TestNuSVR(unittest.TestCase):
@@ -212,7 +236,7 @@ class TestNuSVR(unittest.TestCase):
 
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        model = auroraml.svm.NuSVR(nu=0.5, C=1.0, max_iter=100)
+        model = ingenuityml.svm.NuSVR(nu=0.5, C=1.0, max_iter=100)
         model.fit(self.X_small, self.y_small)
 
         self.assertTrue(model.is_fitted())
@@ -225,7 +249,7 @@ class TestNuSVR(unittest.TestCase):
 
     def test_parameters(self):
         """Test parameter getter and setter"""
-        model = auroraml.svm.NuSVR(nu=0.3, C=2.0)
+        model = ingenuityml.svm.NuSVR(nu=0.3, C=2.0)
 
         # Test parameter access
         params = model.get_params()
@@ -249,7 +273,7 @@ class TestNuSVR(unittest.TestCase):
 
         for params in parameters:
             with self.subTest(params=params):
-                model = auroraml.svm.NuSVR(**params, max_iter=50)
+                model = ingenuityml.svm.NuSVR(**params, max_iter=50)
                 model.fit(self.X_small, self.y_small)
 
                 self.assertTrue(model.is_fitted())
@@ -262,7 +286,7 @@ class TestNuSVR(unittest.TestCase):
         invalid_nu_values = [0.0, -0.1, 1.1]
         for nu in invalid_nu_values:
             with self.subTest(nu=nu):
-                model = auroraml.svm.NuSVR(nu=nu, C=1.0)
+                model = ingenuityml.svm.NuSVR(nu=nu, C=1.0)
                 with self.assertRaises(ValueError):
                     model.fit(self.X_small, self.y_small)
 
@@ -270,13 +294,13 @@ class TestNuSVR(unittest.TestCase):
         invalid_C_values = [0.0, -1.0]
         for C in invalid_C_values:
             with self.subTest(C=C):
-                model = auroraml.svm.NuSVR(nu=0.5, C=C)
+                model = ingenuityml.svm.NuSVR(nu=0.5, C=C)
                 with self.assertRaises(ValueError):
                     model.fit(self.X_small, self.y_small)
 
     def test_not_fitted_predict(self):
         """Test predict without fitting - should raise error"""
-        model = auroraml.svm.NuSVR()
+        model = ingenuityml.svm.NuSVR()
 
         with self.assertRaises(RuntimeError):
             model.predict(self.X_small)
@@ -284,7 +308,7 @@ class TestNuSVR(unittest.TestCase):
     def test_performance(self):
         """Test model performance on a simple regression task"""
         # Linear relationship
-        model = auroraml.svm.NuSVR(nu=0.5, C=1.0, max_iter=200)
+        model = ingenuityml.svm.NuSVR(nu=0.5, C=1.0, max_iter=200)
         model.fit(self.X, self.y)
 
         predictions = model.predict(self.X)
@@ -299,10 +323,10 @@ class TestSVMIntegration(unittest.TestCase):
         """Test that all SVM variants are available in the module"""
         expected_algorithms = ["LinearSVC", "LinearSVR", "NuSVC", "NuSVR", "SVC", "SVR"]
 
-        available_algorithms = [x for x in dir(auroraml.svm) if not x.startswith("_")]
+        available_algorithms = [x for x in dir(ingenuityml.svm) if not x.startswith("_")]
 
         for alg in expected_algorithms:
-            self.assertIn(alg, available_algorithms, f"{alg} not found in auroraml.svm")
+            self.assertIn(alg, available_algorithms, f"{alg} not found in ingenuityml.svm")
 
     def test_svm_vs_linear_performance(self):
         """Compare SVM performance with linear models"""
@@ -311,13 +335,13 @@ class TestSVMIntegration(unittest.TestCase):
         y = (X[:, 0] * X[:, 1] > 0).astype(int)  # Non-linear boundary
 
         # Train SVM
-        svm_model = auroraml.svm.NuSVC(nu=0.5, max_iter=500)
+        svm_model = ingenuityml.svm.NuSVC(nu=0.5, max_iter=500)
         svm_model.fit(X, y)
         svm_pred = svm_model.predict(X)
         svm_acc = np.mean(svm_pred == y)
 
         # Train logistic regression
-        lr_model = auroraml.linear_model.LogisticRegression(max_iter=500)
+        lr_model = ingenuityml.linear_model.LogisticRegression(max_iter=500)
         lr_model.fit(X, y)
         lr_pred = lr_model.predict(X)
         lr_acc = np.mean(lr_pred == y)

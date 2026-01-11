@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "auroraml/pca.hpp"
-#include "auroraml/truncated_svd.hpp"
+#include "ingenuityml/pca.hpp"
+#include "ingenuityml/truncated_svd.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class DecompositionTest : public ::testing::Test {
@@ -473,7 +473,7 @@ TEST_F(DecompositionTest, TruncatedSVDExplainedVarianceOrdering) {
 }
 
 } // namespace test
-} // namespace cxml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

@@ -6,7 +6,7 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import auroraml
+import ingenuityml
 import random
 
 class TestCovariance(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestCovariance(unittest.TestCase):
         self.X[1] -= 4.0
 
     def test_empirical_covariance(self):
-        model = auroraml.covariance.EmpiricalCovariance()
+        model = ingenuityml.covariance.EmpiricalCovariance()
         model.fit(self.X, None)
         cov = model.covariance()
         self.assertEqual(cov.shape, (3, 3))
@@ -25,30 +25,30 @@ class TestCovariance(unittest.TestCase):
         self.assertEqual(dists.shape[0], self.X.shape[0])
 
     def test_shrunk_covariance(self):
-        model = auroraml.covariance.ShrunkCovariance(shrinkage=0.2)
+        model = ingenuityml.covariance.ShrunkCovariance(shrinkage=0.2)
         model.fit(self.X, None)
         self.assertEqual(model.covariance().shape, (3, 3))
 
     def test_ledoit_wolf(self):
-        model = auroraml.covariance.LedoitWolf()
+        model = ingenuityml.covariance.LedoitWolf()
         model.fit(self.X, None)
         self.assertGreaterEqual(model.shrinkage(), 0.0)
         self.assertLessEqual(model.shrinkage(), 1.0)
 
     def test_oas(self):
-        model = auroraml.covariance.OAS()
+        model = ingenuityml.covariance.OAS()
         model.fit(self.X, None)
         self.assertGreaterEqual(model.shrinkage(), 0.0)
         self.assertLessEqual(model.shrinkage(), 1.0)
 
     def test_mincovdet(self):
-        model = auroraml.covariance.MinCovDet(support_fraction=0.75)
+        model = ingenuityml.covariance.MinCovDet(support_fraction=0.75)
         model.fit(self.X, None)
         support = model.support()
         self.assertEqual(support.shape[0], self.X.shape[0])
 
     def test_elliptic_envelope(self):
-        model = auroraml.covariance.EllipticEnvelope(contamination=0.1, support_fraction=0.75, random_state=42)
+        model = ingenuityml.covariance.EllipticEnvelope(contamination=0.1, support_fraction=0.75, random_state=42)
         model.fit(self.X, None)
         labels = model.predict(self.X)
         self.assertEqual(labels.shape[0], self.X.shape[0])

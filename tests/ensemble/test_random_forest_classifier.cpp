@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
-#include "auroraml/random_forest.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/random_forest.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class RandomForestClassifierTest : public ::testing::Test {
@@ -109,7 +109,7 @@ TEST_F(RandomForestClassifierTest, RandomForestClassifierNegativeEstimators) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

@@ -1,11 +1,11 @@
-#include "auroraml/dummy.hpp"
-#include "auroraml/utils.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/dummy.hpp"
+#include "ingenuityml/utils.hpp"
+#include "ingenuityml/base.hpp"
 #include <algorithm>
 #include <vector>
 #include <limits>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace ensemble {
 
 DummyClassifier::DummyClassifier(const std::string& strategy)
@@ -214,4 +214,4 @@ Estimator& DummyRegressor::set_params(const Params& params) {
 }
 
 } // namespace ensemble
-} // namespace auroraml
+} // namespace ingenuityml

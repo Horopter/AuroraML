@@ -14,9 +14,9 @@ build_path = os.path.join(os.path.dirname(__file__), "..", "build")
 sys.path.insert(0, build_path)
 
 try:
-    import auroraml
+    import ingenuityml
 except ImportError as e:
-    print(f"Failed to import auroraml: {e}")
+    print(f"Failed to import ingenuityml: {e}")
     print(f"Python path: {sys.path}")
     sys.exit(1)
 
@@ -39,7 +39,7 @@ class TestMLPClassifier(unittest.TestCase):
 
     def test_basic_functionality_binary(self):
         """Test basic fit and predict functionality for binary classification"""
-        model = auroraml.neural_network.MLPClassifier(
+        model = ingenuityml.neural_network.MLPClassifier(
             hidden_layer_sizes=[10], max_iter=50, random_state=42, learning_rate=0.01
         )
         model.fit(self.X_small, self.y_small)
@@ -56,7 +56,7 @@ class TestMLPClassifier(unittest.TestCase):
 
     def test_basic_functionality_multiclass(self):
         """Test basic fit and predict functionality for multiclass classification"""
-        model = auroraml.neural_network.MLPClassifier(
+        model = ingenuityml.neural_network.MLPClassifier(
             hidden_layer_sizes=[10, 5],
             max_iter=100,
             random_state=42,
@@ -76,7 +76,7 @@ class TestMLPClassifier(unittest.TestCase):
 
     def test_predict_proba(self):
         """Test predict_proba method"""
-        model = auroraml.neural_network.MLPClassifier(
+        model = ingenuityml.neural_network.MLPClassifier(
             hidden_layer_sizes=[5], max_iter=50, random_state=42
         )
         model.fit(self.X_small, self.y_small)
@@ -97,7 +97,7 @@ class TestMLPClassifier(unittest.TestCase):
 
     def test_decision_function(self):
         """Test decision_function method"""
-        model = auroraml.neural_network.MLPClassifier(
+        model = ingenuityml.neural_network.MLPClassifier(
             hidden_layer_sizes=[5], max_iter=50, random_state=42
         )
         model.fit(self.X_small, self.y_small)
@@ -110,14 +110,14 @@ class TestMLPClassifier(unittest.TestCase):
     def test_different_activation_functions(self):
         """Test different activation functions"""
         activations = [
-            auroraml.neural_network.ActivationFunction.RELU,
-            auroraml.neural_network.ActivationFunction.TANH,
-            auroraml.neural_network.ActivationFunction.LOGISTIC,
+            ingenuityml.neural_network.ActivationFunction.RELU,
+            ingenuityml.neural_network.ActivationFunction.TANH,
+            ingenuityml.neural_network.ActivationFunction.LOGISTIC,
         ]
 
         for activation in activations:
             with self.subTest(activation=activation):
-                model = auroraml.neural_network.MLPClassifier(
+                model = ingenuityml.neural_network.MLPClassifier(
                     hidden_layer_sizes=[5],
                     activation=activation,
                     max_iter=30,
@@ -132,13 +132,13 @@ class TestMLPClassifier(unittest.TestCase):
     def test_different_solvers(self):
         """Test different solvers"""
         solvers = [
-            auroraml.neural_network.Solver.ADAM,
-            auroraml.neural_network.Solver.SGD,
+            ingenuityml.neural_network.Solver.ADAM,
+            ingenuityml.neural_network.Solver.SGD,
         ]
 
         for solver in solvers:
             with self.subTest(solver=solver):
-                model = auroraml.neural_network.MLPClassifier(
+                model = ingenuityml.neural_network.MLPClassifier(
                     hidden_layer_sizes=[5], solver=solver, max_iter=30, random_state=42
                 )
                 model.fit(self.X_small, self.y_small)
@@ -149,7 +149,7 @@ class TestMLPClassifier(unittest.TestCase):
 
     def test_parameters(self):
         """Test parameter getter and setter"""
-        model = auroraml.neural_network.MLPClassifier(alpha=0.01, learning_rate=0.001)
+        model = ingenuityml.neural_network.MLPClassifier(alpha=0.01, learning_rate=0.001)
 
         self.assertAlmostEqual(model.alpha(), 0.01, places=6)
         self.assertAlmostEqual(model.learning_rate(), 0.001, places=6)
@@ -160,7 +160,7 @@ class TestMLPClassifier(unittest.TestCase):
 
     def test_loss_curve(self):
         """Test that loss curve is recorded during training"""
-        model = auroraml.neural_network.MLPClassifier(
+        model = ingenuityml.neural_network.MLPClassifier(
             hidden_layer_sizes=[5], max_iter=20, random_state=42
         )
         model.fit(self.X_small, self.y_small)
@@ -174,7 +174,7 @@ class TestMLPClassifier(unittest.TestCase):
 
     def test_not_fitted_predict(self):
         """Test predict without fitting - should raise error"""
-        model = auroraml.neural_network.MLPClassifier()
+        model = ingenuityml.neural_network.MLPClassifier()
 
         with self.assertRaises(RuntimeError):
             model.predict(self.X_small)
@@ -187,14 +187,14 @@ class TestMLPClassifier(unittest.TestCase):
 
     def test_empty_data(self):
         """Test with empty data - should raise error"""
-        model = auroraml.neural_network.MLPClassifier()
+        model = ingenuityml.neural_network.MLPClassifier()
 
         with self.assertRaises(Exception):  # Could be various exception types
             model.fit(np.array([]).reshape(0, 2), np.array([]))
 
     def test_dimension_mismatch(self):
         """Test with dimension mismatch - should raise error"""
-        model = auroraml.neural_network.MLPClassifier()
+        model = ingenuityml.neural_network.MLPClassifier()
         model.fit(self.X_small, self.y_small)
 
         with self.assertRaises(Exception):
@@ -202,7 +202,7 @@ class TestMLPClassifier(unittest.TestCase):
 
     def test_n_iter_property(self):
         """Test n_iter property"""
-        model = auroraml.neural_network.MLPClassifier(
+        model = ingenuityml.neural_network.MLPClassifier(
             hidden_layer_sizes=[5], max_iter=10, random_state=42
         )
         model.fit(self.X_small, self.y_small)
@@ -213,7 +213,7 @@ class TestMLPClassifier(unittest.TestCase):
 
     def test_classes_property(self):
         """Test classes property"""
-        model = auroraml.neural_network.MLPClassifier()
+        model = ingenuityml.neural_network.MLPClassifier()
         model.fit(self.X_small, self.y_small)
 
         classes = model.classes()
@@ -238,7 +238,7 @@ class TestMLPRegressor(unittest.TestCase):
 
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        model = auroraml.neural_network.MLPRegressor(
+        model = ingenuityml.neural_network.MLPRegressor(
             hidden_layer_sizes=[10], max_iter=50, random_state=42, learning_rate=0.01
         )
         model.fit(self.X_small, self.y_small)
@@ -257,7 +257,7 @@ class TestMLPRegressor(unittest.TestCase):
 
         for hidden_layers in configurations:
             with self.subTest(hidden_layers=hidden_layers):
-                model = auroraml.neural_network.MLPRegressor(
+                model = ingenuityml.neural_network.MLPRegressor(
                     hidden_layer_sizes=hidden_layers, max_iter=30, random_state=42
                 )
                 model.fit(self.X_small, self.y_small)
@@ -269,10 +269,10 @@ class TestMLPRegressor(unittest.TestCase):
     def test_regularization_effect(self):
         """Test that regularization affects the model"""
         # Train models with different regularization
-        model_no_reg = auroraml.neural_network.MLPRegressor(
+        model_no_reg = ingenuityml.neural_network.MLPRegressor(
             alpha=0.0, hidden_layer_sizes=[10], max_iter=50, random_state=42
         )
-        model_high_reg = auroraml.neural_network.MLPRegressor(
+        model_high_reg = ingenuityml.neural_network.MLPRegressor(
             alpha=1.0, hidden_layer_sizes=[10], max_iter=50, random_state=42
         )
 
@@ -293,7 +293,7 @@ class TestMLPRegressor(unittest.TestCase):
 
     def test_loss_curve(self):
         """Test that loss curve is recorded during training"""
-        model = auroraml.neural_network.MLPRegressor(
+        model = ingenuityml.neural_network.MLPRegressor(
             hidden_layer_sizes=[5], max_iter=20, random_state=42
         )
         model.fit(self.X_small, self.y_small)
@@ -304,14 +304,14 @@ class TestMLPRegressor(unittest.TestCase):
 
     def test_not_fitted_predict(self):
         """Test predict without fitting - should raise error"""
-        model = auroraml.neural_network.MLPRegressor()
+        model = ingenuityml.neural_network.MLPRegressor()
 
         with self.assertRaises(RuntimeError):
             model.predict(self.X_small)
 
     def test_parameters(self):
         """Test parameter getter and setter"""
-        model = auroraml.neural_network.MLPRegressor(
+        model = ingenuityml.neural_network.MLPRegressor(
             alpha=0.01, learning_rate=0.001, max_iter=100
         )
 
@@ -328,7 +328,7 @@ class TestMLPRegressor(unittest.TestCase):
         X_test = np.array([[1, 1], [2, 2], [3, 3], [4, 4]])
         y_test = X_test[:, 0] + X_test[:, 1]  # y = x1 + x2
 
-        model = auroraml.neural_network.MLPRegressor(
+        model = ingenuityml.neural_network.MLPRegressor(
             hidden_layer_sizes=[20, 10],
             max_iter=200,
             random_state=42,
@@ -344,7 +344,7 @@ class TestMLPRegressor(unittest.TestCase):
 
     def test_dimension_mismatch(self):
         """Test with dimension mismatch - should raise error"""
-        model = auroraml.neural_network.MLPRegressor()
+        model = ingenuityml.neural_network.MLPRegressor()
         model.fit(self.X_small, self.y_small)
 
         with self.assertRaises(Exception):
@@ -355,10 +355,10 @@ class TestNeuralNetworkUtilities(unittest.TestCase):
     def test_activation_functions_enum(self):
         """Test that activation function enums are accessible"""
         # Test that all activation functions are available
-        relu = auroraml.neural_network.ActivationFunction.RELU
-        tanh = auroraml.neural_network.ActivationFunction.TANH
-        logistic = auroraml.neural_network.ActivationFunction.LOGISTIC
-        identity = auroraml.neural_network.ActivationFunction.IDENTITY
+        relu = ingenuityml.neural_network.ActivationFunction.RELU
+        tanh = ingenuityml.neural_network.ActivationFunction.TANH
+        logistic = ingenuityml.neural_network.ActivationFunction.LOGISTIC
+        identity = ingenuityml.neural_network.ActivationFunction.IDENTITY
 
         self.assertIsNotNone(relu)
         self.assertIsNotNone(tanh)
@@ -367,9 +367,9 @@ class TestNeuralNetworkUtilities(unittest.TestCase):
 
     def test_solver_enum(self):
         """Test that solver enums are accessible"""
-        adam = auroraml.neural_network.Solver.ADAM
-        sgd = auroraml.neural_network.Solver.SGD
-        lbfgs = auroraml.neural_network.Solver.LBFGS
+        adam = ingenuityml.neural_network.Solver.ADAM
+        sgd = ingenuityml.neural_network.Solver.SGD
+        lbfgs = ingenuityml.neural_network.Solver.LBFGS
 
         self.assertIsNotNone(adam)
         self.assertIsNotNone(sgd)

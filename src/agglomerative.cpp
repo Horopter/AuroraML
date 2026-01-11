@@ -1,10 +1,10 @@
-#include "auroraml/agglomerative.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/agglomerative.hpp"
+#include "ingenuityml/base.hpp"
 #include <limits>
 #include <stdexcept>
 #include <algorithm>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace cluster {
 
 Estimator& AgglomerativeClustering::fit(const MatrixXd& X, const VectorXd& y) {
@@ -68,6 +68,6 @@ Estimator& AgglomerativeClustering::set_params(const Params& params) {
 }
 
 } // namespace cluster
-} // namespace cxml
+} // namespace ingenuityml
 
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-AuroraML Neural Network Demo
+IngenuityML Neural Network Demo
 
-This script demonstrates the new neural network capabilities in AuroraML,
+This script demonstrates the new neural network capabilities in IngenuityML,
 including MLPClassifier and MLPRegressor with various configurations.
 """
 
@@ -17,9 +17,9 @@ build_path = os.path.join(os.path.dirname(__file__), "..", "build")
 sys.path.insert(0, build_path)
 
 try:
-    import auroraml
+    import ingenuityml
 except ImportError as e:
-    print(f"Failed to import auroraml: {e}")
+    print(f"Failed to import ingenuityml: {e}")
     print("Make sure you have built the project with: cd build && make")
     sys.exit(1)
 
@@ -27,7 +27,7 @@ except ImportError as e:
 def neural_network_classification_demo():
     """Demonstrate MLPClassifier capabilities"""
     print("=" * 80)
-    print("AuroraML Neural Network Classification Demo")
+    print("IngenuityML Neural Network Classification Demo")
     print("=" * 80)
 
     # Generate sample classification data
@@ -53,7 +53,7 @@ def neural_network_classification_demo():
             "name": "Simple MLP (ReLU)",
             "params": {
                 "hidden_layer_sizes": [10],
-                "activation": auroraml.neural_network.ActivationFunction.RELU,
+                "activation": ingenuityml.neural_network.ActivationFunction.RELU,
                 "max_iter": 200,
                 "learning_rate": 0.01,
                 "random_state": 42,
@@ -63,7 +63,7 @@ def neural_network_classification_demo():
             "name": "Deep MLP (Tanh)",
             "params": {
                 "hidden_layer_sizes": [20, 10],
-                "activation": auroraml.neural_network.ActivationFunction.TANH,
+                "activation": ingenuityml.neural_network.ActivationFunction.TANH,
                 "max_iter": 300,
                 "learning_rate": 0.001,
                 "random_state": 42,
@@ -73,8 +73,8 @@ def neural_network_classification_demo():
             "name": "Wide MLP (Logistic)",
             "params": {
                 "hidden_layer_sizes": [50],
-                "activation": auroraml.neural_network.ActivationFunction.LOGISTIC,
-                "solver": auroraml.neural_network.Solver.ADAM,
+                "activation": ingenuityml.neural_network.ActivationFunction.LOGISTIC,
+                "solver": ingenuityml.neural_network.Solver.ADAM,
                 "max_iter": 250,
                 "learning_rate": 0.005,
                 "random_state": 42,
@@ -88,7 +88,7 @@ def neural_network_classification_demo():
         print(f"\n--- {config['name']} ---")
 
         # Create and train the model
-        mlp = auroraml.neural_network.MLPClassifier(**config["params"])
+        mlp = ingenuityml.neural_network.MLPClassifier(**config["params"])
 
         # Fit the model
         print("Training...")
@@ -190,7 +190,7 @@ def neural_network_classification_demo():
 def neural_network_regression_demo():
     """Demonstrate MLPRegressor capabilities"""
     print("\n" + "=" * 80)
-    print("AuroraML Neural Network Regression Demo")
+    print("IngenuityML Neural Network Regression Demo")
     print("=" * 80)
 
     # Generate sample regression data
@@ -220,7 +220,7 @@ def neural_network_regression_demo():
             "name": "Simple Regressor",
             "params": {
                 "hidden_layer_sizes": [20],
-                "activation": auroraml.neural_network.ActivationFunction.RELU,
+                "activation": ingenuityml.neural_network.ActivationFunction.RELU,
                 "max_iter": 500,
                 "learning_rate": 0.001,
                 "alpha": 0.0001,
@@ -231,7 +231,7 @@ def neural_network_regression_demo():
             "name": "Deep Regressor",
             "params": {
                 "hidden_layer_sizes": [30, 20, 10],
-                "activation": auroraml.neural_network.ActivationFunction.TANH,
+                "activation": ingenuityml.neural_network.ActivationFunction.TANH,
                 "max_iter": 800,
                 "learning_rate": 0.0005,
                 "alpha": 0.001,
@@ -242,8 +242,8 @@ def neural_network_regression_demo():
             "name": "Regularized Regressor",
             "params": {
                 "hidden_layer_sizes": [50, 25],
-                "activation": auroraml.neural_network.ActivationFunction.RELU,
-                "solver": auroraml.neural_network.Solver.ADAM,
+                "activation": ingenuityml.neural_network.ActivationFunction.RELU,
+                "solver": ingenuityml.neural_network.Solver.ADAM,
                 "max_iter": 400,
                 "learning_rate": 0.001,
                 "alpha": 0.01,  # Strong regularization
@@ -258,7 +258,7 @@ def neural_network_regression_demo():
         print(f"\n--- {config['name']} ---")
 
         # Create and train the model
-        mlp = auroraml.neural_network.MLPRegressor(**config["params"])
+        mlp = ingenuityml.neural_network.MLPRegressor(**config["params"])
 
         # Fit the model
         print("Training...")
@@ -393,7 +393,7 @@ def compare_with_simple_models():
 
     # Neural Network
     print("\n--- Neural Network ---")
-    mlp = auroraml.neural_network.MLPClassifier(
+    mlp = ingenuityml.neural_network.MLPClassifier(
         hidden_layer_sizes=[20, 10],
         max_iter=300,
         learning_rate=0.001,
@@ -409,7 +409,7 @@ def compare_with_simple_models():
 
     # Logistic Regression
     print("\n--- Logistic Regression ---")
-    lr = auroraml.linear_model.LogisticRegression(max_iter=1000, random_state=42)
+    lr = ingenuityml.linear_model.LogisticRegression(max_iter=1000, random_state=42)
     lr.fit(X, y)
     lr_pred = lr.predict(X)
     lr_acc = np.mean(lr_pred == y)
@@ -418,7 +418,7 @@ def compare_with_simple_models():
 
     # Random Forest
     print("\n--- Random Forest ---")
-    rf = auroraml.ensemble.RandomForestClassifier(n_estimators=100, random_state=42)
+    rf = ingenuityml.ensemble.RandomForestClassifier(n_estimators=100, random_state=42)
     rf.fit(X, y)
     rf_pred = rf.predict(X)
     rf_acc = np.mean(rf_pred == y)
@@ -427,7 +427,7 @@ def compare_with_simple_models():
 
     # K-Nearest Neighbors
     print("\n--- K-Nearest Neighbors ---")
-    knn = auroraml.neighbors.KNeighborsClassifier(n_neighbors=5)
+    knn = ingenuityml.neighbors.KNeighborsClassifier(n_neighbors=5)
     knn.fit(X, y)
     knn_pred = knn.predict(X)
     knn_acc = np.mean(knn_pred == y)
@@ -455,10 +455,10 @@ def activation_function_showcase():
     y = np.sin(X.ravel()) + 0.1 * np.random.randn(100)
 
     activations = [
-        ("ReLU", auroraml.neural_network.ActivationFunction.RELU),
-        ("Tanh", auroraml.neural_network.ActivationFunction.TANH),
-        ("Logistic", auroraml.neural_network.ActivationFunction.LOGISTIC),
-        ("Identity", auroraml.neural_network.ActivationFunction.IDENTITY),
+        ("ReLU", ingenuityml.neural_network.ActivationFunction.RELU),
+        ("Tanh", ingenuityml.neural_network.ActivationFunction.TANH),
+        ("Logistic", ingenuityml.neural_network.ActivationFunction.LOGISTIC),
+        ("Identity", ingenuityml.neural_network.ActivationFunction.IDENTITY),
     ]
 
     results = {}
@@ -466,7 +466,7 @@ def activation_function_showcase():
     for name, activation in activations:
         print(f"\n--- {name} Activation ---")
 
-        mlp = auroraml.neural_network.MLPRegressor(
+        mlp = ingenuityml.neural_network.MLPRegressor(
             hidden_layer_sizes=[10],
             activation=activation,
             max_iter=500,
@@ -536,9 +536,9 @@ def activation_function_showcase():
 
 def main():
     """Run all neural network demonstrations"""
-    print("🚀 AuroraML Neural Network Comprehensive Demo")
+    print("🚀 IngenuityML Neural Network Comprehensive Demo")
     print("=" * 80)
-    print("This demo showcases the new neural network capabilities in AuroraML")
+    print("This demo showcases the new neural network capabilities in IngenuityML")
     print("including MLPClassifier and MLPRegressor with various configurations.")
     print("=" * 80)
 
@@ -568,7 +568,7 @@ def main():
         print(f"Model Comparison: {len(comparison_results)} algorithms")
         print(f"Activation Functions: {len(activation_results)} variants")
 
-        print("\nAuroraML Neural Networks are ready for production use! 🎯")
+        print("\nIngenuityML Neural Networks are ready for production use! 🎯")
 
     except Exception as e:
         print(f"❌ Error during demo: {e}")

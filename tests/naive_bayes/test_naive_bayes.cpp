@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/naive_bayes.hpp"
+#include "ingenuityml/naive_bayes.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class NaiveBayesTest : public ::testing::Test {
@@ -110,7 +110,7 @@ TEST_F(NaiveBayesTest, GaussianNBLoadNonexistentFile) {
 }
 
 } // namespace test
-} // namespace cxml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

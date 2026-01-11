@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML TruncatedSVD Algorithm
+Test Suite for IngenuityML TruncatedSVD Algorithm
 Includes positive and negative test cases
 All tests run in shuffled order with 5-minute timeout
 """
@@ -27,9 +27,9 @@ class TestTruncatedSVD(unittest.TestCase):
     # Positive test cases
     def test_basic_functionality(self):
         """Test basic fit and transform functionality"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.TruncatedSVD(n_components=3, random_state=42)
+        model = ing_decomp.TruncatedSVD(n_components=3, random_state=42)
         model.fit(self.X, self.y_dummy)
         
         X_transformed = model.transform(self.X_test)
@@ -38,9 +38,9 @@ class TestTruncatedSVD(unittest.TestCase):
         
     def test_explained_variance_ratio(self):
         """Test explained variance ratio"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.TruncatedSVD(n_components=3, random_state=42)
+        model = ing_decomp.TruncatedSVD(n_components=3, random_state=42)
         model.fit(self.X, self.y_dummy)
         
         variance_ratio = model.explained_variance_ratio()
@@ -49,9 +49,9 @@ class TestTruncatedSVD(unittest.TestCase):
         
     def test_components(self):
         """Test components"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.TruncatedSVD(n_components=3, random_state=42)
+        model = ing_decomp.TruncatedSVD(n_components=3, random_state=42)
         model.fit(self.X, self.y_dummy)
         
         components = model.components()
@@ -60,19 +60,19 @@ class TestTruncatedSVD(unittest.TestCase):
         
     def test_different_n_components(self):
         """Test with different numbers of components"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
         for n_components in [1, 3, 5]:
-            model = aml_decomp.TruncatedSVD(n_components=n_components, random_state=42)
+            model = ing_decomp.TruncatedSVD(n_components=n_components, random_state=42)
             model.fit(self.X, self.y_dummy)
             X_transformed = model.transform(self.X_test)
             self.assertEqual(X_transformed.shape, (len(self.X_test), n_components))
             
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.TruncatedSVD(n_components=3, random_state=42)
+        model = ing_decomp.TruncatedSVD(n_components=3, random_state=42)
         
         params = model.get_params()
         self.assertIsInstance(params, dict)
@@ -80,9 +80,9 @@ class TestTruncatedSVD(unittest.TestCase):
         
     def test_is_fitted(self):
         """Test is_fitted method"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.TruncatedSVD(n_components=3)
+        model = ing_decomp.TruncatedSVD(n_components=3)
         self.assertFalse(model.is_fitted())
         
         model.fit(self.X, self.y_dummy)
@@ -91,45 +91,45 @@ class TestTruncatedSVD(unittest.TestCase):
     # Negative test cases
     def test_empty_data(self):
         """Test with empty data - should raise error"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.TruncatedSVD(n_components=3)
+        model = ing_decomp.TruncatedSVD(n_components=3)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(np.array([]).reshape(0, 10), np.array([]).reshape(0, 1))
             
     def test_zero_components(self):
         """Test with zero components - should raise error"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.TruncatedSVD(n_components=0)
+        model = ing_decomp.TruncatedSVD(n_components=0)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(self.X, self.y_dummy)
             
     def test_negative_components(self):
         """Test with negative components - should raise error"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.TruncatedSVD(n_components=-1)
+        model = ing_decomp.TruncatedSVD(n_components=-1)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(self.X, self.y_dummy)
             
     def test_not_fitted_transform(self):
         """Test transform without fitting - should raise error"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.TruncatedSVD(n_components=3)
+        model = ing_decomp.TruncatedSVD(n_components=3)
         
         with self.assertRaises((RuntimeError, ValueError)):
             model.transform(self.X_test)
             
     def test_wrong_feature_count(self):
         """Test transform with wrong feature count - should raise error"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.TruncatedSVD(n_components=3, random_state=42)
+        model = ing_decomp.TruncatedSVD(n_components=3, random_state=42)
         model.fit(self.X, self.y_dummy)
         
         X_wrong = np.random.randn(20, 15).astype(np.float64)

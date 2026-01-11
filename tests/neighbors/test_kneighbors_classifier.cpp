@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
-#include "auroraml/neighbors.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/neighbors.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class KNeighborsClassifierTest : public ::testing::Test {
@@ -135,7 +135,7 @@ TEST_F(KNeighborsClassifierTest, KNeighborsClassifierTooLargeK) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

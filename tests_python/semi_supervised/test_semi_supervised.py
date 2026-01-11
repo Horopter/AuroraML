@@ -6,7 +6,7 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import auroraml
+import ingenuityml
 import random
 
 class TestSemiSupervised(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestSemiSupervised(unittest.TestCase):
 
     def test_label_propagation(self):
         """Test LabelPropagation"""
-        lp = auroraml.semi_supervised.LabelPropagation(
+        lp = ingenuityml.semi_supervised.LabelPropagation(
             gamma=20.0, max_iter=10, kernel="rbf"
         )
         lp.fit(self.X, self.y.astype(np.float64))
@@ -35,7 +35,7 @@ class TestSemiSupervised(unittest.TestCase):
 
     def test_label_spreading(self):
         """Test LabelSpreading"""
-        ls = auroraml.semi_supervised.LabelSpreading(
+        ls = ingenuityml.semi_supervised.LabelSpreading(
             alpha=0.2, gamma=20.0, max_iter=10, kernel="rbf"
         )
         ls.fit(self.X, self.y.astype(np.float64))
@@ -47,6 +47,22 @@ class TestSemiSupervised(unittest.TestCase):
         self.assertEqual(proba.shape[0], self.X.shape[0])
         
         classes = ls.classes()
+        self.assertGreater(len(classes), 0)
+
+    def test_self_training_classifier(self):
+        """Test SelfTrainingClassifier"""
+        st = ingenuityml.semi_supervised.SelfTrainingClassifier(
+            n_neighbors=3, threshold=0.6, max_iter=5
+        )
+        st.fit(self.X, self.y.astype(np.float64))
+
+        predictions = st.predict(self.X)
+        self.assertEqual(predictions.shape[0], self.X.shape[0])
+
+        proba = st.predict_proba(self.X)
+        self.assertEqual(proba.shape[0], self.X.shape[0])
+
+        classes = st.classes()
         self.assertGreater(len(classes), 0)
 
 if __name__ == '__main__':
@@ -61,4 +77,3 @@ if __name__ == '__main__':
     shuffled_suite = unittest.TestSuite(test_methods)
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(shuffled_suite)
-

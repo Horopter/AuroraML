@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/preprocessing.hpp"
+#include "ingenuityml/preprocessing.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class PreprocessingTest : public ::testing::Test {
@@ -218,7 +218,7 @@ TEST_F(PreprocessingTest, OrdinalEncoderInverseTransform) {
 }
 
 } // namespace test
-} // namespace cxml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

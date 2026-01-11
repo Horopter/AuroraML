@@ -1,11 +1,11 @@
-#include "auroraml/linear_model.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/linear_model.hpp"
+#include "ingenuityml/base.hpp"
 #include <Eigen/Dense>
 #include <fstream>
 #include <set>
 #include <cmath>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace linear_model {
 
 // LinearRegression implementation
@@ -588,4 +588,4 @@ bool LogisticRegression::is_fitted() const {
 }
 
 } // namespace linear_model
-} // namespace cxml
+} // namespace ingenuityml

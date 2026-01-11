@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/lda.hpp"
+#include "ingenuityml/lda.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class LDATest : public ::testing::Test {
@@ -301,4 +301,4 @@ TEST_F(LDATest, LDAClassSeparation) {
 }
 
 } // namespace test
-} // namespace cxml
+} // namespace ingenuityml

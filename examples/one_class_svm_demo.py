@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-OneClassSVM Demonstration Script for AuroraML
+OneClassSVM Demonstration Script for IngenuityML
 
-This script demonstrates the capabilities of AuroraML's OneClassSVM implementation,
+This script demonstrates the capabilities of IngenuityML's OneClassSVM implementation,
 showcasing both RBF and linear kernels for anomaly detection tasks.
 """
 
@@ -14,15 +14,15 @@ import numpy as np
 from sklearn.datasets import make_blobs, make_circles
 from sklearn.metrics import classification_report, confusion_matrix
 
-# Add AuroraML to path
+# Add IngenuityML to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "build"))
 
 try:
-    import auroraml
+    import ingenuityml
 
-    print("✅ Successfully imported AuroraML")
+    print("✅ Successfully imported IngenuityML")
 except ImportError as e:
-    print(f"❌ Failed to import AuroraML: {e}")
+    print(f"❌ Failed to import IngenuityML: {e}")
     print("Make sure you've built the project: cd build && make")
     sys.exit(1)
 
@@ -88,7 +88,7 @@ def demo_basic_functionality():
     X_test_outliers = np.array([[3, 3], [-3, -3], [3, -3], [-3, 3], [4, 0], [0, 4]])
 
     # Create OneClassSVM with RBF kernel
-    clf = auroraml.svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=1.0, random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=1.0, random_state=42)
 
     print(f"Training on {len(X_train)} samples...")
     clf.fit(X_train)
@@ -133,7 +133,7 @@ def compare_kernels(data):
         print(f"\n🔧 Testing {name} kernel...")
 
         # Create and fit model
-        clf = auroraml.svm.OneClassSVM(nu=0.1, random_state=42, **params)
+        clf = ingenuityml.svm.OneClassSVM(nu=0.1, random_state=42, **params)
         clf.fit(X_train)
 
         # Predict on combined data
@@ -207,7 +207,7 @@ def demo_parameter_sensitivity():
 
     print("Testing different nu values (expected outlier fraction):")
     for nu in nu_values:
-        clf = auroraml.svm.OneClassSVM(nu=nu, kernel="rbf", gamma=1.0, random_state=42)
+        clf = ingenuityml.svm.OneClassSVM(nu=nu, kernel="rbf", gamma=1.0, random_state=42)
         clf.fit(X_train)
 
         predictions = clf.predict(X_test)
@@ -245,7 +245,7 @@ def demo_real_world_scenario():
     X_edge = np.column_stack([edge_cpu, edge_memory])
 
     # Train on normal data only
-    clf = auroraml.svm.OneClassSVM(nu=0.05, kernel="rbf", gamma=0.1, random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.05, kernel="rbf", gamma=0.1, random_state=42)
     print(f"Training on {len(X_normal)} normal server performance samples...")
     clf.fit(X_normal)
 
@@ -294,7 +294,7 @@ def create_visualization_data(data):
     X_combined, y_true, X_train = data["blob"]
 
     # Fit OneClassSVM
-    clf = auroraml.svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.5, random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.5, random_state=42)
     clf.fit(X_train)
 
     # Create a grid for decision boundary
@@ -333,7 +333,7 @@ def create_visualization_data(data):
 
 def run_comprehensive_demo():
     """Run the complete demonstration."""
-    print("🚀 AuroraML OneClassSVM Comprehensive Demo")
+    print("🚀 IngenuityML OneClassSVM Comprehensive Demo")
     print("=" * 50)
     print("This demo showcases anomaly detection capabilities using OneClassSVM")
     print("with both RBF and linear kernels.\n")
@@ -369,7 +369,7 @@ def run_comprehensive_demo():
         print("   • Lower nu values are more conservative (fewer outliers detected)")
         print("   • OneClassSVM is effective for unsupervised anomaly detection")
 
-        print(f"\n🔧 AuroraML OneClassSVM is ready for production use!")
+        print(f"\n🔧 IngenuityML OneClassSVM is ready for production use!")
 
         return True
 

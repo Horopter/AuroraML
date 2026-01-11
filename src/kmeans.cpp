@@ -1,10 +1,10 @@
-#include "auroraml/kmeans.hpp"
+#include "ingenuityml/kmeans.hpp"
 #include <random>
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
-namespace auroraml {
+namespace ingenuityml {
 namespace cluster {
 
 static double sqdist(const VectorXd& a, const VectorXd& b) {
@@ -150,6 +150,6 @@ double KMeans::step_once(const MatrixXd& X, VectorXi& labels) {
 }
 
 } // namespace cluster
-} // namespace cxml
+} // namespace ingenuityml
 
 

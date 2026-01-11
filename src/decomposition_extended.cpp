@@ -1,5 +1,5 @@
-#include "auroraml/decomposition_extended.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/decomposition_extended.hpp"
+#include "ingenuityml/base.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 #include <random>
@@ -7,7 +7,7 @@
 #include <cmath>
 #include <limits>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace decomposition {
 
 namespace {
@@ -1009,4 +1009,4 @@ const MatrixXd& LatentDirichletAllocation::doc_topic() const {
 }
 
 } // namespace decomposition
-} // namespace auroraml
+} // namespace ingenuityml

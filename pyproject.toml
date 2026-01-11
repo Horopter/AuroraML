@@ -3,10 +3,10 @@ requires = ["pybind11", "setuptools", "wheel", "cmake"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "auroraml"
+name = "ingenuityml"
 version = "0.1.0"
 description = "High-performance C++ machine learning library with Python bindings"
-authors = [{name = "AuroraML Team"}]
+authors = [{name = "IngenuityML Team"}]
 license = {text = "Creative Commons Attribution-ShareAlike 4.0 International"}
 readme = "README.md"
 requires-python = ">=3.7"
@@ -37,7 +37,7 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["auroraml"]
+packages = ["ingenuityml"]
 
 [tool.setuptools.package-data]
-auroraml = ["*.so", "*.dll", "*.dylib"]
+ingenuityml = ["*.so", "*.dll", "*.dylib"]

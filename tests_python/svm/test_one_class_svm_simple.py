@@ -6,11 +6,11 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "build"))
 import numpy as np
 
 try:
-    import auroraml
+    import ingenuityml
 
-    print("Successfully imported auroraml")
+    print("Successfully imported ingenuityml")
 except ImportError as e:
-    print(f"Failed to import auroraml: {e}")
+    print(f"Failed to import ingenuityml: {e}")
     sys.exit(1)
 
 
@@ -23,7 +23,7 @@ def test_one_class_svm_basic():
     X_inliers = np.random.randn(50, 2) * 0.5  # Tight cluster around origin
 
     # Create OneClassSVM
-    clf = auroraml.svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=1.0, random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=1.0, random_state=42)
 
     # Fit on inliers
     clf.fit(X_inliers)
@@ -56,7 +56,7 @@ def test_one_class_svm_outliers():
     X_outliers = np.array([[3, 3], [-3, -3], [3, -3], [-3, 3]])
 
     # Create and fit OneClassSVM
-    clf = auroraml.svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=2.0, random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=2.0, random_state=42)
     clf.fit(X_inliers)
 
     # Test on inliers
@@ -81,7 +81,7 @@ def test_decision_function():
     np.random.seed(42)
     X = np.random.randn(25, 2) * 0.8
 
-    clf = auroraml.svm.OneClassSVM(nu=0.2, kernel="rbf", gamma=0.5, random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.2, kernel="rbf", gamma=0.5, random_state=42)
     clf.fit(X)
 
     # Test decision function
@@ -105,7 +105,7 @@ def test_linear_kernel():
     np.random.seed(42)
     X = np.random.randn(40, 2) * 0.5
 
-    clf = auroraml.svm.OneClassSVM(nu=0.15, kernel="linear", random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.15, kernel="linear", random_state=42)
     clf.fit(X)
 
     assert clf.is_fitted(), "Linear kernel model should be fitted"
@@ -126,7 +126,7 @@ def test_parameters():
     """Test parameter handling."""
     print("\nTesting parameter handling...")
 
-    clf = auroraml.svm.OneClassSVM(
+    clf = ingenuityml.svm.OneClassSVM(
         nu=0.3, gamma=0.7, kernel="rbf", max_iter=500, random_state=123
     )
 
@@ -165,7 +165,7 @@ def test_threshold():
     np.random.seed(42)
     X = np.random.randn(30, 2) * 0.6
 
-    clf = auroraml.svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.8, random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.8, random_state=42)
     clf.fit(X)
 
     threshold = clf.get_threshold()
@@ -178,7 +178,7 @@ def test_not_fitted_errors():
     """Test error handling for unfitted model."""
     print("\nTesting error handling...")
 
-    clf = auroraml.svm.OneClassSVM(nu=0.1, random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.1, random_state=42)
     X_test = np.array([[1, 2], [3, 4]])
 
     try:

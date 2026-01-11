@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML RidgeClassifier and RidgeClassifierCV
+Test Suite for IngenuityML RidgeClassifier and RidgeClassifierCV
 Tests Ridge-based classification algorithms
 """
 
@@ -24,9 +24,9 @@ class TestRidgeClassifier(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.RidgeClassifier(alpha=1.0)
+        model = ing_lm.RidgeClassifier(alpha=1.0)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -36,9 +36,9 @@ class TestRidgeClassifier(unittest.TestCase):
         
     def test_predict_proba(self):
         """Test probability prediction"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.RidgeClassifier(alpha=1.0)
+        model = ing_lm.RidgeClassifier(alpha=1.0)
         model.fit(self.X, self.y)
         probabilities = model.predict_proba(self.X_test)
         
@@ -50,19 +50,19 @@ class TestRidgeClassifier(unittest.TestCase):
         
     def test_different_alpha_values(self):
         """Test with different alpha values"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
         for alpha in [0.1, 1.0, 10.0, 100.0]:
-            model = aml_lm.RidgeClassifier(alpha=alpha)
+            model = ing_lm.RidgeClassifier(alpha=alpha)
             model.fit(self.X, self.y)
             predictions = model.predict(self.X_test)
             self.assertEqual(len(predictions), len(self.X_test))
             
     def test_coef_and_intercept(self):
         """Test coefficient and intercept access"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.RidgeClassifier(alpha=1.0)
+        model = ing_lm.RidgeClassifier(alpha=1.0)
         model.fit(self.X, self.y)
         
         coef = model.coef()
@@ -73,18 +73,18 @@ class TestRidgeClassifier(unittest.TestCase):
         
     def test_get_params(self):
         """Test parameter retrieval"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.RidgeClassifier(alpha=2.0, fit_intercept=True)
+        model = ing_lm.RidgeClassifier(alpha=2.0, fit_intercept=True)
         params = model.get_params()
         self.assertIn('alpha', params)
         self.assertIn('fit_intercept', params)
         
     def test_is_fitted(self):
         """Test fitted state"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.RidgeClassifier()
+        model = ing_lm.RidgeClassifier()
         self.assertFalse(model.is_fitted())
         model.fit(self.X, self.y)
         self.assertTrue(model.is_fitted())
@@ -101,9 +101,9 @@ class TestRidgeClassifierCV(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.RidgeClassifierCV(cv=5)
+        model = ing_lm.RidgeClassifierCV(cv=5)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -113,9 +113,9 @@ class TestRidgeClassifierCV(unittest.TestCase):
         
     def test_predict_proba(self):
         """Test probability prediction"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.RidgeClassifierCV(cv=5)
+        model = ing_lm.RidgeClassifierCV(cv=5)
         model.fit(self.X, self.y)
         probabilities = model.predict_proba(self.X_test)
         
@@ -124,38 +124,38 @@ class TestRidgeClassifierCV(unittest.TestCase):
         
     def test_custom_cv_folds(self):
         """Test with different CV fold values"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
         for cv in [3, 5, 10]:
-            model = aml_lm.RidgeClassifierCV(cv=cv)
+            model = ing_lm.RidgeClassifierCV(cv=cv)
             model.fit(self.X, self.y)
             predictions = model.predict(self.X_test)
             self.assertEqual(len(predictions), len(self.X_test))
             
     def test_custom_alpha_values(self):
         """Test with custom alpha values"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
         alphas = [0.1, 1.0, 10.0, 100.0]
-        model = aml_lm.RidgeClassifierCV(cv=5, alphas=alphas)
+        model = ing_lm.RidgeClassifierCV(cv=5, alphas=alphas)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         self.assertEqual(len(predictions), len(self.X_test))
         
     def test_get_params(self):
         """Test parameter retrieval"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.RidgeClassifierCV(cv=5)
+        model = ing_lm.RidgeClassifierCV(cv=5)
         params = model.get_params()
         self.assertIn('cv', params)
         self.assertIn('scoring', params)
         
     def test_is_fitted(self):
         """Test fitted state"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.RidgeClassifierCV(cv=5)
+        model = ing_lm.RidgeClassifierCV(cv=5)
         self.assertFalse(model.is_fitted())
         model.fit(self.X, self.y)
         self.assertTrue(model.is_fitted())

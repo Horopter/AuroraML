@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
-#include "auroraml/random.hpp"
+#include "ingenuityml/random.hpp"
 #include <Eigen/Dense>
 #include <cmath>
 #include <algorithm>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class RandomTest : public ::testing::Test {
@@ -134,7 +134,7 @@ TEST_F(RandomTest, PCG64NormalDistribution) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

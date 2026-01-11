@@ -1,10 +1,10 @@
-#include "auroraml/random_forest.hpp"
+#include "ingenuityml/random_forest.hpp"
 #include <unordered_map>
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
-namespace auroraml {
+namespace ingenuityml {
 namespace ensemble {
 
 static std::vector<int> bootstrap_indices(int n, std::mt19937& rng) {
@@ -255,6 +255,6 @@ void RandomForestRegressor::load(const std::string& filepath) {
 }
 
 } // namespace ensemble
-} // namespace cxml
+} // namespace ingenuityml
 
 

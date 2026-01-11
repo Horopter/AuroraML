@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/mixture.hpp"
+#include "ingenuityml/mixture.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class MixtureTest : public ::testing::Test {
@@ -75,7 +75,7 @@ TEST_F(MixtureTest, GaussianMixtureZeroComponents) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

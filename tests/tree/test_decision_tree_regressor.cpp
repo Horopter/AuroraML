@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "auroraml/tree.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/tree.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class DecisionTreeRegressorTest : public ::testing::Test {
@@ -93,7 +93,7 @@ TEST_F(DecisionTreeRegressorTest, DecisionTreeRegressorDimensionMismatch) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

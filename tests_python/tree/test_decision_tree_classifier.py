@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML DecisionTreeClassifier Algorithm
+Test Suite for IngenuityML DecisionTreeClassifier Algorithm
 Includes positive and negative test cases
 All tests run in shuffled order with 5-minute timeout
 """
@@ -27,9 +27,9 @@ class TestDecisionTreeClassifier(unittest.TestCase):
     # Positive test cases
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.tree as aml_tree
+        import ingenuityml.tree as ing_tree
         
-        model = aml_tree.DecisionTreeClassifier(max_depth=5, random_state=42)
+        model = ing_tree.DecisionTreeClassifier(max_depth=5, random_state=42)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -39,9 +39,9 @@ class TestDecisionTreeClassifier(unittest.TestCase):
         
     def test_predict_proba(self):
         """Test probability prediction"""
-        import auroraml.tree as aml_tree
+        import ingenuityml.tree as ing_tree
         
-        model = aml_tree.DecisionTreeClassifier(max_depth=5, random_state=42)
+        model = ing_tree.DecisionTreeClassifier(max_depth=5, random_state=42)
         model.fit(self.X, self.y)
         probabilities = model.predict_proba(self.X_test)
         
@@ -52,20 +52,20 @@ class TestDecisionTreeClassifier(unittest.TestCase):
         
     def test_different_parameters(self):
         """Test with different parameters"""
-        import auroraml.tree as aml_tree
+        import ingenuityml.tree as ing_tree
         
         depths = [3, 5, 10]
         for depth in depths:
-            model = aml_tree.DecisionTreeClassifier(max_depth=depth, random_state=42)
+            model = ing_tree.DecisionTreeClassifier(max_depth=depth, random_state=42)
             model.fit(self.X, self.y)
             predictions = model.predict(self.X_test)
             self.assertEqual(len(predictions), len(self.X_test))
             
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.tree as aml_tree
+        import ingenuityml.tree as ing_tree
         
-        model = aml_tree.DecisionTreeClassifier(max_depth=5, min_samples_split=2, random_state=42)
+        model = ing_tree.DecisionTreeClassifier(max_depth=5, min_samples_split=2, random_state=42)
         
         params = model.get_params()
         self.assertIn('max_depth', params)
@@ -77,21 +77,21 @@ class TestDecisionTreeClassifier(unittest.TestCase):
         
     def test_performance(self):
         """Test model performance"""
-        import auroraml.tree as aml_tree
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.tree as ing_tree
+        import ingenuityml.metrics as ing_metrics
         
-        model = aml_tree.DecisionTreeClassifier(max_depth=5, random_state=42)
+        model = ing_tree.DecisionTreeClassifier(max_depth=5, random_state=42)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X)
         
-        accuracy = aml_metrics.accuracy_score(self.y, predictions)
+        accuracy = ing_metrics.accuracy_score(self.y, predictions)
         self.assertGreater(accuracy, 0.7)
         
     def test_feature_importance(self):
         """Test feature importance"""
-        import auroraml.tree as aml_tree
+        import ingenuityml.tree as ing_tree
         
-        model = aml_tree.DecisionTreeClassifier(max_depth=5, random_state=42)
+        model = ing_tree.DecisionTreeClassifier(max_depth=5, random_state=42)
         model.fit(self.X, self.y)
         
         if hasattr(model, 'feature_importances_'):
@@ -102,9 +102,9 @@ class TestDecisionTreeClassifier(unittest.TestCase):
         
     def test_is_fitted(self):
         """Test is_fitted method"""
-        import auroraml.tree as aml_tree
+        import ingenuityml.tree as ing_tree
         
-        model = aml_tree.DecisionTreeClassifier()
+        model = ing_tree.DecisionTreeClassifier()
         self.assertFalse(model.is_fitted())
         
         model.fit(self.X, self.y)
@@ -113,36 +113,36 @@ class TestDecisionTreeClassifier(unittest.TestCase):
     # Negative test cases
     def test_empty_data(self):
         """Test with empty data - should raise error"""
-        import auroraml.tree as aml_tree
+        import ingenuityml.tree as ing_tree
         
-        model = aml_tree.DecisionTreeClassifier(max_depth=5)
+        model = ing_tree.DecisionTreeClassifier(max_depth=5)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(np.array([]).reshape(0, 4), np.array([]))
             
     def test_dimension_mismatch(self):
         """Test with dimension mismatch - should raise error"""
-        import auroraml.tree as aml_tree
+        import ingenuityml.tree as ing_tree
         
-        model = aml_tree.DecisionTreeClassifier(max_depth=5)
+        model = ing_tree.DecisionTreeClassifier(max_depth=5)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(self.X, self.y[:-1])
             
     def test_not_fitted_predict(self):
         """Test predict without fitting - should raise error"""
-        import auroraml.tree as aml_tree
+        import ingenuityml.tree as ing_tree
         
-        model = aml_tree.DecisionTreeClassifier(max_depth=5)
+        model = ing_tree.DecisionTreeClassifier(max_depth=5)
         
         with self.assertRaises((RuntimeError, ValueError)):
             model.predict(self.X_test)
             
     def test_wrong_feature_count(self):
         """Test predict with wrong feature count - should raise error"""
-        import auroraml.tree as aml_tree
+        import ingenuityml.tree as ing_tree
         
-        model = aml_tree.DecisionTreeClassifier(max_depth=5, random_state=42)
+        model = ing_tree.DecisionTreeClassifier(max_depth=5, random_state=42)
         model.fit(self.X, self.y)
         
         X_wrong = np.random.randn(20, 6).astype(np.float64)
@@ -152,9 +152,9 @@ class TestDecisionTreeClassifier(unittest.TestCase):
             
     def test_negative_max_depth(self):
         """Test with negative max_depth - edge case"""
-        import auroraml.tree as aml_tree
+        import ingenuityml.tree as ing_tree
         
-        model = aml_tree.DecisionTreeClassifier(max_depth=-1)
+        model = ing_tree.DecisionTreeClassifier(max_depth=-1)
         
         # Should either work (unlimited depth) or raise error
         try:
@@ -166,9 +166,9 @@ class TestDecisionTreeClassifier(unittest.TestCase):
             
     def test_zero_min_samples_split(self):
         """Test with zero min_samples_split - should raise error"""
-        import auroraml.tree as aml_tree
+        import ingenuityml.tree as ing_tree
         
-        model = aml_tree.DecisionTreeClassifier(min_samples_split=0)
+        model = ing_tree.DecisionTreeClassifier(min_samples_split=0)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(self.X, self.y)

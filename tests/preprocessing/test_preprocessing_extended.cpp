@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/preprocessing_extended.hpp"
+#include "ingenuityml/preprocessing_extended.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class PreprocessingExtendedTest : public ::testing::Test {
@@ -95,7 +95,7 @@ TEST_F(PreprocessingExtendedTest, BinarizerNotFitted) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

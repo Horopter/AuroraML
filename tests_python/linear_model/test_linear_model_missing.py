@@ -25,7 +25,7 @@ class TestLinearModelMissing(unittest.TestCase):
         self.y_pos = np.exp(eta).astype(np.float64)
 
     def test_lars_family(self):
-        import auroraml.linear_model as lm
+        import ingenuityml.linear_model as lm
 
         model = lm.Lars(n_nonzero_coefs=3)
         model.fit(self.X, self.y_reg)
@@ -59,7 +59,7 @@ class TestLinearModelMissing(unittest.TestCase):
         self.assertGreater(omp_cv.best_n_nonzero_coefs(), 0)
 
     def test_robust_regressors(self):
-        import auroraml.linear_model as lm
+        import ingenuityml.linear_model as lm
 
         ransac = lm.RANSACRegressor(max_trials=30, random_state=42)
         ransac.fit(self.X, self.y_reg)
@@ -77,7 +77,7 @@ class TestLinearModelMissing(unittest.TestCase):
         self.assertEqual(preds.shape[0], self.X_test.shape[0])
 
     def test_online_models(self):
-        import auroraml.linear_model as lm
+        import ingenuityml.linear_model as lm
 
         sgd_reg = lm.SGDRegressor(max_iter=200, random_state=42)
         sgd_reg.fit(self.X, self.y_reg)
@@ -105,7 +105,7 @@ class TestLinearModelMissing(unittest.TestCase):
         self.assertEqual(preds.shape[0], self.X_test.shape[0])
 
     def test_glm_regressors(self):
-        import auroraml.linear_model as lm
+        import ingenuityml.linear_model as lm
 
         poisson = lm.PoissonRegressor(max_iter=200, learning_rate=0.01)
         poisson.fit(self.X_glm, self.y_pos)
@@ -123,7 +123,7 @@ class TestLinearModelMissing(unittest.TestCase):
         self.assertEqual(preds.shape[0], 10)
 
     def test_multitask_models(self):
-        import auroraml.linear_model as lm
+        import ingenuityml.linear_model as lm
 
         mt_lasso = lm.MultiTaskLasso(alpha=0.1, max_iter=200)
         mt_lasso.fit(self.X, self.y_reg)
@@ -142,6 +142,46 @@ class TestLinearModelMissing(unittest.TestCase):
         mt_enet_cv = lm.MultiTaskElasticNetCV(alphas=[0.05, 0.1], l1_ratios=[0.2, 0.8], cv=3)
         mt_enet_cv.fit(self.X, self.y_reg)
         self.assertGreater(mt_enet_cv.best_alpha(), 0.0)
+
+    def test_cv_regressors(self):
+        import ingenuityml.linear_model as lm
+
+        ridge_cv = lm.RidgeCV(alphas=[0.1, 1.0], cv=3)
+        ridge_cv.fit(self.X, self.y_reg)
+        preds = ridge_cv.predict(self.X_test)
+        self.assertEqual(preds.shape[0], self.X_test.shape[0])
+        self.assertGreater(ridge_cv.best_alpha(), 0.0)
+
+        lasso_cv = lm.LassoCV(alphas=[0.05, 0.1], cv=3, max_iter=200)
+        lasso_cv.fit(self.X, self.y_reg)
+        preds = lasso_cv.predict(self.X_test)
+        self.assertEqual(preds.shape[0], self.X_test.shape[0])
+        self.assertGreater(lasso_cv.best_alpha(), 0.0)
+
+        enet_cv = lm.ElasticNetCV(alphas=[0.05, 0.1], l1_ratios=[0.2, 0.8], cv=3, max_iter=200)
+        enet_cv.fit(self.X, self.y_reg)
+        preds = enet_cv.predict(self.X_test)
+        self.assertEqual(preds.shape[0], self.X_test.shape[0])
+        self.assertGreater(enet_cv.best_alpha(), 0.0)
+        self.assertIn(enet_cv.best_l1_ratio(), [0.2, 0.8])
+
+    def test_bayesian_ard_huber(self):
+        import ingenuityml.linear_model as lm
+
+        bayes = lm.BayesianRidge(max_iter=200, tol=1e-4)
+        bayes.fit(self.X, self.y_reg)
+        preds = bayes.predict(self.X_test)
+        self.assertEqual(preds.shape[0], self.X_test.shape[0])
+
+        ard = lm.ARDRegression(max_iter=200, tol=1e-4)
+        ard.fit(self.X, self.y_reg)
+        preds = ard.predict(self.X_test)
+        self.assertEqual(preds.shape[0], self.X_test.shape[0])
+
+        huber = lm.HuberRegressor(epsilon=1.35, max_iter=100, tol=1e-4)
+        huber.fit(self.X, self.y_reg)
+        preds = huber.predict(self.X_test)
+        self.assertEqual(preds.shape[0], self.X_test.shape[0])
 
 
 if __name__ == '__main__':

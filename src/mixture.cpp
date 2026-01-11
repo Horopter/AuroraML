@@ -1,9 +1,9 @@
-#include "auroraml/mixture.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/mixture.hpp"
+#include "ingenuityml/base.hpp"
 #include <cmath>
 #include <random>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace mixture {
 
 GaussianMixture::GaussianMixture(
@@ -258,6 +258,66 @@ Estimator& GaussianMixture::set_params(const Params& params) {
     return *this;
 }
 
-} // namespace mixture
-} // namespace auroraml
+// BayesianGaussianMixture implementation
 
+BayesianGaussianMixture::BayesianGaussianMixture(
+    int n_components,
+    int max_iter,
+    double tol,
+    double weight_concentration_prior,
+    int random_state
+) : n_components_(n_components),
+    max_iter_(max_iter),
+    tol_(tol),
+    weight_concentration_prior_(weight_concentration_prior),
+    random_state_(random_state),
+    impl_(n_components, max_iter, tol, random_state) {
+}
+
+Estimator& BayesianGaussianMixture::fit(const MatrixXd& X, const VectorXd& y) {
+    (void)y;
+    impl_.set_params({{"n_components", std::to_string(n_components_)},
+                      {"max_iter", std::to_string(max_iter_)},
+                      {"tol", std::to_string(tol_)},
+                      {"random_state", std::to_string(random_state_)}});
+    impl_.fit(X, VectorXd());
+    return *this;
+}
+
+VectorXi BayesianGaussianMixture::predict(const MatrixXd& X) const {
+    return impl_.predict(X);
+}
+
+MatrixXd BayesianGaussianMixture::predict_proba(const MatrixXd& X) const {
+    return impl_.predict_proba(X);
+}
+
+VectorXd BayesianGaussianMixture::score_samples(const MatrixXd& X) const {
+    return impl_.score_samples(X);
+}
+
+Params BayesianGaussianMixture::get_params() const {
+    Params params;
+    params["n_components"] = std::to_string(n_components_);
+    params["max_iter"] = std::to_string(max_iter_);
+    params["tol"] = std::to_string(tol_);
+    params["weight_concentration_prior"] = std::to_string(weight_concentration_prior_);
+    params["random_state"] = std::to_string(random_state_);
+    return params;
+}
+
+Estimator& BayesianGaussianMixture::set_params(const Params& params) {
+    n_components_ = utils::get_param_int(params, "n_components", n_components_);
+    max_iter_ = utils::get_param_int(params, "max_iter", max_iter_);
+    tol_ = utils::get_param_double(params, "tol", tol_);
+    weight_concentration_prior_ = utils::get_param_double(params, "weight_concentration_prior", weight_concentration_prior_);
+    random_state_ = utils::get_param_int(params, "random_state", random_state_);
+    impl_.set_params({{"n_components", std::to_string(n_components_)},
+                      {"max_iter", std::to_string(max_iter_)},
+                      {"tol", std::to_string(tol_)},
+                      {"random_state", std::to_string(random_state_)}});
+    return *this;
+}
+
+} // namespace mixture
+} // namespace ingenuityml

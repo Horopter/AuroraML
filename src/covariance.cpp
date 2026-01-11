@@ -1,12 +1,12 @@
-#include "auroraml/covariance.hpp"
-#include "auroraml/utils.hpp"
+#include "ingenuityml/covariance.hpp"
+#include "ingenuityml/utils.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 #include <numeric>
 #include <random>
 #include <cmath>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace covariance {
 
 namespace {
@@ -615,4 +615,4 @@ Estimator& EllipticEnvelope::set_params(const Params& params) {
 }
 
 } // namespace covariance
-} // namespace auroraml
+} // namespace ingenuityml

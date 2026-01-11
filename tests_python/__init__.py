@@ -1,1 +1,1 @@
-# AuroraML Python Test Suite
+# IngenuityML Python Test Suite

@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
-#include "auroraml/feature_selection.hpp"
-#include "auroraml/linear_model.hpp"
-#include "auroraml/model_selection.hpp"
+#include "ingenuityml/feature_selection.hpp"
+#include "ingenuityml/linear_model.hpp"
+#include "ingenuityml/model_selection.hpp"
 #include <Eigen/Dense>
 #include <functional>
 #include <cmath>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class FeatureSelectionTest : public ::testing::Test {
@@ -232,7 +232,7 @@ TEST_F(FeatureSelectionTest, SelectKBestInvalidK) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

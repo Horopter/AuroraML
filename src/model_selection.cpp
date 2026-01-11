@@ -1,6 +1,6 @@
-#include "auroraml/model_selection.hpp"
-#include "auroraml/base.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/model_selection.hpp"
+#include "ingenuityml/base.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 #include <random>
@@ -10,7 +10,7 @@
 #include <cmath>
 #include <limits>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace model_selection {
 
 namespace {
@@ -1422,4 +1422,4 @@ std::vector<std::pair<Params, double>> HalvingRandomSearchCV::evaluate_candidate
 }
 
 } // namespace model_selection
-} // namespace cxml
+} // namespace ingenuityml

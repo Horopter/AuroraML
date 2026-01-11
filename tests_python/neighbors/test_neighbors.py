@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML Neighbors
+Test Suite for IngenuityML Neighbors
 Tests KNeighborsClassifier, KNeighborsRegressor, RadiusNeighborsClassifier, and RadiusNeighborsRegressor
 """
 
@@ -25,9 +25,9 @@ class TestKNeighborsClassifier(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.neighbors as aml_neighbors
+        import ingenuityml.neighbors as ing_neighbors
         
-        model = aml_neighbors.KNeighborsClassifier(n_neighbors=5)
+        model = ing_neighbors.KNeighborsClassifier(n_neighbors=5)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -37,9 +37,9 @@ class TestKNeighborsClassifier(unittest.TestCase):
         
     def test_predict_proba(self):
         """Test probability prediction"""
-        import auroraml.neighbors as aml_neighbors
+        import ingenuityml.neighbors as ing_neighbors
         
-        model = aml_neighbors.KNeighborsClassifier(n_neighbors=5)
+        model = ing_neighbors.KNeighborsClassifier(n_neighbors=5)
         model.fit(self.X, self.y)
         probabilities = model.predict_proba(self.X_test)
         
@@ -58,9 +58,9 @@ class TestRadiusNeighborsClassifier(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.neighbors as aml_neighbors
+        import ingenuityml.neighbors as ing_neighbors
         
-        model = aml_neighbors.RadiusNeighborsClassifier(radius=1.0)
+        model = ing_neighbors.RadiusNeighborsClassifier(radius=1.0)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -70,9 +70,9 @@ class TestRadiusNeighborsClassifier(unittest.TestCase):
         
     def test_predict_proba(self):
         """Test probability prediction"""
-        import auroraml.neighbors as aml_neighbors
+        import ingenuityml.neighbors as ing_neighbors
         
-        model = aml_neighbors.RadiusNeighborsClassifier(radius=1.0)
+        model = ing_neighbors.RadiusNeighborsClassifier(radius=1.0)
         model.fit(self.X, self.y)
         probabilities = model.predict_proba(self.X_test)
         
@@ -81,10 +81,10 @@ class TestRadiusNeighborsClassifier(unittest.TestCase):
         
     def test_different_radius_values(self):
         """Test with different radius values"""
-        import auroraml.neighbors as aml_neighbors
+        import ingenuityml.neighbors as ing_neighbors
         
         for radius in [0.5, 1.0, 2.0]:
-            model = aml_neighbors.RadiusNeighborsClassifier(radius=radius)
+            model = ing_neighbors.RadiusNeighborsClassifier(radius=radius)
             model.fit(self.X, self.y)
             predictions = model.predict(self.X_test)
             self.assertEqual(len(predictions), len(self.X_test))
@@ -101,9 +101,9 @@ class TestRadiusNeighborsRegressor(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.neighbors as aml_neighbors
+        import ingenuityml.neighbors as ing_neighbors
         
-        model = aml_neighbors.RadiusNeighborsRegressor(radius=1.0)
+        model = ing_neighbors.RadiusNeighborsRegressor(radius=1.0)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -113,10 +113,10 @@ class TestRadiusNeighborsRegressor(unittest.TestCase):
         
     def test_different_radius_values(self):
         """Test with different radius values"""
-        import auroraml.neighbors as aml_neighbors
+        import ingenuityml.neighbors as ing_neighbors
         
         for radius in [0.5, 1.0, 2.0]:
-            model = aml_neighbors.RadiusNeighborsRegressor(radius=radius)
+            model = ing_neighbors.RadiusNeighborsRegressor(radius=radius)
             model.fit(self.X, self.y)
             predictions = model.predict(self.X_test)
             self.assertEqual(len(predictions), len(self.X_test))

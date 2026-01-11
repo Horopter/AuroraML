@@ -7,7 +7,7 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import auroraml
+import ingenuityml
 import random
 
 class TestPipeline(unittest.TestCase):
@@ -19,14 +19,14 @@ class TestPipeline(unittest.TestCase):
 
     def test_pipeline_classification(self):
         """Test Pipeline with classifier"""
-        scaler = auroraml.preprocessing.StandardScaler()
-        clf = auroraml.tree.DecisionTreeClassifier(max_depth=3)
+        scaler = ingenuityml.preprocessing.StandardScaler()
+        clf = ingenuityml.tree.DecisionTreeClassifier(max_depth=3)
         
         steps = [
             ("scaler", scaler),
             ("classifier", clf)
         ]
-        pipeline = auroraml.pipeline.Pipeline(steps)
+        pipeline = ingenuityml.pipeline.Pipeline(steps)
         
         pipeline.fit(self.X, self.y_class)
         self.assertTrue(pipeline.is_fitted())
@@ -39,14 +39,14 @@ class TestPipeline(unittest.TestCase):
 
     def test_pipeline_regression(self):
         """Test Pipeline with regressor"""
-        scaler = auroraml.preprocessing.StandardScaler()
-        reg = auroraml.linear_model.LinearRegression()
+        scaler = ingenuityml.preprocessing.StandardScaler()
+        reg = ingenuityml.linear_model.LinearRegression()
         
         steps = [
             ("scaler", scaler),
             ("regressor", reg)
         ]
-        pipeline = auroraml.pipeline.Pipeline(steps)
+        pipeline = ingenuityml.pipeline.Pipeline(steps)
         
         pipeline.fit(self.X, self.y)
         predictions = pipeline.predict(self.X)
@@ -54,28 +54,28 @@ class TestPipeline(unittest.TestCase):
 
     def test_pipeline_transform(self):
         """Test Pipeline transform method"""
-        scaler1 = auroraml.preprocessing.StandardScaler()
-        scaler2 = auroraml.preprocessing.MinMaxScaler()
+        scaler1 = ingenuityml.preprocessing.StandardScaler()
+        scaler2 = ingenuityml.preprocessing.MinMaxScaler()
         
         steps = [
             ("scaler1", scaler1),
             ("scaler2", scaler2)
         ]
-        pipeline = auroraml.pipeline.Pipeline(steps)
+        pipeline = ingenuityml.pipeline.Pipeline(steps)
         
         X_transformed = pipeline.fit_transform(self.X, self.y)
         self.assertEqual(X_transformed.shape, self.X.shape)
 
     def test_feature_union(self):
         """Test FeatureUnion"""
-        scaler1 = auroraml.preprocessing.StandardScaler()
-        scaler2 = auroraml.preprocessing.MinMaxScaler()
+        scaler1 = ingenuityml.preprocessing.StandardScaler()
+        scaler2 = ingenuityml.preprocessing.MinMaxScaler()
         
         transformers = [
             ("scaler1", scaler1),
             ("scaler2", scaler2)
         ]
-        union = auroraml.pipeline.FeatureUnion(transformers)
+        union = ingenuityml.pipeline.FeatureUnion(transformers)
         
         X_transformed = union.fit_transform(self.X, self.y)
         # Should have double the columns
@@ -84,9 +84,9 @@ class TestPipeline(unittest.TestCase):
 
     def test_feature_union_get_transformer(self):
         """Test FeatureUnion get_transformer"""
-        scaler = auroraml.preprocessing.StandardScaler()
+        scaler = ingenuityml.preprocessing.StandardScaler()
         transformers = [("scaler", scaler)]
-        union = auroraml.pipeline.FeatureUnion(transformers)
+        union = ingenuityml.pipeline.FeatureUnion(transformers)
         
         union.fit(self.X, self.y)
         retrieved = union.get_transformer("scaler")
@@ -97,10 +97,10 @@ class TestPipeline(unittest.TestCase):
 
     def test_pipeline_get_step(self):
         """Test Pipeline get_step"""
-        scaler = auroraml.preprocessing.StandardScaler()
-        clf = auroraml.tree.DecisionTreeClassifier()
+        scaler = ingenuityml.preprocessing.StandardScaler()
+        clf = ingenuityml.tree.DecisionTreeClassifier()
         steps = [("scaler", scaler), ("classifier", clf)]
-        pipeline = auroraml.pipeline.Pipeline(steps)
+        pipeline = ingenuityml.pipeline.Pipeline(steps)
         
         pipeline.fit(self.X, self.y_class)
         retrieved = pipeline.get_step("scaler")

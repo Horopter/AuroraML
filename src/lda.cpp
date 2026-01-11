@@ -1,11 +1,11 @@
-#include "auroraml/lda.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/lda.hpp"
+#include "ingenuityml/base.hpp"
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 #include <map>
 #include <set>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace decomposition {
 
 Estimator& LDA::fit(const MatrixXd& X, const VectorXd& y) {
@@ -156,4 +156,4 @@ Estimator& LDA::set_params(const Params& params) {
 }
 
 } // namespace decomposition
-} // namespace cxml
+} // namespace ingenuityml

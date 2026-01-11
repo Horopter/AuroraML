@@ -1,5 +1,5 @@
-#include "auroraml/utils.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/utils.hpp"
+#include "ingenuityml/base.hpp"
 #include <algorithm>
 #include <unordered_set>
 #include <unordered_map>
@@ -7,7 +7,7 @@
 #include <limits>
 #include <random>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace utils {
 
 // Multiclass utilities
@@ -326,4 +326,4 @@ int safe_index(int idx, int size) {
 } // namespace index
 
 } // namespace utils
-} // namespace auroraml
+} // namespace ingenuityml

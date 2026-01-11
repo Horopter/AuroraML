@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
-#include "auroraml/neighbors.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/neighbors.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 #include <cmath>
 #include <sstream>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 // RadiusNeighborsRegressor implementation using KNeighborsRegressor as base
@@ -152,7 +152,7 @@ TEST_F(RadiusNeighborsRegressorTest, NegativeRadius) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

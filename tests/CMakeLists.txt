@@ -9,189 +9,189 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # Test executables
 add_executable(test_preprocessing preprocessing/test_preprocessing.cpp)
-target_link_libraries(test_preprocessing auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_preprocessing ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_naive_bayes naive_bayes/test_naive_bayes.cpp)
-target_link_libraries(test_naive_bayes auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_naive_bayes ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_kmeans cluster/test_kmeans.cpp)
-target_link_libraries(test_kmeans auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_kmeans ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_pca decomposition/test_pca.cpp)
-target_link_libraries(test_pca auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_pca ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_svm svm/test_svm.cpp)
-target_link_libraries(test_svm auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_svm ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_decomposition decomposition/test_decomposition.cpp)
-target_link_libraries(test_decomposition auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_decomposition ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_metrics metrics/test_metrics.cpp)
-target_link_libraries(test_metrics auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_metrics ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_model_selection model_selection/test_model_selection.cpp)
-target_link_libraries(test_model_selection auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_model_selection ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_lda discriminant_analysis/test_lda.cpp)
-target_link_libraries(test_lda auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_lda ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_adaboost_classifier ensemble/test_adaboost_classifier.cpp)
-target_link_libraries(test_adaboost_classifier auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_adaboost_classifier ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_adaboost_regressor ensemble/test_adaboost_regressor.cpp)
-target_link_libraries(test_adaboost_regressor auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_adaboost_regressor ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_xgboost ensemble/test_xgboost.cpp)
-target_link_libraries(test_xgboost auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_xgboost ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_catboost ensemble/test_catboost.cpp)
-target_link_libraries(test_catboost auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_catboost ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_decision_tree_classifier tree/test_decision_tree_classifier.cpp)
-target_link_libraries(test_decision_tree_classifier auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_decision_tree_classifier ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_decision_tree_regressor tree/test_decision_tree_regressor.cpp)
-target_link_libraries(test_decision_tree_regressor auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_decision_tree_regressor ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_random_forest_classifier ensemble/test_random_forest_classifier.cpp)
-target_link_libraries(test_random_forest_classifier auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_random_forest_classifier ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_random_forest_regressor ensemble/test_random_forest_regressor.cpp)
-target_link_libraries(test_random_forest_regressor auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_random_forest_regressor ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_kneighbors_classifier neighbors/test_kneighbors_classifier.cpp)
-target_link_libraries(test_kneighbors_classifier auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_kneighbors_classifier ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_kneighbors_regressor neighbors/test_kneighbors_regressor.cpp)
-target_link_libraries(test_kneighbors_regressor auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_kneighbors_regressor ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_nearest_neighbors neighbors/test_nearest_neighbors.cpp)
-target_link_libraries(test_nearest_neighbors auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_nearest_neighbors ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_neighbors_transformer neighbors/test_neighbors_transformer.cpp)
-target_link_libraries(test_neighbors_transformer auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_neighbors_transformer ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_logistic_regression linear_model/test_logistic_regression.cpp)
-target_link_libraries(test_logistic_regression auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_logistic_regression ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_elasticnet linear_model/test_elasticnet.cpp)
-target_link_libraries(test_elasticnet auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_elasticnet ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_dbscan cluster/test_dbscan.cpp)
-target_link_libraries(test_dbscan auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_dbscan ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_agglomerative_clustering cluster/test_agglomerative_clustering.cpp)
-target_link_libraries(test_agglomerative_clustering auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_agglomerative_clustering ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_linear_regression linear_model/test_linear_regression.cpp)
-target_link_libraries(test_linear_regression auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_linear_regression ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_ridge linear_model/test_ridge.cpp)
-target_link_libraries(test_ridge auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_ridge ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_lasso linear_model/test_lasso.cpp)
-target_link_libraries(test_lasso auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_lasso ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_svr svm/test_svr.cpp)
-target_link_libraries(test_svr auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_svr ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_truncated_svd decomposition/test_truncated_svd.cpp)
-target_link_libraries(test_truncated_svd auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_truncated_svd ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_decomposition_extended decomposition/test_decomposition_extended.cpp)
-target_link_libraries(test_decomposition_extended auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_decomposition_extended ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_gradient_boosting_classifier ensemble/test_gradient_boosting_classifier.cpp)
-target_link_libraries(test_gradient_boosting_classifier auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_gradient_boosting_classifier ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_gradient_boosting_regressor ensemble/test_gradient_boosting_regressor.cpp)
-target_link_libraries(test_gradient_boosting_regressor auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_gradient_boosting_regressor ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_calibration calibration/test_calibration.cpp)
-target_link_libraries(test_calibration auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_calibration ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_compose pipeline/test_compose.cpp)
-target_link_libraries(test_compose auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_compose ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_discriminant_analysis discriminant_analysis/test_discriminant_analysis.cpp)
-target_link_libraries(test_discriminant_analysis auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_discriminant_analysis ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_dummy_classifier dummy/test_dummy_classifier.cpp)
-target_link_libraries(test_dummy_classifier auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_dummy_classifier ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_dummy_regressor dummy/test_dummy_regressor.cpp)
-target_link_libraries(test_dummy_regressor auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_dummy_regressor ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_covariance covariance/test_covariance.cpp)
-target_link_libraries(test_covariance auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_covariance ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_meta_estimators meta/test_meta_estimators.cpp)
-target_link_libraries(test_meta_estimators auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_meta_estimators ingenuityml_core GTest::GTest GTest::Main)
 add_executable(test_feature_selection preprocessing/test_feature_selection.cpp)
-target_link_libraries(test_feature_selection auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_feature_selection ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_impute preprocessing/test_impute.cpp)
-target_link_libraries(test_impute auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_impute ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_inspection inspection/test_inspection.cpp)
-target_link_libraries(test_inspection auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_inspection ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_isotonic calibration/test_isotonic.cpp)
-target_link_libraries(test_isotonic auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_isotonic ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_logistic_regression_cv linear_model/test_logistic_regression_cv.cpp)
-target_link_libraries(test_logistic_regression_cv auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_logistic_regression_cv ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_linear_model_sparse linear_model/test_linear_model_sparse.cpp)
-target_link_libraries(test_linear_model_sparse auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_linear_model_sparse ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_linear_model_robust linear_model/test_linear_model_robust.cpp)
-target_link_libraries(test_linear_model_robust auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_linear_model_robust ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_linear_model_online linear_model/test_linear_model_online.cpp)
-target_link_libraries(test_linear_model_online auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_linear_model_online ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_linear_model_glm linear_model/test_linear_model_glm.cpp)
-target_link_libraries(test_linear_model_glm auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_linear_model_glm ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_linear_model_classifiers_cv linear_model/test_linear_model_classifiers_cv.cpp)
-target_link_libraries(test_linear_model_classifiers_cv auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_linear_model_classifiers_cv ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_linear_model_multitask linear_model/test_linear_model_multitask.cpp)
-target_link_libraries(test_linear_model_multitask auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_linear_model_multitask ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_mixture mixture/test_mixture.cpp)
-target_link_libraries(test_mixture auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_mixture ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_naive_bayes_variants naive_bayes/test_naive_bayes_variants.cpp)
-target_link_libraries(test_naive_bayes_variants auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_naive_bayes_variants ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_nearest_centroid neighbors/test_nearest_centroid.cpp)
-target_link_libraries(test_nearest_centroid auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_nearest_centroid ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_outlier_detection outlier/test_outlier_detection.cpp)
-target_link_libraries(test_outlier_detection auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_outlier_detection ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_pipeline pipeline/test_pipeline.cpp)
-target_link_libraries(test_pipeline auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_pipeline ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_preprocessing_extended preprocessing/test_preprocessing_extended.cpp)
-target_link_libraries(test_preprocessing_extended auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_preprocessing_extended ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_radiusneighborsclassifier neighbors/test_radiusneighborsclassifier.cpp)
-target_link_libraries(test_radiusneighborsclassifier auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_radiusneighborsclassifier ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_radiusneighborsregressor neighbors/test_radiusneighborsregressor.cpp)
-target_link_libraries(test_radiusneighborsregressor auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_radiusneighborsregressor ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_random utils/test_random.cpp)
-target_link_libraries(test_random auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_random ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_semi_supervised semi_supervised/test_semi_supervised.cpp)
-target_link_libraries(test_semi_supervised auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_semi_supervised ingenuityml_core GTest::GTest GTest::Main)
 
 add_executable(test_utils utils/test_utils.cpp)
-target_link_libraries(test_utils auroraml_core GTest::GTest GTest::Main)
+target_link_libraries(test_utils ingenuityml_core GTest::GTest GTest::Main)
 
 # Enable testing
 enable_testing()

@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "auroraml/impute.hpp"
+#include "ingenuityml/impute.hpp"
 #include <Eigen/Dense>
 #include <limits>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class ImputeTest : public ::testing::Test {
@@ -89,7 +89,7 @@ TEST_F(ImputeTest, KNNImputerNegativeNeighbors) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

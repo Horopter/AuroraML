@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "auroraml/gradient_boosting.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/gradient_boosting.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class GradientBoostingRegressorTest : public ::testing::Test {
@@ -82,7 +82,7 @@ TEST_F(GradientBoostingRegressorTest, GradientBoostingRegressorEmptyData) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

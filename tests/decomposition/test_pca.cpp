@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/pca.hpp"
+#include "ingenuityml/pca.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class PCATest : public ::testing::Test {
@@ -124,7 +124,7 @@ TEST_F(PCATest, PCAMean) {
 }
 
 } // namespace test
-} // namespace cxml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

@@ -6,7 +6,7 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import auroraml
+import ingenuityml
 import random
 
 class TestNaiveBayesVariants(unittest.TestCase):
@@ -17,10 +17,12 @@ class TestNaiveBayesVariants(unittest.TestCase):
         self.y_class = (np.random.randn(100) > 0).astype(np.int32)
         # For multinomial, use positive counts
         self.X_multinomial = np.abs(np.random.randint(0, 10, (100, 4))).astype(np.float64)
+        # For categorical, use small integer categories
+        self.X_categorical = np.random.randint(0, 4, (100, 4)).astype(np.float64)
 
     def test_multinomial_nb(self):
         """Test MultinomialNB"""
-        nb = auroraml.naive_bayes.MultinomialNB(alpha=1.0)
+        nb = ingenuityml.naive_bayes.MultinomialNB(alpha=1.0)
         nb.fit(self.X_multinomial, self.y_class)
         
         predictions = nb.predict(self.X_multinomial)
@@ -37,7 +39,7 @@ class TestNaiveBayesVariants(unittest.TestCase):
         # Binarize data
         X_binary = (self.X > 0).astype(np.float64)
         
-        nb = auroraml.naive_bayes.BernoulliNB(alpha=1.0, binarize=0.0)
+        nb = ingenuityml.naive_bayes.BernoulliNB(alpha=1.0, binarize=0.0)
         nb.fit(X_binary, self.y_class)
         
         predictions = nb.predict(X_binary)
@@ -48,7 +50,7 @@ class TestNaiveBayesVariants(unittest.TestCase):
 
     def test_complement_nb(self):
         """Test ComplementNB"""
-        nb = auroraml.naive_bayes.ComplementNB(alpha=1.0)
+        nb = ingenuityml.naive_bayes.ComplementNB(alpha=1.0)
         nb.fit(self.X_multinomial, self.y_class)
         
         predictions = nb.predict(self.X_multinomial)
@@ -56,6 +58,21 @@ class TestNaiveBayesVariants(unittest.TestCase):
         
         proba = nb.predict_proba(self.X_multinomial)
         self.assertEqual(proba.shape[0], self.X_multinomial.shape[0])
+
+    def test_categorical_nb(self):
+        """Test CategoricalNB"""
+        nb = ingenuityml.naive_bayes.CategoricalNB(alpha=1.0)
+        nb.fit(self.X_categorical, self.y_class)
+
+        predictions = nb.predict(self.X_categorical)
+        self.assertEqual(predictions.shape[0], self.X_categorical.shape[0])
+
+        proba = nb.predict_proba(self.X_categorical)
+        self.assertEqual(proba.shape[0], self.X_categorical.shape[0])
+        self.assertEqual(proba.shape[1], len(nb.classes()))
+
+        n_categories = nb.n_categories()
+        self.assertEqual(len(n_categories), self.X_categorical.shape[1])
 
 if __name__ == '__main__':
     # Shuffle tests within this file
@@ -69,4 +86,3 @@ if __name__ == '__main__':
     shuffled_suite = unittest.TestSuite(test_methods)
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(shuffled_suite)
-

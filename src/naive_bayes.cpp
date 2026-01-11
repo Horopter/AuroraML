@@ -1,8 +1,8 @@
-#include "auroraml/naive_bayes.hpp"
+#include "ingenuityml/naive_bayes.hpp"
 #include <cmath>
 #include <limits>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace naive_bayes {
 
 Estimator& GaussianNB::fit(const MatrixXd& X, const VectorXd& y) {
@@ -245,6 +245,6 @@ void GaussianNB::load(const std::string& filepath) {
 }
 
 } // namespace naive_bayes
-} // namespace cxml
+} // namespace ingenuityml
 
 

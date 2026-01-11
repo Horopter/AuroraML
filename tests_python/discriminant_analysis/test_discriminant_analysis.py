@@ -6,7 +6,7 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import auroraml
+import ingenuityml
 import random
 
 class TestDiscriminantAnalysis(unittest.TestCase):
@@ -18,7 +18,7 @@ class TestDiscriminantAnalysis(unittest.TestCase):
 
     def test_quadratic_discriminant_analysis(self):
         """Test QuadraticDiscriminantAnalysis"""
-        qda = auroraml.discriminant_analysis.QuadraticDiscriminantAnalysis(
+        qda = ingenuityml.discriminant_analysis.QuadraticDiscriminantAnalysis(
             regularization=0.0
         )
         qda.fit(self.X, self.y_class)
@@ -30,6 +30,22 @@ class TestDiscriminantAnalysis(unittest.TestCase):
         self.assertEqual(proba.shape[0], self.X.shape[0])
         
         classes = qda.classes()
+        self.assertGreater(len(classes), 0)
+
+    def test_linear_discriminant_analysis(self):
+        """Test LinearDiscriminantAnalysis"""
+        lda = ingenuityml.discriminant_analysis.LinearDiscriminantAnalysis(
+            regularization=0.0
+        )
+        lda.fit(self.X, self.y_class)
+
+        predictions = lda.predict(self.X)
+        self.assertEqual(predictions.shape[0], self.X.shape[0])
+
+        proba = lda.predict_proba(self.X)
+        self.assertEqual(proba.shape[0], self.X.shape[0])
+
+        classes = lda.classes()
         self.assertGreater(len(classes), 0)
 
 if __name__ == '__main__':
@@ -44,4 +60,3 @@ if __name__ == '__main__':
     shuffled_suite = unittest.TestSuite(test_methods)
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(shuffled_suite)
-

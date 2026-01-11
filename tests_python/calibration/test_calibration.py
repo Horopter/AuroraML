@@ -6,7 +6,7 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import auroraml
+import ingenuityml
 import random
 
 class TestCalibration(unittest.TestCase):
@@ -18,9 +18,9 @@ class TestCalibration(unittest.TestCase):
 
     def test_calibrated_classifier_cv(self):
         """Test CalibratedClassifierCV"""
-        base_clf = auroraml.tree.DecisionTreeClassifier(max_depth=3)
+        base_clf = ingenuityml.tree.DecisionTreeClassifier(max_depth=3)
         
-        calibrated = auroraml.calibration.CalibratedClassifierCV(
+        calibrated = ingenuityml.calibration.CalibratedClassifierCV(
             base_estimator=base_clf, method="sigmoid", cv=3
         )
         calibrated.fit(self.X, self.y_class)

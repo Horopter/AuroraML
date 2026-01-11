@@ -1,5 +1,5 @@
-#include "auroraml/preprocessing.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/preprocessing.hpp"
+#include "ingenuityml/base.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 #include <vector>
@@ -10,7 +10,7 @@
 #include <functional>
 #include <fstream>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace preprocessing {
 
 // StandardScaler implementation
@@ -361,10 +361,10 @@ bool LabelEncoder::is_fitted() const {
 }
 
 } // namespace preprocessing
-} // namespace cxml
+} // namespace ingenuityml
 
-// ---- RobustScaler implementation (in cxml::preprocessing)
-namespace auroraml {
+// ---- RobustScaler implementation (in ingenuityml::preprocessing)
+namespace ingenuityml {
 namespace preprocessing {
 
 static double _median(VectorXd v) {
@@ -445,10 +445,10 @@ Estimator& RobustScaler::set_params(const Params& params) {
 }
 
 } // namespace preprocessing
-} // namespace cxml
+} // namespace ingenuityml
 
 // ---- OneHotEncoder implementation
-namespace auroraml {
+namespace ingenuityml {
 namespace preprocessing {
 
 Estimator& OneHotEncoder::fit(const MatrixXd& X, const VectorXd& y) {
@@ -976,4 +976,4 @@ Estimator& SimpleImputer::set_params(const Params& params) {
 }
 
 } // namespace preprocessing
-} // namespace cxml
+} // namespace ingenuityml

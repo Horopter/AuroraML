@@ -1,12 +1,85 @@
-#include "auroraml/svm.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/svm.hpp"
+#include "ingenuityml/base.hpp"
 #include <random>
 #include <set>
 #include <algorithm>
 #include <numeric>
+#include <cmath>
+#include <limits>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace svm {
+
+namespace {
+
+constexpr double kEps = 1e-12;
+
+double kernel_value(const VectorXd& x1, const VectorXd& x2,
+                    const std::string& kernel, double gamma,
+                    double degree, double coef0) {
+    if (kernel == "linear") {
+        return x1.dot(x2);
+    }
+    if (kernel == "rbf") {
+        double dist = (x1 - x2).squaredNorm();
+        return std::exp(-gamma * dist);
+    }
+    if (kernel == "poly") {
+        return std::pow(gamma * x1.dot(x2) + coef0, degree);
+    }
+    if (kernel == "sigmoid") {
+        return std::tanh(gamma * x1.dot(x2) + coef0);
+    }
+    // Default to linear
+    return x1.dot(x2);
+}
+
+MatrixXd compute_kernel_matrix(const MatrixXd& A, const MatrixXd& B,
+                               const std::string& kernel, double gamma,
+                               double degree, double coef0) {
+    MatrixXd K(A.rows(), B.rows());
+    for (int i = 0; i < A.rows(); ++i) {
+        for (int j = 0; j < B.rows(); ++j) {
+            K(i, j) = kernel_value(A.row(i), B.row(j), kernel, gamma, degree, coef0);
+        }
+    }
+    return K;
+}
+
+double sigmoid(double x) {
+    if (x >= 0.0) {
+        double z = std::exp(-x);
+        return 1.0 / (1.0 + z);
+    }
+    double z = std::exp(x);
+    return z / (1.0 + z);
+}
+
+VectorXi unique_classes_from_y(const VectorXd& y) {
+    std::set<int> unique;
+    for (int i = 0; i < y.size(); ++i) {
+        unique.insert(static_cast<int>(y(i)));
+    }
+    VectorXi classes(static_cast<int>(unique.size()));
+    int idx = 0;
+    for (int cls : unique) {
+        classes(idx++) = cls;
+    }
+    return classes;
+}
+
+VectorXd solve_kernel_system(const MatrixXd& K, const VectorXd& y, double lambda) {
+    MatrixXd K_reg = K;
+    K_reg.diagonal().array() += lambda;
+    Eigen::LDLT<MatrixXd> ldlt(K_reg);
+    if (ldlt.info() == Eigen::Success) {
+        return ldlt.solve(y);
+    }
+    Eigen::CompleteOrthogonalDecomposition<MatrixXd> cod(K_reg);
+    return cod.solve(y);
+}
+
+} // namespace
 
 Estimator& LinearSVC::fit(const MatrixXd& X, const VectorXd& y_in) {
     validation::check_X_y(X, y_in);
@@ -148,8 +221,10 @@ void LinearSVC::load(const std::string& filepath) {
 }
 
 // SVR implementation
-SVR::SVR(double C, double epsilon, int max_iter, double lr, int random_state)
-    : C_(C), epsilon_(epsilon), max_iter_(max_iter), lr_(lr), random_state_(random_state) {}
+SVR::SVR(double C, double epsilon, int max_iter, double lr, int random_state,
+         const std::string& kernel, double gamma, double degree, double coef0)
+    : C_(C), epsilon_(epsilon), kernel_(kernel), gamma_(gamma), degree_(degree), coef0_(coef0),
+      max_iter_(max_iter), lr_(lr), random_state_(random_state) {}
 
 Estimator& SVR::fit(const MatrixXd& X, const VectorXd& y) {
     validation::check_X_y(X, y);
@@ -166,24 +241,38 @@ Estimator& SVR::fit(const MatrixXd& X, const VectorXd& y) {
     if (epsilon_ < 0.0) {
         throw std::invalid_argument("epsilon must be non-negative");
     }
-    
+
     const double lambda = 1.0 / std::max(C_, 1e-12);
     int n_samples = X.rows();
     int n_features = X.cols();
-    MatrixXd X_aug(n_samples, n_features + 1);
-    X_aug.leftCols(n_features) = X;
-    X_aug.col(n_features) = VectorXd::Ones(n_samples);
-    
-    MatrixXd XtX = X_aug.transpose() * X_aug;
-    MatrixXd reg = MatrixXd::Identity(n_features + 1, n_features + 1);
-    reg(n_features, n_features) = 0.0; // Don't regularize intercept
-    MatrixXd A = XtX + lambda * reg;
-    VectorXd Xty = X_aug.transpose() * y;
-    VectorXd coeffs = A.ldlt().solve(Xty);
-    
-    w_ = coeffs.head(n_features);
-    b_ = coeffs(n_features);
-    
+
+    if (kernel_ == "linear") {
+        MatrixXd X_aug(n_samples, n_features + 1);
+        X_aug.leftCols(n_features) = X;
+        X_aug.col(n_features) = VectorXd::Ones(n_samples);
+
+        MatrixXd XtX = X_aug.transpose() * X_aug;
+        MatrixXd reg = MatrixXd::Identity(n_features + 1, n_features + 1);
+        reg(n_features, n_features) = 0.0; // Don't regularize intercept
+        MatrixXd A = XtX + lambda * reg;
+        VectorXd Xty = X_aug.transpose() * y;
+        VectorXd coeffs = A.ldlt().solve(Xty);
+
+        w_ = coeffs.head(n_features);
+        b_ = coeffs(n_features);
+        alpha_.resize(0);
+        X_train_.resize(0, 0);
+    } else {
+        if (gamma_ <= 0.0) {
+            gamma_ = 1.0 / std::max(1, n_features);
+        }
+        X_train_ = X;
+        MatrixXd K = compute_kernel_matrix(X_train_, X_train_, kernel_, gamma_, degree_, coef0_);
+        alpha_ = solve_kernel_system(K, y, lambda);
+        w_.resize(0);
+        b_ = 0.0;
+    }
+
     fitted_ = true;
     return *this;
 }
@@ -194,22 +283,36 @@ VectorXd SVR::predict(const MatrixXd& X) const {
     }
     validation::check_X(X);
     
-    if (X.cols() != w_.size()) {
+    if (kernel_ == "linear") {
+        if (X.cols() != w_.size()) {
+            throw std::runtime_error("X must have the same number of features as training data");
+        }
+        VectorXd predictions(X.rows());
+        for (int i = 0; i < X.rows(); ++i) {
+            predictions(i) = X.row(i).dot(w_) + b_;
+        }
+        return predictions;
+    }
+
+    if (X_train_.rows() == 0) {
+        throw std::runtime_error("SVR kernel model not initialized");
+    }
+    if (X.cols() != X_train_.cols()) {
         throw std::runtime_error("X must have the same number of features as training data");
     }
-    
-    VectorXd predictions(X.rows());
-    for (int i = 0; i < X.rows(); ++i) {
-        predictions(i) = X.row(i).dot(w_) + b_;
-    }
-    
-    return predictions;
+    double gamma_use = (gamma_ <= 0.0) ? 1.0 / std::max(1, X_train_.cols()) : gamma_;
+    MatrixXd K = compute_kernel_matrix(X, X_train_, kernel_, gamma_use, degree_, coef0_);
+    return K * alpha_;
 }
 
 Params SVR::get_params() const {
     return {
         {"C", std::to_string(C_)},
         {"epsilon", std::to_string(epsilon_)},
+        {"kernel", kernel_},
+        {"gamma", std::to_string(gamma_)},
+        {"degree", std::to_string(degree_)},
+        {"coef0", std::to_string(coef0_)},
         {"max_iter", std::to_string(max_iter_)},
         {"lr", std::to_string(lr_)},
         {"random_state", std::to_string(random_state_)}
@@ -219,6 +322,10 @@ Params SVR::get_params() const {
 Estimator& SVR::set_params(const Params& params) {
     C_ = utils::get_param_double(params, "C", C_);
     epsilon_ = utils::get_param_double(params, "epsilon", epsilon_);
+    kernel_ = utils::get_param_string(params, "kernel", kernel_);
+    gamma_ = utils::get_param_double(params, "gamma", gamma_);
+    degree_ = utils::get_param_double(params, "degree", degree_);
+    coef0_ = utils::get_param_double(params, "coef0", coef0_);
     max_iter_ = utils::get_param_int(params, "max_iter", max_iter_);
     lr_ = utils::get_param_double(params, "lr", lr_);
     random_state_ = utils::get_param_int(params, "random_state", random_state_);
@@ -669,5 +776,127 @@ Estimator& OneClassSVM::set_params(const Params& params) {
     return *this;
 }
 
+// SVC implementation
+
+SVC::SVC(const std::string& kernel, double C, int max_iter, double lr, int random_state,
+         double gamma, double degree, double coef0)
+    : kernel_(kernel),
+      C_(C),
+      gamma_(gamma),
+      degree_(degree),
+      coef0_(coef0),
+      max_iter_(max_iter),
+      lr_(lr),
+      random_state_(random_state) {}
+
+Estimator& SVC::fit(const MatrixXd& X, const VectorXd& y) {
+    validation::check_X_y(X, y);
+    if (C_ <= 0.0) {
+        throw std::invalid_argument("C must be positive");
+    }
+    X_train_ = X;
+    classes_ = unique_classes_from_y(y);
+    if (classes_.size() == 0) {
+        throw std::invalid_argument("SVC requires at least one class");
+    }
+    if (gamma_ <= 0.0) {
+        gamma_ = 1.0 / std::max(1, X.cols());
+    }
+
+    int n_samples = X.rows();
+    int n_classes = classes_.size();
+    alphas_.resize(n_samples, n_classes);
+
+    MatrixXd K = compute_kernel_matrix(X_train_, X_train_, kernel_, gamma_, degree_, coef0_);
+    double lambda = 1.0 / std::max(C_, 1e-12);
+
+    for (int c = 0; c < n_classes; ++c) {
+        VectorXd y_bin(n_samples);
+        for (int i = 0; i < n_samples; ++i) {
+            y_bin(i) = (static_cast<int>(y(i)) == classes_(c)) ? 1.0 : -1.0;
+        }
+        alphas_.col(c) = solve_kernel_system(K, y_bin, lambda);
+    }
+
+    fitted_ = true;
+    return *this;
+}
+
+MatrixXd SVC::predict_proba(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("SVC must be fitted before predict_proba");
+    }
+    if (X.cols() != X_train_.cols()) {
+        throw std::invalid_argument("X must have the same number of features as training data");
+    }
+    double gamma_use = (gamma_ <= 0.0) ? 1.0 / std::max(1, X_train_.cols()) : gamma_;
+    MatrixXd K = compute_kernel_matrix(X, X_train_, kernel_, gamma_use, degree_, coef0_);
+    MatrixXd scores = K * alphas_;
+
+    MatrixXd proba(scores.rows(), scores.cols());
+    for (int i = 0; i < scores.rows(); ++i) {
+        double row_sum = 0.0;
+        for (int c = 0; c < scores.cols(); ++c) {
+            double p = sigmoid(scores(i, c));
+            proba(i, c) = p;
+            row_sum += p;
+        }
+        if (row_sum > 0.0) {
+            proba.row(i) /= row_sum;
+        } else {
+            proba.row(i).setConstant(1.0 / std::max(1, scores.cols()));
+        }
+    }
+    return proba;
+}
+
+VectorXi SVC::predict_classes(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("SVC must be fitted before predict");
+    }
+    MatrixXd proba = predict_proba(X);
+    VectorXi preds(proba.rows());
+    for (int i = 0; i < proba.rows(); ++i) {
+        Eigen::Index max_idx = 0;
+        proba.row(i).maxCoeff(&max_idx);
+        preds(i) = classes_(static_cast<int>(max_idx));
+    }
+    return preds;
+}
+
+VectorXd SVC::decision_function(const MatrixXd& X) const {
+    MatrixXd proba = predict_proba(X);
+    VectorXd decision(proba.rows());
+    for (int i = 0; i < proba.rows(); ++i) {
+        decision(i) = proba.row(i).maxCoeff();
+    }
+    return decision;
+}
+
+Params SVC::get_params() const {
+    Params params;
+    params["kernel"] = kernel_;
+    params["C"] = std::to_string(C_);
+    params["gamma"] = std::to_string(gamma_);
+    params["degree"] = std::to_string(degree_);
+    params["coef0"] = std::to_string(coef0_);
+    params["max_iter"] = std::to_string(max_iter_);
+    params["lr"] = std::to_string(lr_);
+    params["random_state"] = std::to_string(random_state_);
+    return params;
+}
+
+Estimator& SVC::set_params(const Params& params) {
+    kernel_ = utils::get_param_string(params, "kernel", kernel_);
+    C_ = utils::get_param_double(params, "C", C_);
+    gamma_ = utils::get_param_double(params, "gamma", gamma_);
+    degree_ = utils::get_param_double(params, "degree", degree_);
+    coef0_ = utils::get_param_double(params, "coef0", coef0_);
+    max_iter_ = utils::get_param_int(params, "max_iter", max_iter_);
+    lr_ = utils::get_param_double(params, "lr", lr_);
+    random_state_ = utils::get_param_int(params, "random_state", random_state_);
+    return *this;
+}
+
 } // namespace svm
-} // namespace auroraml
+} // namespace ingenuityml

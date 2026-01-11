@@ -1,5 +1,5 @@
-#include "auroraml/metrics.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/metrics.hpp"
+#include "ingenuityml/base.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 #include <numeric>
@@ -11,7 +11,7 @@
 #include <set>
 #include <limits>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace metrics {
 
 // Classification Metrics
@@ -1337,4 +1337,4 @@ std::vector<int> unique_values(const VectorXi& vec) {
 }
 
 } // namespace metrics
-} // namespace cxml
+} // namespace ingenuityml

@@ -6,7 +6,7 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import auroraml
+import ingenuityml
 import random
 
 class TestCompose(unittest.TestCase):
@@ -17,14 +17,14 @@ class TestCompose(unittest.TestCase):
 
     def test_column_transformer(self):
         """Test ColumnTransformer"""
-        scaler1 = auroraml.preprocessing.StandardScaler()
-        scaler2 = auroraml.preprocessing.MinMaxScaler()
+        scaler1 = ingenuityml.preprocessing.StandardScaler()
+        scaler2 = ingenuityml.preprocessing.MinMaxScaler()
         
         transformers = [
             ("scaler1", scaler1, [0, 1]),
             ("scaler2", scaler2, [2, 3])
         ]
-        ct = auroraml.compose.ColumnTransformer(transformers, remainder="drop")
+        ct = ingenuityml.compose.ColumnTransformer(transformers, remainder="drop")
         
         ct.fit(self.X, self.y)
         X_transformed = ct.transform(self.X)
@@ -35,9 +35,9 @@ class TestCompose(unittest.TestCase):
 
     def test_column_transformer_remainder(self):
         """Test ColumnTransformer with remainder passthrough"""
-        scaler = auroraml.preprocessing.StandardScaler()
+        scaler = ingenuityml.preprocessing.StandardScaler()
         transformers = [("scaler", scaler, [0])]
-        ct = auroraml.compose.ColumnTransformer(transformers, remainder="passthrough")
+        ct = ingenuityml.compose.ColumnTransformer(transformers, remainder="passthrough")
         
         ct.fit(self.X, self.y)
         X_transformed = ct.transform(self.X)
@@ -47,10 +47,10 @@ class TestCompose(unittest.TestCase):
 
     def test_transformed_target_regressor(self):
         """Test TransformedTargetRegressor"""
-        regressor = auroraml.linear_model.LinearRegression()
-        transformer = auroraml.preprocessing.StandardScaler()
+        regressor = ingenuityml.linear_model.LinearRegression()
+        transformer = ingenuityml.preprocessing.StandardScaler()
         
-        ttr = auroraml.compose.TransformedTargetRegressor(
+        ttr = ingenuityml.compose.TransformedTargetRegressor(
             regressor=regressor,
             transformer=transformer
         )
@@ -63,8 +63,8 @@ class TestCompose(unittest.TestCase):
 
     def test_transformed_target_regressor_no_transformer(self):
         """Test TransformedTargetRegressor without transformer"""
-        regressor = auroraml.linear_model.LinearRegression()
-        ttr = auroraml.compose.TransformedTargetRegressor(regressor=regressor)
+        regressor = ingenuityml.linear_model.LinearRegression()
+        ttr = ingenuityml.compose.TransformedTargetRegressor(regressor=regressor)
         
         ttr.fit(self.X, self.y)
         predictions = ttr.predict(self.X)

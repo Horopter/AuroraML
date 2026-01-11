@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML NearestCentroid
+Test Suite for IngenuityML NearestCentroid
 Tests NearestCentroid classifier
 """
 
@@ -37,9 +37,9 @@ class TestNearestCentroid(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml
+        import ingenuityml
         
-        model = auroraml.NearestCentroid()
+        model = ingenuityml.NearestCentroid()
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -50,9 +50,9 @@ class TestNearestCentroid(unittest.TestCase):
         
     def test_predict_proba(self):
         """Test probability prediction"""
-        import auroraml
+        import ingenuityml
         
-        model = auroraml.NearestCentroid()
+        model = ingenuityml.NearestCentroid()
         model.fit(self.X, self.y)
         probabilities = model.predict_proba(self.X_test)
         
@@ -64,9 +64,9 @@ class TestNearestCentroid(unittest.TestCase):
         
     def test_decision_function(self):
         """Test decision function"""
-        import auroraml
+        import ingenuityml
         
-        model = auroraml.NearestCentroid()
+        model = ingenuityml.NearestCentroid()
         model.fit(self.X, self.y)
         decision = model.decision_function(self.X_test)
         
@@ -75,9 +75,9 @@ class TestNearestCentroid(unittest.TestCase):
         
     def test_centroid_properties(self):
         """Test that centroids are computed correctly"""
-        import auroraml
+        import ingenuityml
         
-        model = auroraml.NearestCentroid()
+        model = ingenuityml.NearestCentroid()
         model.fit(self.X, self.y)
         
         # Check that predictions are reasonable
@@ -88,10 +88,10 @@ class TestNearestCentroid(unittest.TestCase):
         
     def test_binary_classification(self):
         """Test with binary classification"""
-        import auroraml
+        import ingenuityml
         
         y_binary = (self.X[:, 0] > 0).astype(np.int32)
-        model = auroraml.NearestCentroid()
+        model = ingenuityml.NearestCentroid()
         model.fit(self.X, y_binary)
         predictions = model.predict(self.X_test)
         
@@ -99,32 +99,32 @@ class TestNearestCentroid(unittest.TestCase):
         
     def test_get_params(self):
         """Test parameter retrieval"""
-        import auroraml
+        import ingenuityml
         
-        model = auroraml.NearestCentroid()
+        model = ingenuityml.NearestCentroid()
         params = model.get_params()
         self.assertIsInstance(params, dict)
         
     def test_is_fitted(self):
         """Test fitted state"""
-        import auroraml
+        import ingenuityml
         
-        model = auroraml.NearestCentroid()
+        model = ingenuityml.NearestCentroid()
         self.assertFalse(model.is_fitted())
         model.fit(self.X, self.y)
         self.assertTrue(model.is_fitted())
         
     def test_multiclass_classification(self):
         """Test with multiclass classification"""
-        import auroraml
-        import auroraml.metrics as aml_metrics
+        import ingenuityml
+        import ingenuityml.metrics as ing_metrics
         
-        model = auroraml.NearestCentroid()
+        model = ingenuityml.NearestCentroid()
         model.fit(self.X, self.y)
         predictions = model.predict(self.X)
         
         # Should have reasonable accuracy
-        accuracy = aml_metrics.accuracy_score(self.y, predictions)
+        accuracy = ing_metrics.accuracy_score(self.y, predictions)
         self.assertGreater(accuracy, 0.3)  # Better than random for 3 classes
 
 if __name__ == '__main__':

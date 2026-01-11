@@ -1,9 +1,9 @@
-#include "auroraml/feature_selection.hpp"
-#include "auroraml/base.hpp"
-#include "auroraml/metrics.hpp"
-#include "auroraml/model_selection.hpp"
-#include "auroraml/linear_model.hpp"
-#include "auroraml/svm.hpp"
+#include "ingenuityml/feature_selection.hpp"
+#include "ingenuityml/base.hpp"
+#include "ingenuityml/metrics.hpp"
+#include "ingenuityml/model_selection.hpp"
+#include "ingenuityml/linear_model.hpp"
+#include "ingenuityml/svm.hpp"
 #include <cmath>
 #include <algorithm>
 #include <numeric>
@@ -12,7 +12,7 @@
 #include <set>
 #include <limits>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace feature_selection {
 
 namespace {
@@ -1114,4 +1114,4 @@ double chi2(const VectorXd& X_feature, const VectorXi& y) {
 } // namespace scores
 
 } // namespace feature_selection
-} // namespace auroraml
+} // namespace ingenuityml

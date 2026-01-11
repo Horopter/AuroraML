@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML KMeans Algorithm
+Test Suite for IngenuityML KMeans Algorithm
 Includes positive and negative test cases
 All tests run in shuffled order with 5-minute timeout
 """
@@ -32,9 +32,9 @@ class TestKMeans(unittest.TestCase):
     # Positive test cases
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.KMeans(n_clusters=3, random_state=42)
+        model = ing_cluster.KMeans(n_clusters=3, random_state=42)
         model.fit(self.X, self.y_dummy)
         
         labels = model.predict_labels(self.X)
@@ -45,9 +45,9 @@ class TestKMeans(unittest.TestCase):
         
     def test_cluster_centers(self):
         """Test cluster centers"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.KMeans(n_clusters=3, random_state=42)
+        model = ing_cluster.KMeans(n_clusters=3, random_state=42)
         model.fit(self.X, self.y_dummy)
         
         centers = model.cluster_centers()
@@ -57,9 +57,9 @@ class TestKMeans(unittest.TestCase):
         
     def test_inertia(self):
         """Test inertia calculation"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.KMeans(n_clusters=3, random_state=42)
+        model = ing_cluster.KMeans(n_clusters=3, random_state=42)
         model.fit(self.X, self.y_dummy)
         
         inertia = model.inertia()
@@ -69,10 +69,10 @@ class TestKMeans(unittest.TestCase):
         
     def test_different_k(self):
         """Test with different numbers of clusters"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
         for k in [2, 3, 4]:
-            model = aml_cluster.KMeans(n_clusters=k, random_state=42)
+            model = ing_cluster.KMeans(n_clusters=k, random_state=42)
             model.fit(self.X, self.y_dummy)
             labels = model.predict_labels(self.X)
             self.assertEqual(len(labels), len(self.X))
@@ -81,9 +81,9 @@ class TestKMeans(unittest.TestCase):
             
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.KMeans(n_clusters=3, random_state=42)
+        model = ing_cluster.KMeans(n_clusters=3, random_state=42)
         
         params = model.get_params()
         self.assertIsInstance(params, dict)
@@ -91,9 +91,9 @@ class TestKMeans(unittest.TestCase):
         
     def test_is_fitted(self):
         """Test is_fitted method"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.KMeans(n_clusters=3)
+        model = ing_cluster.KMeans(n_clusters=3)
         self.assertFalse(model.is_fitted())
         
         model.fit(self.X, self.y_dummy)
@@ -102,48 +102,48 @@ class TestKMeans(unittest.TestCase):
     # Negative test cases
     def test_empty_data(self):
         """Test with empty data - should raise error"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.KMeans(n_clusters=3)
+        model = ing_cluster.KMeans(n_clusters=3)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(np.array([]).reshape(0, 2), np.array([]).reshape(0, 1))
             
     def test_zero_clusters(self):
         """Test with zero clusters - should raise error"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.KMeans(n_clusters=0)
+        model = ing_cluster.KMeans(n_clusters=0)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(self.X, self.y_dummy)
             
     def test_negative_clusters(self):
         """Test with negative clusters - should raise error"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.KMeans(n_clusters=-1)
+        model = ing_cluster.KMeans(n_clusters=-1)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(self.X, self.y_dummy)
             
     def test_more_clusters_than_samples(self):
         """Test with more clusters than samples - should raise error"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
         X_small = self.X[:5]
         y_small = self.y_dummy[:5]
         
-        model = aml_cluster.KMeans(n_clusters=10)
+        model = ing_cluster.KMeans(n_clusters=10)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(X_small, y_small)
             
     def test_not_fitted_predict(self):
         """Test predict without fitting - should raise error"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.KMeans(n_clusters=3)
+        model = ing_cluster.KMeans(n_clusters=3)
         
         with self.assertRaises((RuntimeError, ValueError)):
             model.predict_labels(self.X)

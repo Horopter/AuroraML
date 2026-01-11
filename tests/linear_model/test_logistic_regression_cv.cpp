@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
-#include "auroraml/linear_model.hpp"
-#include "auroraml/model_selection.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/linear_model.hpp"
+#include "ingenuityml/model_selection.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class LogisticRegressionCVTest : public ::testing::Test {
@@ -160,7 +160,7 @@ TEST_F(LogisticRegressionCVTest, InvalidKFold) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

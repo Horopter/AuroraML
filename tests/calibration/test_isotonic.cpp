@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "auroraml/isotonic.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/isotonic.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class IsotonicTest : public ::testing::Test {
@@ -80,7 +80,7 @@ TEST_F(IsotonicTest, IsotonicRegressionDimensionMismatch) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

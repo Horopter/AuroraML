@@ -1,6 +1,6 @@
-#include "auroraml/adaboost.hpp"
-#include "auroraml/base.hpp"
-#include "auroraml/tree.hpp"
+#include "ingenuityml/adaboost.hpp"
+#include "ingenuityml/base.hpp"
+#include "ingenuityml/tree.hpp"
 #include <Eigen/Dense>
 #include <vector>
 #include <random>
@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace ensemble {
 
 // AdaBoost Classifier Implementation
@@ -318,5 +318,5 @@ Estimator& AdaBoostRegressor::set_params(const Params& params) {
 }
 
 } // namespace ensemble
-} // namespace cxml
+} // namespace ingenuityml
 

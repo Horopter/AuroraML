@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
-#include "auroraml/calibration.hpp"
-#include "auroraml/linear_model.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/calibration.hpp"
+#include "ingenuityml/linear_model.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 #include <memory>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class CalibrationTest : public ::testing::Test {
@@ -79,7 +79,7 @@ TEST_F(CalibrationTest, CalibratedClassifierCVEmptyData) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/svm.hpp"
+#include "ingenuityml/svm.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class SVMTest : public ::testing::Test {
@@ -337,7 +337,7 @@ TEST_F(SVMTest, LinearSVCLoadNonexistentFile) {
 }
 
 } // namespace test
-} // namespace cxml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

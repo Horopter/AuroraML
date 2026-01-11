@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(auroraml)
+project(ingenuityml)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -29,25 +29,25 @@ find_package(GTest QUIET)
 include_directories(include)
 
 # Collect all source files
-file(GLOB_RECURSE AURORAML_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
+file(GLOB_RECURSE INGENUITYML_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 
 # Create the core library
-add_library(auroraml_core STATIC ${AURORAML_SOURCES})
+add_library(ingenuityml_core STATIC ${INGENUITYML_SOURCES})
 
 # Find and configure OpenMP
 find_package(OpenMP QUIET)
 if(OpenMP_CXX_FOUND)
-    target_link_libraries(auroraml_core PUBLIC OpenMP::OpenMP_CXX)
-    target_compile_options(auroraml_core PUBLIC ${OpenMP_CXX_FLAGS})
+    target_link_libraries(ingenuityml_core PUBLIC OpenMP::OpenMP_CXX)
+    target_compile_options(ingenuityml_core PUBLIC ${OpenMP_CXX_FLAGS})
     add_compile_definitions(_OPENMP)
     message(STATUS "OpenMP found: ${OpenMP_CXX_VERSION}")
     set(OPENMP_AVAILABLE TRUE)
 else()
     # Try to find OpenMP manually on macOS
     if(APPLE)
-        target_compile_options(auroraml_core PUBLIC -Xpreprocessor -fopenmp)
-        target_include_directories(auroraml_core PUBLIC /opt/homebrew/opt/libomp/include)
-        target_link_libraries(auroraml_core PUBLIC -L/opt/homebrew/opt/libomp/lib -lomp)
+        target_compile_options(ingenuityml_core PUBLIC -Xpreprocessor -fopenmp)
+        target_include_directories(ingenuityml_core PUBLIC /opt/homebrew/opt/libomp/include)
+        target_link_libraries(ingenuityml_core PUBLIC -L/opt/homebrew/opt/libomp/lib -lomp)
         message(STATUS "OpenMP configured manually for macOS")
         set(OPENMP_AVAILABLE TRUE)
     else()
@@ -56,18 +56,18 @@ else()
     endif()
 endif()
 
-target_link_libraries(auroraml_core PUBLIC Eigen3::Eigen)
+target_link_libraries(ingenuityml_core PUBLIC Eigen3::Eigen)
 
 # Create Python extension
-pybind11_add_module(auroraml python/auroraml_bindings.cpp)
-target_link_libraries(auroraml PRIVATE auroraml_core Eigen3::Eigen)
+pybind11_add_module(ingenuityml python/ingenuityml_bindings.cpp)
+target_link_libraries(ingenuityml PRIVATE ingenuityml_core Eigen3::Eigen)
 
 # Add OpenMP to Python extension if available
 if(OPENMP_AVAILABLE)
     if(OpenMP_CXX_FOUND)
-        target_link_libraries(auroraml PRIVATE OpenMP::OpenMP_CXX)
+        target_link_libraries(ingenuityml PRIVATE OpenMP::OpenMP_CXX)
     else()
-        target_link_libraries(auroraml PRIVATE -L/opt/homebrew/opt/libomp/lib -lomp)
+        target_link_libraries(ingenuityml PRIVATE -L/opt/homebrew/opt/libomp/lib -lomp)
     endif()
 endif()
 

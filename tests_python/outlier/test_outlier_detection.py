@@ -6,7 +6,7 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import auroraml
+import ingenuityml
 import random
 
 class TestOutlierDetection(unittest.TestCase):
@@ -21,7 +21,7 @@ class TestOutlierDetection(unittest.TestCase):
 
     def test_isolation_forest(self):
         """Test IsolationForest"""
-        iso = auroraml.outlier_detection.IsolationForest(
+        iso = ingenuityml.outlier_detection.IsolationForest(
             n_estimators=10, contamination=0.1, random_state=42
         )
         iso.fit(self.X_outliers, None)
@@ -40,7 +40,7 @@ class TestOutlierDetection(unittest.TestCase):
 
     def test_local_outlier_factor(self):
         """Test LocalOutlierFactor"""
-        lof = auroraml.outlier_detection.LocalOutlierFactor(
+        lof = ingenuityml.outlier_detection.LocalOutlierFactor(
             n_neighbors=10, contamination=0.1
         )
         lof.fit(self.X_outliers, None)

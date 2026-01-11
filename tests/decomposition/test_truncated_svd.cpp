@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/truncated_svd.hpp"
+#include "ingenuityml/truncated_svd.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class TruncatedSVDTest : public ::testing::Test {
@@ -76,7 +76,7 @@ TEST_F(TruncatedSVDTest, TruncatedSVDZeroComponents) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

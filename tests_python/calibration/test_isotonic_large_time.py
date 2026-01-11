@@ -6,7 +6,7 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import auroraml
+import ingenuityml
 import random
 
 class TestIsotonic(unittest.TestCase):
@@ -18,7 +18,7 @@ class TestIsotonic(unittest.TestCase):
 
     def test_isotonic_regression(self):
         """Test IsotonicRegression"""
-        iso = auroraml.isotonic.IsotonicRegression(increasing=True)
+        iso = ingenuityml.isotonic.IsotonicRegression(increasing=True)
         iso.fit(self.X, self.y)
         
         predictions = iso.predict(self.X)
@@ -30,7 +30,7 @@ class TestIsotonic(unittest.TestCase):
 
     def test_isotonic_regression_decreasing(self):
         """Test IsotonicRegression with decreasing=True"""
-        iso = auroraml.isotonic.IsotonicRegression(increasing=False)
+        iso = ingenuityml.isotonic.IsotonicRegression(increasing=False)
         iso.fit(self.X, self.y)
         
         predictions = iso.predict(self.X)

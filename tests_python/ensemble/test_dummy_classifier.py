@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML DummyClassifier
+Test Suite for IngenuityML DummyClassifier
 Tests DummyClassifier for baseline comparisons
 """
 
@@ -25,9 +25,9 @@ class TestDummyClassifier(unittest.TestCase):
         
     def test_most_frequent_strategy(self):
         """Test most_frequent strategy"""
-        import auroraml.ensemble as aml_ensemble
+        import ingenuityml.ensemble as ing_ensemble
         
-        model = aml_ensemble.DummyClassifier(strategy="most_frequent")
+        model = ing_ensemble.DummyClassifier(strategy="most_frequent")
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -38,9 +38,9 @@ class TestDummyClassifier(unittest.TestCase):
         
     def test_uniform_strategy(self):
         """Test uniform strategy"""
-        import auroraml.ensemble as aml_ensemble
+        import ingenuityml.ensemble as ing_ensemble
         
-        model = aml_ensemble.DummyClassifier(strategy="uniform")
+        model = ing_ensemble.DummyClassifier(strategy="uniform")
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -51,9 +51,9 @@ class TestDummyClassifier(unittest.TestCase):
         
     def test_predict_proba_most_frequent(self):
         """Test probability prediction with most_frequent strategy"""
-        import auroraml.ensemble as aml_ensemble
+        import ingenuityml.ensemble as ing_ensemble
         
-        model = aml_ensemble.DummyClassifier(strategy="most_frequent")
+        model = ing_ensemble.DummyClassifier(strategy="most_frequent")
         model.fit(self.X, self.y)
         probabilities = model.predict_proba(self.X_test)
         
@@ -63,9 +63,9 @@ class TestDummyClassifier(unittest.TestCase):
         
     def test_predict_proba_uniform(self):
         """Test probability prediction with uniform strategy"""
-        import auroraml.ensemble as aml_ensemble
+        import ingenuityml.ensemble as ing_ensemble
         
-        model = aml_ensemble.DummyClassifier(strategy="uniform")
+        model = ing_ensemble.DummyClassifier(strategy="uniform")
         model.fit(self.X, self.y)
         probabilities = model.predict_proba(self.X_test)
         
@@ -78,28 +78,28 @@ class TestDummyClassifier(unittest.TestCase):
         
     def test_get_params(self):
         """Test parameter retrieval"""
-        import auroraml.ensemble as aml_ensemble
+        import ingenuityml.ensemble as ing_ensemble
         
-        model = aml_ensemble.DummyClassifier(strategy="most_frequent")
+        model = ing_ensemble.DummyClassifier(strategy="most_frequent")
         params = model.get_params()
         self.assertIn('strategy', params)
         self.assertEqual(params['strategy'], 'most_frequent')
         
     def test_is_fitted(self):
         """Test fitted state"""
-        import auroraml.ensemble as aml_ensemble
+        import ingenuityml.ensemble as ing_ensemble
         
-        model = aml_ensemble.DummyClassifier()
+        model = ing_ensemble.DummyClassifier()
         self.assertFalse(model.is_fitted())
         model.fit(self.X, self.y)
         self.assertTrue(model.is_fitted())
         
     def test_binary_classification(self):
         """Test with binary classification"""
-        import auroraml.ensemble as aml_ensemble
+        import ingenuityml.ensemble as ing_ensemble
         
         y_binary = np.random.randint(0, 2, 100).astype(np.int32)
-        model = aml_ensemble.DummyClassifier(strategy="most_frequent")
+        model = ing_ensemble.DummyClassifier(strategy="most_frequent")
         model.fit(self.X, y_binary)
         predictions = model.predict(self.X_test)
         

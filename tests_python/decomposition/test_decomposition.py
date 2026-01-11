@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import random
 """
-Test Suite for AuroraML Decomposition
+Test Suite for IngenuityML Decomposition
 Tests PCA, TruncatedSVD, and LDA algorithms
 """
 
@@ -24,9 +24,9 @@ class TestPCA(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and transform functionality"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.PCA(n_components=3)
+        model = ing_decomp.PCA(n_components=3)
         model.fit(self.X, self.y_dummy)
         X_transformed = model.transform(self.X)
         
@@ -35,9 +35,9 @@ class TestPCA(unittest.TestCase):
         
     def test_fit_transform(self):
         """Test fit_transform method"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.PCA(n_components=3)
+        model = ing_decomp.PCA(n_components=3)
         X_transformed = model.fit_transform(self.X, self.y_dummy)
         
         self.assertEqual(X_transformed.shape, (100, 3))
@@ -45,9 +45,9 @@ class TestPCA(unittest.TestCase):
         
     def test_inverse_transform(self):
         """Test inverse_transform method"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.PCA(n_components=3)
+        model = ing_decomp.PCA(n_components=3)
         model.fit(self.X, self.y_dummy)
         X_transformed = model.transform(self.X)
         X_inverse = model.inverse_transform(X_transformed)
@@ -57,11 +57,11 @@ class TestPCA(unittest.TestCase):
         
     def test_different_n_components(self):
         """Test with different n_components values"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
         n_components_values = [1, 3, 5, 8]
         for n_components in n_components_values:
-            model = aml_decomp.PCA(n_components=n_components)
+            model = ing_decomp.PCA(n_components=n_components)
             model.fit(self.X, self.y_dummy)
             X_transformed = model.transform(self.X)
             
@@ -69,9 +69,9 @@ class TestPCA(unittest.TestCase):
             
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.PCA(n_components=3, whiten=True)
+        model = ing_decomp.PCA(n_components=3, whiten=True)
         
         # Test default parameters
         params = model.get_params()
@@ -84,9 +84,9 @@ class TestPCA(unittest.TestCase):
         
     def test_explained_variance(self):
         """Test explained variance ratio"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.PCA(n_components=3)
+        model = ing_decomp.PCA(n_components=3)
         model.fit(self.X, self.y_dummy)
         
         # Check that explained variance ratio is available
@@ -99,9 +99,9 @@ class TestPCA(unittest.TestCase):
             
     def test_performance(self):
         """Test model performance"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.PCA(n_components=3)
+        model = ing_decomp.PCA(n_components=3)
         model.fit(self.X, self.y_dummy)
         X_transformed = model.transform(self.X)
         
@@ -125,9 +125,9 @@ class TestTruncatedSVD(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and transform functionality"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.TruncatedSVD(n_components=3)
+        model = ing_decomp.TruncatedSVD(n_components=3)
         model.fit(self.X, self.y_dummy)
         X_transformed = model.transform(self.X)
         
@@ -136,9 +136,9 @@ class TestTruncatedSVD(unittest.TestCase):
         
     def test_fit_transform(self):
         """Test fit_transform method"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.TruncatedSVD(n_components=3)
+        model = ing_decomp.TruncatedSVD(n_components=3)
         X_transformed = model.fit_transform(self.X, self.y_dummy)
         
         self.assertEqual(X_transformed.shape, (100, 3))
@@ -146,9 +146,9 @@ class TestTruncatedSVD(unittest.TestCase):
         
     def test_inverse_transform(self):
         """Test inverse_transform method"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.TruncatedSVD(n_components=3)
+        model = ing_decomp.TruncatedSVD(n_components=3)
         model.fit(self.X, self.y_dummy)
         X_transformed = model.transform(self.X)
         X_inverse = model.inverse_transform(X_transformed)
@@ -158,11 +158,11 @@ class TestTruncatedSVD(unittest.TestCase):
         
     def test_different_n_components(self):
         """Test with different n_components values"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
         n_components_values = [1, 3, 5, 8]
         for n_components in n_components_values:
-            model = aml_decomp.TruncatedSVD(n_components=n_components)
+            model = ing_decomp.TruncatedSVD(n_components=n_components)
             model.fit(self.X, self.y_dummy)
             X_transformed = model.transform(self.X)
             
@@ -170,9 +170,9 @@ class TestTruncatedSVD(unittest.TestCase):
             
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.TruncatedSVD(n_components=3, n_iter=5)
+        model = ing_decomp.TruncatedSVD(n_components=3, n_iter=5)
         
         # Test default parameters
         params = model.get_params()
@@ -195,9 +195,9 @@ class TestLDA(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and transform functionality"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.LDA(n_components=2)
+        model = ing_decomp.LDA(n_components=2)
         model.fit(self.X, self.y_dummy, self.y)
         X_transformed = model.transform(self.X)
         
@@ -206,9 +206,9 @@ class TestLDA(unittest.TestCase):
         
     def test_fit_transform(self):
         """Test fit_transform method"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.LDA(n_components=2)
+        model = ing_decomp.LDA(n_components=2)
         X_transformed = model.fit_transform(self.X, self.y_dummy, self.y)
         
         self.assertEqual(X_transformed.shape, (100, 2))
@@ -216,12 +216,12 @@ class TestLDA(unittest.TestCase):
         
     def test_different_n_components(self):
         """Test with different n_components values"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
         # LDA can have at most n_classes - 1 components
         n_components_values = [1, 2]
         for n_components in n_components_values:
-            model = aml_decomp.LDA(n_components=n_components)
+            model = ing_decomp.LDA(n_components=n_components)
             model.fit(self.X, self.y_dummy, self.y)
             X_transformed = model.transform(self.X)
             
@@ -229,9 +229,9 @@ class TestLDA(unittest.TestCase):
             
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.LDA(n_components=2)
+        model = ing_decomp.LDA(n_components=2)
         
         # Test default parameters
         params = model.get_params()
@@ -243,9 +243,9 @@ class TestLDA(unittest.TestCase):
         
     def test_class_separation(self):
         """Test that LDA improves class separation"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        model = aml_decomp.LDA(n_components=2)
+        model = ing_decomp.LDA(n_components=2)
         model.fit(self.X, self.y_dummy, self.y)
         X_transformed = model.transform(self.X)
         
@@ -276,12 +276,12 @@ class TestDecompositionIntegration(unittest.TestCase):
         
     def test_model_comparison(self):
         """Compare different decomposition algorithms"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
         models = [
-            ('PCA', aml_decomp.PCA(n_components=3)),
-            ('TruncatedSVD', aml_decomp.TruncatedSVD(n_components=3)),
-            ('LDA', aml_decomp.LDA(n_components=2))
+            ('PCA', ing_decomp.PCA(n_components=3)),
+            ('TruncatedSVD', ing_decomp.TruncatedSVD(n_components=3)),
+            ('LDA', ing_decomp.LDA(n_components=2))
         ]
         
         for name, model in models:
@@ -295,10 +295,10 @@ class TestDecompositionIntegration(unittest.TestCase):
             
     def test_dimensionality_reduction(self):
         """Test that dimensionality reduction works correctly"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
         # Test PCA
-        pca = aml_decomp.PCA(n_components=5)
+        pca = ing_decomp.PCA(n_components=5)
         pca.fit(self.X, self.y_dummy)
         X_pca = pca.transform(self.X)
         
@@ -306,7 +306,7 @@ class TestDecompositionIntegration(unittest.TestCase):
         self.assertLess(X_pca.shape[1], self.X.shape[1])
         
         # Test TruncatedSVD
-        svd = aml_decomp.TruncatedSVD(n_components=5)
+        svd = ing_decomp.TruncatedSVD(n_components=5)
         svd.fit(self.X, self.y_dummy)
         X_svd = svd.transform(self.X)
         
@@ -315,10 +315,10 @@ class TestDecompositionIntegration(unittest.TestCase):
         
     def test_reconstruction_quality(self):
         """Test reconstruction quality"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
         # Test PCA reconstruction
-        pca = aml_decomp.PCA(n_components=5)
+        pca = ing_decomp.PCA(n_components=5)
         pca.fit(self.X, self.y_dummy)
         X_transformed = pca.transform(self.X)
         X_reconstructed = pca.inverse_transform(X_transformed)
@@ -329,13 +329,13 @@ class TestDecompositionIntegration(unittest.TestCase):
         
     def test_edge_cases(self):
         """Test edge cases"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
         # Test with single sample
         X_single = self.X[:1]
         y_dummy_single = np.zeros((1, 1)).astype(np.float64)
         
-        pca = aml_decomp.PCA(n_components=1)
+        pca = ing_decomp.PCA(n_components=1)
         pca.fit(X_single, y_dummy_single)
         X_transformed = pca.transform(X_single)
         self.assertEqual(X_transformed.shape, (1, 1))
@@ -346,21 +346,21 @@ class TestDecompositionIntegration(unittest.TestCase):
             
     def test_single_feature(self):
         """Test with single feature"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
         X_single_feature = self.X[:, [0]]
         y_dummy = np.zeros((X_single_feature.shape[0], 1)).astype(np.float64)
         
-        pca = aml_decomp.PCA(n_components=1)
+        pca = ing_decomp.PCA(n_components=1)
         pca.fit(X_single_feature, y_dummy)
         X_transformed = pca.transform(X_single_feature)
         self.assertEqual(X_transformed.shape, (100, 1))
         
     def test_not_fitted_error(self):
         """Test error when using unfitted model"""
-        import auroraml.decomposition as aml_decomp
+        import ingenuityml.decomposition as ing_decomp
         
-        pca = aml_decomp.PCA(n_components=3)
+        pca = ing_decomp.PCA(n_components=3)
         
         # Should raise error when not fitted
         with self.assertRaises((AttributeError, RuntimeError)):

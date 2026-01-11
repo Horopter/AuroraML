@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
-#include "auroraml/semi_supervised.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/semi_supervised.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class SemiSupervisedTest : public ::testing::Test {
@@ -81,7 +81,7 @@ TEST_F(SemiSupervisedTest, LabelSpreadingNotFitted) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

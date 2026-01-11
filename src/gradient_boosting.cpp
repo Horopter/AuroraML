@@ -1,13 +1,13 @@
-#include "auroraml/gradient_boosting.hpp"
-#include "auroraml/base.hpp"
-#include "auroraml/tree.hpp"
+#include "ingenuityml/gradient_boosting.hpp"
+#include "ingenuityml/base.hpp"
+#include "ingenuityml/tree.hpp"
 #include <Eigen/Dense>
 #include <vector>
 #include <random>
 #include <set>
 #include <algorithm>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace ensemble {
 
 // Gradient Boosting Classifier Implementation
@@ -522,5 +522,105 @@ void GradientBoostingRegressor::load(const std::string& filepath) {
     }
 }
 
+// HistGradientBoostingClassifier wrapper implementation
+Estimator& HistGradientBoostingClassifier::fit(const MatrixXd& X, const VectorXd& y) {
+    impl_.fit(X, y);
+    return *this;
+}
+
+VectorXi HistGradientBoostingClassifier::predict_classes(const MatrixXd& X) const {
+    return impl_.predict_classes(X);
+}
+
+MatrixXd HistGradientBoostingClassifier::predict_proba(const MatrixXd& X) const {
+    return impl_.predict_proba(X);
+}
+
+VectorXd HistGradientBoostingClassifier::decision_function(const MatrixXd& X) const {
+    return impl_.decision_function(X);
+}
+
+Params HistGradientBoostingClassifier::get_params() const {
+    Params base_params = impl_.get_params();
+    Params mapped;
+    auto it = base_params.find("n_estimators");
+    if (it != base_params.end()) {
+        mapped["max_iter"] = it->second;
+    }
+    for (const auto& kv : base_params) {
+        if (kv.first == "n_estimators") {
+            continue;
+        }
+        mapped[kv.first] = kv.second;
+    }
+    return mapped;
+}
+
+Estimator& HistGradientBoostingClassifier::set_params(const Params& params) {
+    Params mapped;
+    auto max_iter_it = params.find("max_iter");
+    if (max_iter_it != params.end()) {
+        mapped["n_estimators"] = max_iter_it->second;
+    }
+    auto n_estimators_it = params.find("n_estimators");
+    if (n_estimators_it != params.end()) {
+        mapped["n_estimators"] = n_estimators_it->second;
+    }
+    for (const auto& kv : params) {
+        if (kv.first == "max_iter" || kv.first == "n_estimators") {
+            continue;
+        }
+        mapped[kv.first] = kv.second;
+    }
+    impl_.set_params(mapped);
+    return *this;
+}
+
+// HistGradientBoostingRegressor wrapper implementation
+Estimator& HistGradientBoostingRegressor::fit(const MatrixXd& X, const VectorXd& y) {
+    impl_.fit(X, y);
+    return *this;
+}
+
+VectorXd HistGradientBoostingRegressor::predict(const MatrixXd& X) const {
+    return impl_.predict(X);
+}
+
+Params HistGradientBoostingRegressor::get_params() const {
+    Params base_params = impl_.get_params();
+    Params mapped;
+    auto it = base_params.find("n_estimators");
+    if (it != base_params.end()) {
+        mapped["max_iter"] = it->second;
+    }
+    for (const auto& kv : base_params) {
+        if (kv.first == "n_estimators") {
+            continue;
+        }
+        mapped[kv.first] = kv.second;
+    }
+    return mapped;
+}
+
+Estimator& HistGradientBoostingRegressor::set_params(const Params& params) {
+    Params mapped;
+    auto max_iter_it = params.find("max_iter");
+    if (max_iter_it != params.end()) {
+        mapped["n_estimators"] = max_iter_it->second;
+    }
+    auto n_estimators_it = params.find("n_estimators");
+    if (n_estimators_it != params.end()) {
+        mapped["n_estimators"] = n_estimators_it->second;
+    }
+    for (const auto& kv : params) {
+        if (kv.first == "max_iter" || kv.first == "n_estimators") {
+            continue;
+        }
+        mapped[kv.first] = kv.second;
+    }
+    impl_.set_params(mapped);
+    return *this;
+}
+
 } // namespace ensemble
-} // namespace cxml
+} // namespace ingenuityml

@@ -1,12 +1,12 @@
-#include "auroraml/ensemble_wrappers.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/ensemble_wrappers.hpp"
+#include "ingenuityml/base.hpp"
 #include <random>
 #include <algorithm>
 #include <numeric>
 #include <unordered_map>
 #include <set>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace ensemble {
 
 // Helper function for bootstrap sampling
@@ -661,5 +661,5 @@ Estimator& StackingRegressor::set_params(const Params& params) {
 }
 
 } // namespace ensemble
-} // namespace auroraml
+} // namespace ingenuityml
 

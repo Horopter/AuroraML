@@ -1,10 +1,10 @@
-#include "auroraml/calibration.hpp"
-#include "auroraml/model_selection.hpp"
+#include "ingenuityml/calibration.hpp"
+#include "ingenuityml/model_selection.hpp"
 #include <algorithm>
 #include <cmath>
 #include <set>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace calibration {
 
 CalibratedClassifierCV::CalibratedClassifierCV(
@@ -163,5 +163,5 @@ Estimator& CalibratedClassifierCV::set_params(const Params& params) {
 }
 
 } // namespace calibration
-} // namespace auroraml
+} // namespace ingenuityml
 

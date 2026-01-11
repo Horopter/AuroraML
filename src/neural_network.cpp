@@ -1,4 +1,4 @@
-#include "auroraml/neural_network.hpp"
+#include "ingenuityml/neural_network.hpp"
 #include <algorithm>
 #include <cmath>
 #include <numeric>
@@ -6,9 +6,9 @@
 #include <sstream>
 #include <set>
 #include <iostream>
-#include "auroraml/utils.hpp"
+#include "ingenuityml/utils.hpp"
 
-namespace auroraml {
+namespace ingenuityml {
 namespace neural_network {
 
 // MLPBase implementation
@@ -698,5 +698,146 @@ VectorXd MLPRegressor::predict_output(const MatrixXd& activations) const {
     return activations.row(0);
 }
 
+// BernoulliRBM implementation
+
+BernoulliRBM::BernoulliRBM(int n_components, double learning_rate, int batch_size,
+                           int n_iter, int random_state, bool verbose)
+    : n_components_(n_components),
+      learning_rate_(learning_rate),
+      batch_size_(batch_size),
+      n_iter_(n_iter),
+      random_state_(random_state),
+      verbose_(verbose),
+      fitted_(false),
+      n_features_(0) {
+    if (random_state_ >= 0) {
+        rng_.seed(random_state_);
+    } else {
+        std::random_device rd;
+        rng_.seed(rd());
+    }
+}
+
+MatrixXd BernoulliRBM::sigmoid(const MatrixXd& X) const {
+    return (1.0 / (1.0 + (-X.array()).exp())).matrix();
+}
+
+Estimator& BernoulliRBM::fit(const MatrixXd& X, const VectorXd& y) {
+    validation::check_X(X);
+    (void)y;
+
+    n_features_ = X.cols();
+    int n_samples = X.rows();
+
+    std::normal_distribution<double> normal(0.0, 0.01);
+    components_ = MatrixXd::Zero(n_components_, n_features_);
+    for (int i = 0; i < n_components_; ++i) {
+        for (int j = 0; j < n_features_; ++j) {
+            components_(i, j) = normal(rng_);
+        }
+    }
+    intercept_visible_ = VectorXd::Zero(n_features_);
+    intercept_hidden_ = VectorXd::Zero(n_components_);
+
+    MatrixXd X_clipped = X.cwiseMax(0.0).cwiseMin(1.0);
+
+    for (int iter = 0; iter < n_iter_; ++iter) {
+        MatrixXd pos_linear = X_clipped * components_.transpose();
+        pos_linear.rowwise() += intercept_hidden_.transpose();
+        MatrixXd pos_hidden = sigmoid(pos_linear);
+
+        MatrixXd pos_assoc = pos_hidden.transpose() * X_clipped;
+
+        MatrixXd neg_visible_linear = pos_hidden * components_;
+        neg_visible_linear.rowwise() += intercept_visible_.transpose();
+        MatrixXd neg_visible = sigmoid(neg_visible_linear);
+
+        MatrixXd neg_hidden_linear = neg_visible * components_.transpose();
+        neg_hidden_linear.rowwise() += intercept_hidden_.transpose();
+        MatrixXd neg_hidden = sigmoid(neg_hidden_linear);
+
+        MatrixXd neg_assoc = neg_hidden.transpose() * neg_visible;
+
+        double lr = learning_rate_ / static_cast<double>(n_samples);
+        components_ += lr * (pos_assoc - neg_assoc);
+
+        VectorXd pos_vis_mean = X_clipped.colwise().mean().transpose();
+        VectorXd neg_vis_mean = neg_visible.colwise().mean().transpose();
+        intercept_visible_ += learning_rate_ * (pos_vis_mean - neg_vis_mean);
+
+        VectorXd pos_hid_mean = pos_hidden.colwise().mean().transpose();
+        VectorXd neg_hid_mean = neg_hidden.colwise().mean().transpose();
+        intercept_hidden_ += learning_rate_ * (pos_hid_mean - neg_hid_mean);
+
+        if (verbose_) {
+            std::cout << "BernoulliRBM iter " << iter + 1 << "/" << n_iter_ << std::endl;
+        }
+    }
+
+    fitted_ = true;
+    return *this;
+}
+
+MatrixXd BernoulliRBM::transform(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("BernoulliRBM must be fitted before transform");
+    }
+    if (X.cols() != n_features_) {
+        throw std::invalid_argument("X must have the same number of features as training data");
+    }
+
+    MatrixXd X_clipped = X.cwiseMax(0.0).cwiseMin(1.0);
+    MatrixXd linear = X_clipped * components_.transpose();
+    linear.rowwise() += intercept_hidden_.transpose();
+    return sigmoid(linear);
+}
+
+MatrixXd BernoulliRBM::inverse_transform(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("BernoulliRBM must be fitted before inverse_transform");
+    }
+    if (X.cols() != n_components_) {
+        throw std::invalid_argument("X must have the same number of components as the model");
+    }
+
+    MatrixXd linear = X * components_;
+    linear.rowwise() += intercept_visible_.transpose();
+    return sigmoid(linear);
+}
+
+MatrixXd BernoulliRBM::fit_transform(const MatrixXd& X, const VectorXd& y) {
+    fit(X, y);
+    return transform(X);
+}
+
+Params BernoulliRBM::get_params() const {
+    Params params;
+    params["n_components"] = std::to_string(n_components_);
+    params["learning_rate"] = std::to_string(learning_rate_);
+    params["batch_size"] = std::to_string(batch_size_);
+    params["n_iter"] = std::to_string(n_iter_);
+    params["random_state"] = std::to_string(random_state_);
+    params["verbose"] = verbose_ ? "true" : "false";
+    return params;
+}
+
+Estimator& BernoulliRBM::set_params(const Params& params) {
+    n_components_ = utils::get_param_int(params, "n_components", n_components_);
+    learning_rate_ = utils::get_param_double(params, "learning_rate", learning_rate_);
+    batch_size_ = utils::get_param_int(params, "batch_size", batch_size_);
+    n_iter_ = utils::get_param_int(params, "n_iter", n_iter_);
+    random_state_ = utils::get_param_int(params, "random_state", random_state_);
+    verbose_ = utils::get_param_bool(params, "verbose", verbose_);
+
+    if (random_state_ >= 0) {
+        rng_.seed(random_state_);
+    } else {
+        std::random_device rd;
+        rng_.seed(rd());
+    }
+
+    return *this;
+}
+
 } // namespace neural_network
-} // namespace auroraml
+} // namespace ingenuityml

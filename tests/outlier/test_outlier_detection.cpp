@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/outlier_detection.hpp"
+#include "ingenuityml/outlier_detection.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class OutlierDetectionTest : public ::testing::Test {
@@ -84,7 +84,7 @@ TEST_F(OutlierDetectionTest, LocalOutlierFactorNegativeNeighbors) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "build"))
 
 import numpy as np
 
-import auroraml
+import ingenuityml
 
 
 def make_blobs(n_samples=100, centers=1, cluster_std=0.5, random_state=None):
@@ -31,7 +31,7 @@ def test_one_class_svm_basic():
     )
 
     # Create OneClassSVM
-    clf = auroraml.svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.1, random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.1, random_state=42)
 
     # Fit on inliers
     clf.fit(X_inliers)
@@ -61,7 +61,7 @@ def test_one_class_svm_outlier_detection():
     X_outliers = np.array([[5, 5], [-5, -5], [5, -5], [-5, 5]])
 
     # Create and fit OneClassSVM
-    clf = auroraml.svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=1.0, random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=1.0, random_state=42)
     clf.fit(X_inliers)
 
     # Test on inliers
@@ -83,7 +83,7 @@ def test_one_class_svm_decision_function():
     """Test decision function returns reasonable scores."""
     X, _ = make_blobs(n_samples=50, centers=1, cluster_std=0.8, random_state=42)
 
-    clf = auroraml.svm.OneClassSVM(nu=0.2, kernel="rbf", gamma=0.5, random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.2, kernel="rbf", gamma=0.5, random_state=42)
     clf.fit(X)
 
     # Test decision function
@@ -104,7 +104,7 @@ def test_one_class_svm_score_samples():
     """Test score_samples method."""
     X, _ = make_blobs(n_samples=50, centers=1, cluster_std=0.6, random_state=42)
 
-    clf = auroraml.svm.OneClassSVM(nu=0.15, kernel="rbf", gamma=0.8, random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.15, kernel="rbf", gamma=0.8, random_state=42)
     clf.fit(X)
 
     # Test score_samples
@@ -120,7 +120,7 @@ def test_one_class_svm_linear_kernel():
     """Test OneClassSVM with linear kernel."""
     X, _ = make_blobs(n_samples=80, centers=1, cluster_std=0.7, random_state=42)
 
-    clf = auroraml.svm.OneClassSVM(nu=0.1, kernel="linear", random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.1, kernel="linear", random_state=42)
     clf.fit(X)
 
     assert clf.is_fitted()
@@ -139,7 +139,7 @@ def test_one_class_svm_linear_kernel():
 
 def test_one_class_svm_parameters():
     """Test parameter getting and setting."""
-    clf = auroraml.svm.OneClassSVM(
+    clf = ingenuityml.svm.OneClassSVM(
         nu=0.3, gamma=0.7, kernel="rbf", max_iter=500, random_state=123
     )
 
@@ -170,7 +170,7 @@ def test_one_class_svm_nu_parameter():
     nu_values = [0.05, 0.1, 0.2, 0.5]
 
     for nu in nu_values:
-        clf = auroraml.svm.OneClassSVM(nu=nu, kernel="rbf", gamma=0.5, random_state=42)
+        clf = ingenuityml.svm.OneClassSVM(nu=nu, kernel="rbf", gamma=0.5, random_state=42)
         clf.fit(X)
 
         predictions = clf.predict(X)
@@ -184,7 +184,7 @@ def test_one_class_svm_nu_parameter():
 
 def test_one_class_svm_empty_input():
     """Test behavior with edge cases."""
-    clf = auroraml.svm.OneClassSVM(nu=0.1, random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.1, random_state=42)
 
     # Test not fitted error
     X_test = np.array([[1, 2], [3, 4]])
@@ -207,7 +207,7 @@ def test_one_class_svm_single_feature():
     # Single feature data
     X = np.random.randn(50, 1)
 
-    clf = auroraml.svm.OneClassSVM(nu=0.2, kernel="rbf", gamma=1.0, random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.2, kernel="rbf", gamma=1.0, random_state=42)
     clf.fit(X)
 
     assert clf.is_fitted()
@@ -223,7 +223,7 @@ def test_one_class_svm_threshold():
     """Test threshold functionality."""
     X, _ = make_blobs(n_samples=60, centers=1, cluster_std=0.5, random_state=42)
 
-    clf = auroraml.svm.OneClassSVM(nu=0.15, kernel="rbf", gamma=0.8, random_state=42)
+    clf = ingenuityml.svm.OneClassSVM(nu=0.15, kernel="rbf", gamma=0.8, random_state=42)
     clf.fit(X)
 
     # Test get_threshold
@@ -246,8 +246,8 @@ def test_one_class_svm_reproducibility():
     X, _ = make_blobs(n_samples=50, centers=1, cluster_std=0.6, random_state=42)
 
     # Create two identical models
-    clf1 = auroraml.svm.OneClassSVM(nu=0.1, gamma=0.5, kernel="rbf", random_state=42)
-    clf2 = auroraml.svm.OneClassSVM(nu=0.1, gamma=0.5, kernel="rbf", random_state=42)
+    clf1 = ingenuityml.svm.OneClassSVM(nu=0.1, gamma=0.5, kernel="rbf", random_state=42)
+    clf2 = ingenuityml.svm.OneClassSVM(nu=0.1, gamma=0.5, kernel="rbf", random_state=42)
 
     # Fit both models
     clf1.fit(X)

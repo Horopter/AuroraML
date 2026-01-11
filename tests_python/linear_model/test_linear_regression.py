@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML LinearRegression Algorithm
+Test Suite for IngenuityML LinearRegression Algorithm
 Includes positive and negative test cases
 All tests run in shuffled order with 5-minute timeout
 """
@@ -27,9 +27,9 @@ class TestLinearRegression(unittest.TestCase):
     # Positive test cases
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.LinearRegression()
+        model = ing_lm.LinearRegression()
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -40,9 +40,9 @@ class TestLinearRegression(unittest.TestCase):
         
     def test_coefficients(self):
         """Test coefficient retrieval"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.LinearRegression()
+        model = ing_lm.LinearRegression()
         model.fit(self.X, self.y)
         coef = model.coef()
         intercept = model.intercept()
@@ -52,9 +52,9 @@ class TestLinearRegression(unittest.TestCase):
         
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.LinearRegression()
+        model = ing_lm.LinearRegression()
         
         params = model.get_params()
         self.assertIn('fit_intercept', params)
@@ -66,22 +66,22 @@ class TestLinearRegression(unittest.TestCase):
         
     def test_performance(self):
         """Test model performance on simple data"""
-        import auroraml.linear_model as aml_lm
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.linear_model as ing_lm
+        import ingenuityml.metrics as ing_metrics
         
-        model = aml_lm.LinearRegression()
+        model = ing_lm.LinearRegression()
         model.fit(self.X, self.y)
         predictions = model.predict(self.X)
         
-        r2 = aml_metrics.r2_score(self.y, predictions)
+        r2 = ing_metrics.r2_score(self.y, predictions)
         self.assertGreater(r2, 0.8)
         
     def test_single_feature(self):
         """Test with single feature"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
         X_single = self.X[:, [0]]
-        model = aml_lm.LinearRegression()
+        model = ing_lm.LinearRegression()
         model.fit(X_single, self.y)
         predictions = model.predict(X_single)
         
@@ -89,9 +89,9 @@ class TestLinearRegression(unittest.TestCase):
         
     def test_is_fitted(self):
         """Test is_fitted method"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.LinearRegression()
+        model = ing_lm.LinearRegression()
         self.assertFalse(model.is_fitted())
         
         model.fit(self.X, self.y)
@@ -100,36 +100,36 @@ class TestLinearRegression(unittest.TestCase):
     # Negative test cases
     def test_empty_data(self):
         """Test with empty data - should raise error"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.LinearRegression()
+        model = ing_lm.LinearRegression()
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(np.array([]).reshape(0, 5), np.array([]))
             
     def test_dimension_mismatch(self):
         """Test with dimension mismatch - should raise error"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.LinearRegression()
+        model = ing_lm.LinearRegression()
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(self.X, self.y[:-1])  # y has wrong length
             
     def test_not_fitted_predict(self):
         """Test predict without fitting - should raise error"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.LinearRegression()
+        model = ing_lm.LinearRegression()
         
         with self.assertRaises((RuntimeError, ValueError)):
             model.predict(self.X_test)
             
     def test_wrong_feature_count(self):
         """Test predict with wrong feature count - should raise error"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.LinearRegression()
+        model = ing_lm.LinearRegression()
         model.fit(self.X, self.y)
         
         X_wrong = np.random.randn(20, 6).astype(np.float64)  # Wrong number of features
@@ -139,12 +139,12 @@ class TestLinearRegression(unittest.TestCase):
             
     def test_single_sample(self):
         """Test with single sample - edge case"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
         X_single = self.X[:1]
         y_single = self.y[:1]
         
-        model = aml_lm.LinearRegression()
+        model = ing_lm.LinearRegression()
         # Should either work or raise appropriate error
         try:
             model.fit(X_single, y_single)
@@ -156,12 +156,12 @@ class TestLinearRegression(unittest.TestCase):
             
     def test_nan_values(self):
         """Test with NaN values - should handle gracefully"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
         X_with_nan = self.X.copy()
         X_with_nan[0, 0] = np.nan
         
-        model = aml_lm.LinearRegression()
+        model = ing_lm.LinearRegression()
         # Should either handle NaN or raise error
         try:
             model.fit(X_with_nan, self.y)

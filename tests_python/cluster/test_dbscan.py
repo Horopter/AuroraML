@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML DBSCAN Algorithm
+Test Suite for IngenuityML DBSCAN Algorithm
 Includes positive and negative test cases
 All tests run in shuffled order with 5-minute timeout
 """
@@ -32,9 +32,9 @@ class TestDBSCAN(unittest.TestCase):
     # Positive test cases
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.DBSCAN(eps=0.5, min_samples=5)
+        model = ing_cluster.DBSCAN(eps=0.5, min_samples=5)
         labels = model.fit_predict(self.X)
         
         self.assertEqual(len(labels), len(self.X))
@@ -43,9 +43,9 @@ class TestDBSCAN(unittest.TestCase):
         
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.DBSCAN(eps=0.5, min_samples=5)
+        model = ing_cluster.DBSCAN(eps=0.5, min_samples=5)
         
         params = model.get_params()
         self.assertIsInstance(params, dict)
@@ -54,27 +54,27 @@ class TestDBSCAN(unittest.TestCase):
         
     def test_different_eps(self):
         """Test with different eps values"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
         for eps in [0.3, 0.5, 1.0]:
-            model = aml_cluster.DBSCAN(eps=eps, min_samples=5)
+            model = ing_cluster.DBSCAN(eps=eps, min_samples=5)
             labels = model.fit_predict(self.X)
             self.assertEqual(len(labels), len(self.X))
             
     def test_different_min_samples(self):
         """Test with different min_samples values"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
         for min_samples in [3, 5, 10]:
-            model = aml_cluster.DBSCAN(eps=0.5, min_samples=min_samples)
+            model = ing_cluster.DBSCAN(eps=0.5, min_samples=min_samples)
             labels = model.fit_predict(self.X)
             self.assertEqual(len(labels), len(self.X))
             
     def test_labels_method(self):
         """Test labels method"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.DBSCAN(eps=0.5, min_samples=5)
+        model = ing_cluster.DBSCAN(eps=0.5, min_samples=5)
         model.fit(self.X, self.y_dummy)
         
         labels = model.labels()
@@ -84,36 +84,36 @@ class TestDBSCAN(unittest.TestCase):
     # Negative test cases
     def test_empty_data(self):
         """Test with empty data - should raise error"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.DBSCAN(eps=0.5, min_samples=5)
+        model = ing_cluster.DBSCAN(eps=0.5, min_samples=5)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit_predict(np.array([]).reshape(0, 2))
             
     def test_negative_eps(self):
         """Test with negative eps - should raise error"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.DBSCAN(eps=-0.1, min_samples=5)
+        model = ing_cluster.DBSCAN(eps=-0.1, min_samples=5)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit_predict(self.X)
             
     def test_zero_min_samples(self):
         """Test with zero min_samples - should raise error"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.DBSCAN(eps=0.5, min_samples=0)
+        model = ing_cluster.DBSCAN(eps=0.5, min_samples=0)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit_predict(self.X)
             
     def test_negative_min_samples(self):
         """Test with negative min_samples - should raise error"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.DBSCAN(eps=0.5, min_samples=-1)
+        model = ing_cluster.DBSCAN(eps=0.5, min_samples=-1)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit_predict(self.X)

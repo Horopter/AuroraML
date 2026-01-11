@@ -1,14 +1,19 @@
-#include "auroraml/cluster_extended.hpp"
-#include "auroraml/base.hpp"
-#include "auroraml/kmeans.hpp"
-#include "auroraml/pca.hpp"
+#include "ingenuityml/cluster_extended.hpp"
+#include "ingenuityml/base.hpp"
+#include "ingenuityml/kmeans.hpp"
+#include "ingenuityml/pca.hpp"
 #include <cmath>
 #include <random>
 #include <algorithm>
 #include <queue>
 #include <limits>
+#include <numeric>
+#include <deque>
+#include <unordered_map>
 
-namespace auroraml {
+#include "ingenuityml/agglomerative.hpp"
+
+namespace ingenuityml {
 namespace cluster {
 
 // MiniBatchKMeans implementation
@@ -736,6 +741,530 @@ Estimator& Birch::set_params(const Params& params) {
     return *this;
 }
 
-} // namespace cluster
-} // namespace auroraml
+// BisectingKMeans implementation
 
+static double cluster_sse(const MatrixXd& X, const std::vector<int>& indices) {
+    if (indices.empty()) return 0.0;
+    VectorXd centroid = VectorXd::Zero(X.cols());
+    for (int idx : indices) {
+        centroid += X.row(idx).transpose();
+    }
+    centroid /= static_cast<double>(indices.size());
+
+    double sse = 0.0;
+    for (int idx : indices) {
+        VectorXd diff = X.row(idx).transpose() - centroid;
+        sse += diff.squaredNorm();
+    }
+    return sse;
+}
+
+Estimator& BisectingKMeans::fit(const MatrixXd& X, const VectorXd& y) {
+    (void)y;
+    validation::check_X(X);
+    if (n_clusters_ <= 0 || n_clusters_ > X.rows()) {
+        throw std::invalid_argument("n_clusters must be in (0, n_samples]");
+    }
+
+    std::vector<std::vector<int>> clusters;
+    clusters.resize(1);
+    clusters[0].resize(X.rows());
+    std::iota(clusters[0].begin(), clusters[0].end(), 0);
+
+    labels_ = VectorXi::Zero(X.rows());
+
+    std::mt19937 rng(random_state_ >= 0 ? random_state_ : std::random_device{}());
+
+    while (static_cast<int>(clusters.size()) < n_clusters_) {
+        int split_idx = -1;
+        double best_sse = -1.0;
+        for (int i = 0; i < static_cast<int>(clusters.size()); ++i) {
+            if (clusters[i].size() < 2) {
+                continue;
+            }
+            double sse = cluster_sse(X, clusters[i]);
+            if (sse > best_sse) {
+                best_sse = sse;
+                split_idx = i;
+            }
+        }
+
+        if (split_idx < 0) {
+            break;
+        }
+
+        const auto& indices = clusters[split_idx];
+        MatrixXd X_sub(indices.size(), X.cols());
+        for (size_t i = 0; i < indices.size(); ++i) {
+            X_sub.row(i) = X.row(indices[i]);
+        }
+
+        int split_seed = static_cast<int>(rng());
+        KMeans kmeans(2, max_iter_, tol_, init_, split_seed);
+        kmeans.fit(X_sub, VectorXd());
+        VectorXi sub_labels = kmeans.predict_labels(X_sub);
+
+        std::vector<int> left;
+        std::vector<int> right;
+        for (size_t i = 0; i < indices.size(); ++i) {
+            if (sub_labels(static_cast<int>(i)) == 0) {
+                left.push_back(indices[i]);
+            } else {
+                right.push_back(indices[i]);
+            }
+        }
+
+        if (left.empty() || right.empty()) {
+            break;
+        }
+
+        clusters[split_idx] = left;
+        clusters.push_back(right);
+        int new_id = static_cast<int>(clusters.size()) - 1;
+
+        for (int idx : left) {
+            labels_(idx) = split_idx;
+        }
+        for (int idx : right) {
+            labels_(idx) = new_id;
+        }
+    }
+
+    cluster_centers_ = MatrixXd::Zero(clusters.size(), X.cols());
+    for (int c = 0; c < static_cast<int>(clusters.size()); ++c) {
+        if (clusters[c].empty()) continue;
+        VectorXd centroid = VectorXd::Zero(X.cols());
+        for (int idx : clusters[c]) {
+            centroid += X.row(idx).transpose();
+        }
+        centroid /= static_cast<double>(clusters[c].size());
+        cluster_centers_.row(c) = centroid.transpose();
+    }
+
+    fitted_ = true;
+    return *this;
+}
+
+VectorXi BisectingKMeans::fit_predict(const MatrixXd& X) {
+    fit(X, VectorXd());
+    return labels_;
+}
+
+VectorXi BisectingKMeans::predict(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("BisectingKMeans must be fitted before predict");
+    }
+    if (X.cols() != cluster_centers_.cols()) {
+        throw std::runtime_error("X must have the same number of features as training data");
+    }
+
+    VectorXi predictions = VectorXi::Zero(X.rows());
+    for (int i = 0; i < X.rows(); ++i) {
+        double min_dist = (X.row(i) - cluster_centers_.row(0)).squaredNorm();
+        int best_cluster = 0;
+        for (int k = 1; k < cluster_centers_.rows(); ++k) {
+            double dist = (X.row(i) - cluster_centers_.row(k)).squaredNorm();
+            if (dist < min_dist) {
+                min_dist = dist;
+                best_cluster = k;
+            }
+        }
+        predictions(i) = best_cluster;
+    }
+    return predictions;
+}
+
+Params BisectingKMeans::get_params() const {
+    Params params;
+    params["n_clusters"] = std::to_string(n_clusters_);
+    params["max_iter"] = std::to_string(max_iter_);
+    params["tol"] = std::to_string(tol_);
+    params["init"] = init_;
+    params["random_state"] = std::to_string(random_state_);
+    return params;
+}
+
+Estimator& BisectingKMeans::set_params(const Params& params) {
+    n_clusters_ = utils::get_param_int(params, "n_clusters", n_clusters_);
+    max_iter_ = utils::get_param_int(params, "max_iter", max_iter_);
+    tol_ = utils::get_param_double(params, "tol", tol_);
+    init_ = utils::get_param_string(params, "init", init_);
+    random_state_ = utils::get_param_int(params, "random_state", random_state_);
+    return *this;
+}
+
+// AffinityPropagation implementation
+
+Estimator& AffinityPropagation::fit(const MatrixXd& X, const VectorXd& y) {
+    (void)y;
+    validation::check_X(X);
+
+    int n_samples = X.rows();
+    MatrixXd S = MatrixXd::Zero(n_samples, n_samples);
+    for (int i = 0; i < n_samples; ++i) {
+        for (int k = 0; k < n_samples; ++k) {
+            double dist_sq = (X.row(i) - X.row(k)).squaredNorm();
+            S(i, k) = -dist_sq;
+        }
+    }
+
+    double preference = preference_;
+    if (std::isnan(preference)) {
+        std::vector<double> sims;
+        sims.reserve(n_samples * n_samples);
+        for (int i = 0; i < n_samples; ++i) {
+            for (int k = 0; k < n_samples; ++k) {
+                sims.push_back(S(i, k));
+            }
+        }
+        size_t mid = sims.size() / 2;
+        std::nth_element(sims.begin(), sims.begin() + mid, sims.end());
+        preference = sims[mid];
+    }
+
+    for (int i = 0; i < n_samples; ++i) {
+        S(i, i) = preference;
+    }
+
+    MatrixXd R = MatrixXd::Zero(n_samples, n_samples);
+    MatrixXd A = MatrixXd::Zero(n_samples, n_samples);
+
+    std::vector<int> last_exemplars;
+    int stable_count = 0;
+
+    for (int iter = 0; iter < max_iter_; ++iter) {
+        // Update responsibilities
+        MatrixXd AS = A + S;
+        for (int i = 0; i < n_samples; ++i) {
+            double max1 = -std::numeric_limits<double>::infinity();
+            double max2 = -std::numeric_limits<double>::infinity();
+            int idx1 = -1;
+            for (int k = 0; k < n_samples; ++k) {
+                double val = AS(i, k);
+                if (val > max1) {
+                    max2 = max1;
+                    max1 = val;
+                    idx1 = k;
+                } else if (val > max2) {
+                    max2 = val;
+                }
+            }
+            for (int k = 0; k < n_samples; ++k) {
+                double val = S(i, k) - ((k == idx1) ? max2 : max1);
+                R(i, k) = damping_ * R(i, k) + (1.0 - damping_) * val;
+            }
+        }
+
+        // Update availabilities
+        for (int k = 0; k < n_samples; ++k) {
+            double sum_pos = 0.0;
+            for (int i = 0; i < n_samples; ++i) {
+                if (i == k) continue;
+                sum_pos += std::max(0.0, R(i, k));
+            }
+            for (int i = 0; i < n_samples; ++i) {
+                double val;
+                if (i == k) {
+                    val = sum_pos;
+                } else {
+                    val = std::min(0.0, R(k, k) + sum_pos - std::max(0.0, R(i, k)));
+                }
+                A(i, k) = damping_ * A(i, k) + (1.0 - damping_) * val;
+            }
+        }
+
+        // Check convergence
+        std::vector<int> exemplars;
+        for (int k = 0; k < n_samples; ++k) {
+            if (A(k, k) + R(k, k) > 0.0) {
+                exemplars.push_back(k);
+            }
+        }
+
+        if (exemplars == last_exemplars && !exemplars.empty()) {
+            stable_count++;
+        } else {
+            stable_count = 0;
+            last_exemplars = exemplars;
+        }
+
+        if (stable_count >= convergence_iter_) {
+            break;
+        }
+    }
+
+    std::vector<int> exemplars = last_exemplars;
+    if (exemplars.empty()) {
+        int best_k = 0;
+        double best_val = A(0, 0) + R(0, 0);
+        for (int k = 1; k < n_samples; ++k) {
+            double val = A(k, k) + R(k, k);
+            if (val > best_val) {
+                best_val = val;
+                best_k = k;
+            }
+        }
+        exemplars.push_back(best_k);
+    }
+
+    std::unordered_map<int, int> exemplar_to_label;
+    for (int i = 0; i < static_cast<int>(exemplars.size()); ++i) {
+        exemplar_to_label[exemplars[i]] = i;
+    }
+
+    labels_ = VectorXi::Zero(n_samples);
+    for (int i = 0; i < n_samples; ++i) {
+        int best_exemplar = exemplars[0];
+        double best_score = A(i, best_exemplar) + R(i, best_exemplar);
+        for (int ex : exemplars) {
+            double score = A(i, ex) + R(i, ex);
+            if (score > best_score) {
+                best_score = score;
+                best_exemplar = ex;
+            }
+        }
+        labels_(i) = exemplar_to_label[best_exemplar];
+    }
+
+    exemplar_indices_ = VectorXi::Zero(exemplars.size());
+    cluster_centers_ = MatrixXd(exemplars.size(), X.cols());
+    for (int i = 0; i < static_cast<int>(exemplars.size()); ++i) {
+        exemplar_indices_(i) = exemplars[i];
+        cluster_centers_.row(i) = X.row(exemplars[i]);
+    }
+
+    fitted_ = true;
+    return *this;
+}
+
+VectorXi AffinityPropagation::fit_predict(const MatrixXd& X) {
+    fit(X, VectorXd());
+    return labels_;
+}
+
+VectorXi AffinityPropagation::predict(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("AffinityPropagation must be fitted before predict");
+    }
+    if (X.cols() != cluster_centers_.cols()) {
+        throw std::runtime_error("X must have the same number of features as training data");
+    }
+    if (cluster_centers_.rows() == 0) {
+        throw std::runtime_error("AffinityPropagation has no cluster centers");
+    }
+
+    VectorXi predictions = VectorXi::Zero(X.rows());
+    for (int i = 0; i < X.rows(); ++i) {
+        double min_dist = (X.row(i) - cluster_centers_.row(0)).squaredNorm();
+        int best_cluster = 0;
+        for (int k = 1; k < cluster_centers_.rows(); ++k) {
+            double dist = (X.row(i) - cluster_centers_.row(k)).squaredNorm();
+            if (dist < min_dist) {
+                min_dist = dist;
+                best_cluster = k;
+            }
+        }
+        predictions(i) = best_cluster;
+    }
+    return predictions;
+}
+
+Params AffinityPropagation::get_params() const {
+    Params params;
+    params["damping"] = std::to_string(damping_);
+    params["max_iter"] = std::to_string(max_iter_);
+    params["convergence_iter"] = std::to_string(convergence_iter_);
+    if (std::isnan(preference_)) {
+        params["preference"] = "nan";
+    } else {
+        params["preference"] = std::to_string(preference_);
+    }
+    params["random_state"] = std::to_string(random_state_);
+    return params;
+}
+
+Estimator& AffinityPropagation::set_params(const Params& params) {
+    damping_ = utils::get_param_double(params, "damping", damping_);
+    max_iter_ = utils::get_param_int(params, "max_iter", max_iter_);
+    convergence_iter_ = utils::get_param_int(params, "convergence_iter", convergence_iter_);
+    if (params.count("preference")) {
+        const std::string& val = params.at("preference");
+        if (val == "nan" || val == "NaN") {
+            preference_ = std::numeric_limits<double>::quiet_NaN();
+        } else {
+            preference_ = std::stod(val);
+        }
+    }
+    random_state_ = utils::get_param_int(params, "random_state", random_state_);
+    return *this;
+}
+
+// FeatureAgglomeration implementation
+
+Estimator& FeatureAgglomeration::fit(const MatrixXd& X, const VectorXd& y) {
+    (void)y;
+    validation::check_X(X);
+    if (n_clusters_ <= 0 || n_clusters_ > X.cols()) {
+        throw std::invalid_argument("n_clusters must be in (0, n_features]");
+    }
+
+    n_features_ = X.cols();
+    MatrixXd X_t = X.transpose();
+    AgglomerativeClustering agg(n_clusters_, linkage_, affinity_);
+    agg.fit(X_t, VectorXd());
+    feature_labels_ = agg.labels();
+
+    fitted_ = true;
+    return *this;
+}
+
+MatrixXd FeatureAgglomeration::transform(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("FeatureAgglomeration must be fitted before transform");
+    }
+    if (X.cols() != n_features_) {
+        throw std::invalid_argument("X must have the same number of features as training data");
+    }
+
+    MatrixXd reduced = MatrixXd::Zero(X.rows(), n_clusters_);
+    std::vector<int> counts(n_clusters_, 0);
+
+    for (int j = 0; j < n_features_; ++j) {
+        int cluster = feature_labels_(j);
+        reduced.col(cluster) += X.col(j);
+        counts[cluster]++;
+    }
+
+    for (int k = 0; k < n_clusters_; ++k) {
+        if (counts[k] > 0) {
+            reduced.col(k) /= static_cast<double>(counts[k]);
+        }
+    }
+
+    return reduced;
+}
+
+MatrixXd FeatureAgglomeration::inverse_transform(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("FeatureAgglomeration must be fitted before inverse_transform");
+    }
+    if (X.cols() != n_clusters_) {
+        throw std::invalid_argument("X must have the same number of clusters as the model");
+    }
+
+    MatrixXd expanded = MatrixXd::Zero(X.rows(), n_features_);
+    for (int j = 0; j < n_features_; ++j) {
+        int cluster = feature_labels_(j);
+        expanded.col(j) = X.col(cluster);
+    }
+    return expanded;
+}
+
+MatrixXd FeatureAgglomeration::fit_transform(const MatrixXd& X, const VectorXd& y) {
+    fit(X, y);
+    return transform(X);
+}
+
+Params FeatureAgglomeration::get_params() const {
+    Params params;
+    params["n_clusters"] = std::to_string(n_clusters_);
+    params["linkage"] = linkage_;
+    params["affinity"] = affinity_;
+    return params;
+}
+
+Estimator& FeatureAgglomeration::set_params(const Params& params) {
+    n_clusters_ = utils::get_param_int(params, "n_clusters", n_clusters_);
+    linkage_ = utils::get_param_string(params, "linkage", linkage_);
+    affinity_ = utils::get_param_string(params, "affinity", affinity_);
+    return *this;
+}
+
+// SpectralBiclustering implementation
+
+Estimator& SpectralBiclustering::fit(const MatrixXd& X, const VectorXd& y) {
+    (void)y;
+    validation::check_X(X);
+    if (n_clusters_ <= 0 || n_clusters_ > X.rows() || n_clusters_ > X.cols()) {
+        throw std::invalid_argument("n_clusters must be in (0, min(n_samples, n_features)]");
+    }
+
+    decomposition::PCA pca_rows(n_clusters_);
+    pca_rows.fit(X, VectorXd());
+    MatrixXd row_embed = pca_rows.transform(X);
+
+    KMeans row_kmeans(n_clusters_, 100, 1e-4, "k-means++", random_state_);
+    row_kmeans.fit(row_embed, VectorXd());
+    row_labels_ = row_kmeans.predict_labels(row_embed);
+
+    MatrixXd X_t = X.transpose();
+    decomposition::PCA pca_cols(n_clusters_);
+    pca_cols.fit(X_t, VectorXd());
+    MatrixXd col_embed = pca_cols.transform(X_t);
+
+    KMeans col_kmeans(n_clusters_, 100, 1e-4, "k-means++", random_state_);
+    col_kmeans.fit(col_embed, VectorXd());
+    column_labels_ = col_kmeans.predict_labels(col_embed);
+
+    fitted_ = true;
+    return *this;
+}
+
+Params SpectralBiclustering::get_params() const {
+    Params params;
+    params["n_clusters"] = std::to_string(n_clusters_);
+    params["random_state"] = std::to_string(random_state_);
+    return params;
+}
+
+Estimator& SpectralBiclustering::set_params(const Params& params) {
+    n_clusters_ = utils::get_param_int(params, "n_clusters", n_clusters_);
+    random_state_ = utils::get_param_int(params, "random_state", random_state_);
+    return *this;
+}
+
+// SpectralCoclustering implementation
+
+Estimator& SpectralCoclustering::fit(const MatrixXd& X, const VectorXd& y) {
+    (void)y;
+    validation::check_X(X);
+    if (n_clusters_ <= 0 || n_clusters_ > X.rows() || n_clusters_ > X.cols()) {
+        throw std::invalid_argument("n_clusters must be in (0, min(n_samples, n_features)]");
+    }
+
+    decomposition::PCA pca_rows(n_clusters_);
+    pca_rows.fit(X, VectorXd());
+    MatrixXd row_embed = pca_rows.transform(X);
+
+    KMeans row_kmeans(n_clusters_, 100, 1e-4, "k-means++", random_state_);
+    row_kmeans.fit(row_embed, VectorXd());
+    row_labels_ = row_kmeans.predict_labels(row_embed);
+
+    MatrixXd X_t = X.transpose();
+    decomposition::PCA pca_cols(n_clusters_);
+    pca_cols.fit(X_t, VectorXd());
+    MatrixXd col_embed = pca_cols.transform(X_t);
+
+    KMeans col_kmeans(n_clusters_, 100, 1e-4, "k-means++", random_state_);
+    col_kmeans.fit(col_embed, VectorXd());
+    column_labels_ = col_kmeans.predict_labels(col_embed);
+
+    fitted_ = true;
+    return *this;
+}
+
+Params SpectralCoclustering::get_params() const {
+    Params params;
+    params["n_clusters"] = std::to_string(n_clusters_);
+    params["random_state"] = std::to_string(random_state_);
+    return params;
+}
+
+Estimator& SpectralCoclustering::set_params(const Params& params) {
+    n_clusters_ = utils::get_param_int(params, "n_clusters", n_clusters_);
+    random_state_ = utils::get_param_int(params, "random_state", random_state_);
+    return *this;
+}
+
+} // namespace cluster
+} // namespace ingenuityml

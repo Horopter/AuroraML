@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
-#include "auroraml/model_selection.hpp"
-#include "auroraml/linear_model.hpp"
+#include "ingenuityml/model_selection.hpp"
+#include "ingenuityml/linear_model.hpp"
 #include <Eigen/Dense>
 #include <map>
 #include <set>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class ModelSelectionTest : public ::testing::Test {
@@ -682,7 +682,7 @@ TEST_F(ModelSelectionTest, GroupKFoldGroupSeparation) {
 }
 
 } // namespace test
-} // namespace cxml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

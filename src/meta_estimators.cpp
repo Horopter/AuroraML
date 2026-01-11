@@ -1,5 +1,5 @@
-#include "auroraml/meta_estimators.hpp"
-#include "auroraml/utils.hpp"
+#include "ingenuityml/meta_estimators.hpp"
+#include "ingenuityml/utils.hpp"
 #include <algorithm>
 #include <numeric>
 #include <random>
@@ -8,7 +8,7 @@
 #include <cmath>
 #include <limits>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace meta {
 
 namespace {
@@ -759,4 +759,4 @@ Estimator& RegressorChain::set_params(const Params& params) {
 }
 
 } // namespace meta
-} // namespace auroraml
+} // namespace ingenuityml

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML SVR Algorithm
+Test Suite for IngenuityML SVR Algorithm
 Includes positive and negative test cases
 All tests run in shuffled order with 5-minute timeout
 """
@@ -27,9 +27,9 @@ class TestSVR(unittest.TestCase):
     # Positive test cases
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.svm as aml_module
+        import ingenuityml.svm as ing_module
         
-        model = aml_module.SVR(C=1.0, random_state=42)
+        model = ing_module.SVR(C=1.0, random_state=42)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -40,9 +40,9 @@ class TestSVR(unittest.TestCase):
         
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.svm as aml_module
+        import ingenuityml.svm as ing_module
         
-        model = aml_module.SVR(C=1.0, random_state=42)
+        model = ing_module.SVR(C=1.0, random_state=42)
         
         params = model.get_params()
         self.assertIsInstance(params, dict)
@@ -50,59 +50,70 @@ class TestSVR(unittest.TestCase):
         
     def test_performance(self):
         """Test model performance"""
-        import auroraml.svm as aml_module
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.svm as ing_module
+        import ingenuityml.metrics as ing_metrics
         
-        model = aml_module.SVR(C=1.0, random_state=42)
+        model = ing_module.SVR(C=1.0, random_state=42)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X)
         
-        r2 = aml_metrics.r2_score(self.y, predictions)
+        r2 = ing_metrics.r2_score(self.y, predictions)
         self.assertGreater(r2, 0.5)
         
     def test_is_fitted(self):
         """Test is_fitted method"""
-        import auroraml.svm as aml_module
+        import ingenuityml.svm as ing_module
         
-        model = aml_module.SVR(C=1.0, random_state=42)
+        model = ing_module.SVR(C=1.0, random_state=42)
         self.assertFalse(model.is_fitted())
         
         model.fit(self.X, self.y)
         self.assertTrue(model.is_fitted())
+
+    def test_rbf_kernel(self):
+        """Test SVR with RBF kernel"""
+        import ingenuityml.svm as ing_module
+
+        model = ing_module.SVR(C=1.0, kernel="rbf", gamma=0.5, random_state=42)
+        model.fit(self.X, self.y)
+        predictions = model.predict(self.X_test)
+
+        self.assertEqual(len(predictions), len(self.X_test))
+        self.assertFalse(np.any(np.isnan(predictions)))
         
     # Negative test cases
     def test_empty_data(self):
         """Test with empty data - should raise error"""
-        import auroraml.svm as aml_module
+        import ingenuityml.svm as ing_module
         
-        model = aml_module.SVR(C=1.0, random_state=42)
+        model = ing_module.SVR(C=1.0, random_state=42)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(np.array([]).reshape(0, 4), np.array([]))
             
     def test_dimension_mismatch(self):
         """Test with dimension mismatch - should raise error"""
-        import auroraml.svm as aml_module
+        import ingenuityml.svm as ing_module
         
-        model = aml_module.SVR(C=1.0, random_state=42)
+        model = ing_module.SVR(C=1.0, random_state=42)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(self.X, self.y[:-1])
             
     def test_not_fitted_predict(self):
         """Test predict without fitting - should raise error"""
-        import auroraml.svm as aml_module
+        import ingenuityml.svm as ing_module
         
-        model = aml_module.SVR(C=1.0, random_state=42)
+        model = ing_module.SVR(C=1.0, random_state=42)
         
         with self.assertRaises((RuntimeError, ValueError)):
             model.predict(self.X_test)
             
     def test_wrong_feature_count(self):
         """Test predict with wrong feature count - should raise error"""
-        import auroraml.svm as aml_module
+        import ingenuityml.svm as ing_module
         
-        model = aml_module.SVR(C=1.0, random_state=42)
+        model = ing_module.SVR(C=1.0, random_state=42)
         model.fit(self.X, self.y)
         
         X_wrong = np.random.randn(20, 6).astype(np.float64)

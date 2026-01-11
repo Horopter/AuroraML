@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "auroraml/svm.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/svm.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class SVRTest : public ::testing::Test {
@@ -72,7 +72,7 @@ TEST_F(SVRTest, SVREmptyData) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

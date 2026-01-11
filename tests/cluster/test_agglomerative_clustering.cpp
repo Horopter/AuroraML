@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/agglomerative.hpp"
+#include "ingenuityml/agglomerative.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class AgglomerativeClusteringTest : public ::testing::Test {
@@ -108,7 +108,7 @@ TEST_F(AgglomerativeClusteringTest, AgglomerativeClusteringMoreClustersThanSampl
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

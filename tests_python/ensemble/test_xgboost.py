@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import random
 """
-Test Suite for AuroraML XGBoost Algorithms
+Test Suite for IngenuityML XGBoost Algorithms
 Tests XGBClassifier and XGBRegressor
 """
 
@@ -29,9 +29,9 @@ class TestXGBClassifier(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.xgboost as aml_xgb
+        import ingenuityml.xgboost as ing_xgb
         
-        model = aml_xgb.XGBClassifier(n_estimators=50, learning_rate=0.1, max_depth=6, random_state=42)
+        model = ing_xgb.XGBClassifier(n_estimators=50, learning_rate=0.1, max_depth=6, random_state=42)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -44,9 +44,9 @@ class TestXGBClassifier(unittest.TestCase):
         
     def test_predict_proba(self):
         """Test probability prediction"""
-        import auroraml.xgboost as aml_xgb
+        import ingenuityml.xgboost as ing_xgb
         
-        model = aml_xgb.XGBClassifier(n_estimators=50, learning_rate=0.1, max_depth=6, random_state=42)
+        model = ing_xgb.XGBClassifier(n_estimators=50, learning_rate=0.1, max_depth=6, random_state=42)
         model.fit(self.X, self.y)
         probabilities = model.predict_proba(self.X_test)
         
@@ -57,9 +57,9 @@ class TestXGBClassifier(unittest.TestCase):
         
     def test_decision_function(self):
         """Test decision function"""
-        import auroraml.xgboost as aml_xgb
+        import ingenuityml.xgboost as ing_xgb
         
-        model = aml_xgb.XGBClassifier(n_estimators=50, learning_rate=0.1, max_depth=6, random_state=42)
+        model = ing_xgb.XGBClassifier(n_estimators=50, learning_rate=0.1, max_depth=6, random_state=42)
         model.fit(self.X, self.y)
         decision = model.decision_function(self.X_test)
         
@@ -68,9 +68,9 @@ class TestXGBClassifier(unittest.TestCase):
         
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.xgboost as aml_xgb
+        import ingenuityml.xgboost as ing_xgb
         
-        model = aml_xgb.XGBClassifier(n_estimators=50, learning_rate=0.1, max_depth=6,
+        model = ing_xgb.XGBClassifier(n_estimators=50, learning_rate=0.1, max_depth=6,
                                      gamma=0.1, reg_alpha=0.5, reg_lambda=2.0,
                                      min_child_weight=2, subsample=0.8, colsample_bytree=0.8,
                                      random_state=42)
@@ -94,27 +94,27 @@ class TestXGBClassifier(unittest.TestCase):
         
     def test_performance(self):
         """Test model performance"""
-        import auroraml.xgboost as aml_xgb
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.xgboost as ing_xgb
+        import ingenuityml.metrics as ing_metrics
         
-        model = aml_xgb.XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=6, random_state=42)
+        model = ing_xgb.XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=6, random_state=42)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X)
         
-        accuracy = aml_metrics.accuracy_score(self.y, predictions)
+        accuracy = ing_metrics.accuracy_score(self.y, predictions)
         self.assertGreater(accuracy, 0.7)
         
     def test_regularization(self):
         """Test with different regularization parameters"""
-        import auroraml.xgboost as aml_xgb
+        import ingenuityml.xgboost as ing_xgb
         
         # Low regularization
-        model_low = aml_xgb.XGBClassifier(n_estimators=50, learning_rate=0.1, max_depth=6,
+        model_low = ing_xgb.XGBClassifier(n_estimators=50, learning_rate=0.1, max_depth=6,
                                           reg_lambda=0.1, random_state=42)
         model_low.fit(self.X, self.y)
         
         # High regularization
-        model_high = aml_xgb.XGBClassifier(n_estimators=50, learning_rate=0.1, max_depth=6,
+        model_high = ing_xgb.XGBClassifier(n_estimators=50, learning_rate=0.1, max_depth=6,
                                           reg_lambda=10.0, random_state=42)
         model_high.fit(self.X, self.y)
         
@@ -126,9 +126,9 @@ class TestXGBClassifier(unittest.TestCase):
         
     def test_subsampling(self):
         """Test with subsampling"""
-        import auroraml.xgboost as aml_xgb
+        import ingenuityml.xgboost as ing_xgb
         
-        model = aml_xgb.XGBClassifier(n_estimators=50, learning_rate=0.1, max_depth=6,
+        model = ing_xgb.XGBClassifier(n_estimators=50, learning_rate=0.1, max_depth=6,
                                      subsample=0.5, random_state=42)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
@@ -136,9 +136,9 @@ class TestXGBClassifier(unittest.TestCase):
         
     def test_is_fitted(self):
         """Test is_fitted method"""
-        import auroraml.xgboost as aml_xgb
+        import ingenuityml.xgboost as ing_xgb
         
-        model = aml_xgb.XGBClassifier()
+        model = ing_xgb.XGBClassifier()
         self.assertFalse(model.is_fitted())
         
         model.fit(self.X, self.y)
@@ -146,9 +146,9 @@ class TestXGBClassifier(unittest.TestCase):
         
     def test_classes_attribute(self):
         """Test classes attribute"""
-        import auroraml.xgboost as aml_xgb
+        import ingenuityml.xgboost as ing_xgb
         
-        model = aml_xgb.XGBClassifier(n_estimators=50, random_state=42)
+        model = ing_xgb.XGBClassifier(n_estimators=50, random_state=42)
         model.fit(self.X, self.y)
         
         classes = model.classes()
@@ -172,9 +172,9 @@ class TestXGBRegressor(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.xgboost as aml_xgb
+        import ingenuityml.xgboost as ing_xgb
         
-        model = aml_xgb.XGBRegressor(n_estimators=50, learning_rate=0.1, max_depth=6, random_state=42)
+        model = ing_xgb.XGBRegressor(n_estimators=50, learning_rate=0.1, max_depth=6, random_state=42)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -185,9 +185,9 @@ class TestXGBRegressor(unittest.TestCase):
         
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.xgboost as aml_xgb
+        import ingenuityml.xgboost as ing_xgb
         
-        model = aml_xgb.XGBRegressor(n_estimators=50, learning_rate=0.1, max_depth=6,
+        model = ing_xgb.XGBRegressor(n_estimators=50, learning_rate=0.1, max_depth=6,
                                     gamma=0.1, reg_alpha=0.5, reg_lambda=2.0,
                                     min_child_weight=2, subsample=0.8, colsample_bytree=0.8,
                                     random_state=42)
@@ -204,30 +204,30 @@ class TestXGBRegressor(unittest.TestCase):
         
     def test_performance(self):
         """Test model performance"""
-        import auroraml.xgboost as aml_xgb
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.xgboost as ing_xgb
+        import ingenuityml.metrics as ing_metrics
         
-        model = aml_xgb.XGBRegressor(n_estimators=100, learning_rate=0.1, max_depth=6, random_state=42)
+        model = ing_xgb.XGBRegressor(n_estimators=100, learning_rate=0.1, max_depth=6, random_state=42)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X)
         
-        mse = aml_metrics.mean_squared_error(self.y, predictions)
+        mse = ing_metrics.mean_squared_error(self.y, predictions)
         self.assertLess(mse, 5.0)
         
-        r2 = aml_metrics.r2_score(self.y, predictions)
+        r2 = ing_metrics.r2_score(self.y, predictions)
         self.assertGreater(r2, 0.6)
         
     def test_regularization(self):
         """Test with different regularization parameters"""
-        import auroraml.xgboost as aml_xgb
+        import ingenuityml.xgboost as ing_xgb
         
         # Low regularization
-        model_low = aml_xgb.XGBRegressor(n_estimators=50, learning_rate=0.1, max_depth=6,
+        model_low = ing_xgb.XGBRegressor(n_estimators=50, learning_rate=0.1, max_depth=6,
                                         reg_lambda=0.1, random_state=42)
         model_low.fit(self.X, self.y)
         
         # High regularization
-        model_high = aml_xgb.XGBRegressor(n_estimators=50, learning_rate=0.1, max_depth=6,
+        model_high = ing_xgb.XGBRegressor(n_estimators=50, learning_rate=0.1, max_depth=6,
                                          reg_lambda=10.0, random_state=42)
         model_high.fit(self.X, self.y)
         
@@ -239,9 +239,9 @@ class TestXGBRegressor(unittest.TestCase):
         
     def test_subsampling(self):
         """Test with subsampling"""
-        import auroraml.xgboost as aml_xgb
+        import ingenuityml.xgboost as ing_xgb
         
-        model = aml_xgb.XGBRegressor(n_estimators=50, learning_rate=0.1, max_depth=6,
+        model = ing_xgb.XGBRegressor(n_estimators=50, learning_rate=0.1, max_depth=6,
                                     subsample=0.7, colsample_bytree=0.7, random_state=42)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
@@ -249,9 +249,9 @@ class TestXGBRegressor(unittest.TestCase):
         
     def test_is_fitted(self):
         """Test is_fitted method"""
-        import auroraml.xgboost as aml_xgb
+        import ingenuityml.xgboost as ing_xgb
         
-        model = aml_xgb.XGBRegressor()
+        model = ing_xgb.XGBRegressor()
         self.assertFalse(model.is_fitted())
         
         model.fit(self.X, self.y)
@@ -259,10 +259,10 @@ class TestXGBRegressor(unittest.TestCase):
         
     def test_consistency(self):
         """Test model consistency with same random seed"""
-        import auroraml.xgboost as aml_xgb
+        import ingenuityml.xgboost as ing_xgb
         
-        model1 = aml_xgb.XGBRegressor(n_estimators=50, learning_rate=0.1, max_depth=6, random_state=42)
-        model2 = aml_xgb.XGBRegressor(n_estimators=50, learning_rate=0.1, max_depth=6, random_state=42)
+        model1 = ing_xgb.XGBRegressor(n_estimators=50, learning_rate=0.1, max_depth=6, random_state=42)
+        model2 = ing_xgb.XGBRegressor(n_estimators=50, learning_rate=0.1, max_depth=6, random_state=42)
         
         model1.fit(self.X, self.y)
         model2.fit(self.X, self.y)

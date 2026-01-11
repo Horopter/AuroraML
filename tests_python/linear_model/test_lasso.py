@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML Lasso Algorithm
+Test Suite for IngenuityML Lasso Algorithm
 Includes positive and negative test cases
 All tests run in shuffled order with 5-minute timeout
 """
@@ -27,9 +27,9 @@ class TestLasso(unittest.TestCase):
     # Positive test cases
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.Lasso(alpha=0.1)
+        model = ing_lm.Lasso(alpha=0.1)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -39,10 +39,10 @@ class TestLasso(unittest.TestCase):
         
     def test_sparsity_effect(self):
         """Test that Lasso creates sparse solutions"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        lasso_model = aml_lm.Lasso(alpha=100.0)
-        linear_model = aml_lm.LinearRegression()
+        lasso_model = ing_lm.Lasso(alpha=100.0)
+        linear_model = ing_lm.LinearRegression()
         
         lasso_model.fit(self.X, self.y)
         linear_model.fit(self.X, self.y)
@@ -54,20 +54,20 @@ class TestLasso(unittest.TestCase):
         
     def test_alpha_parameter(self):
         """Test alpha parameter effect"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
         alphas = [0.1, 1.0, 10.0]
         for alpha in alphas:
-            model = aml_lm.Lasso(alpha=alpha)
+            model = ing_lm.Lasso(alpha=alpha)
             model.fit(self.X, self.y)
             predictions = model.predict(self.X_test)
             self.assertEqual(len(predictions), len(self.X_test))
             
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.Lasso(alpha=0.1)
+        model = ing_lm.Lasso(alpha=0.1)
         
         params = model.get_params()
         self.assertIn('alpha', params)
@@ -78,21 +78,21 @@ class TestLasso(unittest.TestCase):
         
     def test_performance(self):
         """Test model performance"""
-        import auroraml.linear_model as aml_lm
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.linear_model as ing_lm
+        import ingenuityml.metrics as ing_metrics
         
-        model = aml_lm.Lasso(alpha=0.1)
+        model = ing_lm.Lasso(alpha=0.1)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X)
         
-        r2 = aml_metrics.r2_score(self.y, predictions)
+        r2 = ing_metrics.r2_score(self.y, predictions)
         self.assertGreater(r2, 0.7)
         
     def test_is_fitted(self):
         """Test is_fitted method"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.Lasso(alpha=0.1)
+        model = ing_lm.Lasso(alpha=0.1)
         self.assertFalse(model.is_fitted())
         
         model.fit(self.X, self.y)
@@ -101,36 +101,36 @@ class TestLasso(unittest.TestCase):
     # Negative test cases
     def test_empty_data(self):
         """Test with empty data - should raise error"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.Lasso(alpha=0.1)
+        model = ing_lm.Lasso(alpha=0.1)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(np.array([]).reshape(0, 5), np.array([]))
             
     def test_dimension_mismatch(self):
         """Test with dimension mismatch - should raise error"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.Lasso(alpha=0.1)
+        model = ing_lm.Lasso(alpha=0.1)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(self.X, self.y[:-1])
             
     def test_not_fitted_predict(self):
         """Test predict without fitting - should raise error"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.Lasso(alpha=0.1)
+        model = ing_lm.Lasso(alpha=0.1)
         
         with self.assertRaises((RuntimeError, ValueError)):
             model.predict(self.X_test)
             
     def test_wrong_feature_count(self):
         """Test predict with wrong feature count - should raise error"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.Lasso(alpha=0.1)
+        model = ing_lm.Lasso(alpha=0.1)
         model.fit(self.X, self.y)
         
         X_wrong = np.random.randn(20, 6).astype(np.float64)
@@ -140,9 +140,9 @@ class TestLasso(unittest.TestCase):
             
     def test_negative_alpha(self):
         """Test with negative alpha - should raise error"""
-        import auroraml.linear_model as aml_lm
+        import ingenuityml.linear_model as ing_lm
         
-        model = aml_lm.Lasso(alpha=-1.0)
+        model = ing_lm.Lasso(alpha=-1.0)
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(self.X, self.y)
 

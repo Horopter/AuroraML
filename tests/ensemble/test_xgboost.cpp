@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
-#include "auroraml/xgboost.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/xgboost.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 #include <vector>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class XGBoostTest : public ::testing::Test {
@@ -231,7 +231,7 @@ TEST_F(XGBoostTest, XGBRegressorConsistency) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

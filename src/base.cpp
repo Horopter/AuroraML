@@ -1,7 +1,7 @@
-#include "auroraml/base.hpp"
+#include "ingenuityml/base.hpp"
 #include <stdexcept>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace utils {
 
 std::string get_param_string(const Params& params, const std::string& key, const std::string& default_val) {
@@ -67,4 +67,4 @@ void check_X(const MatrixXd& X) {
 
 } // namespace validation
 
-} // namespace cxml
+} // namespace ingenuityml

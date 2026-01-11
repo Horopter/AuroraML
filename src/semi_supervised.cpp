@@ -1,10 +1,10 @@
-#include "auroraml/semi_supervised.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/semi_supervised.hpp"
+#include "ingenuityml/base.hpp"
 #include <set>
 #include <cmath>
 #include <algorithm>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace semi_supervised {
 
 // LabelPropagation implementation
@@ -459,6 +459,152 @@ Estimator& LabelSpreading::set_params(const Params& params) {
     return *this;
 }
 
-} // namespace semi_supervised
-} // namespace auroraml
+// SelfTrainingClassifier implementation
 
+SelfTrainingClassifier::SelfTrainingClassifier(int n_neighbors, double threshold, int max_iter)
+    : n_neighbors_(n_neighbors),
+      threshold_(threshold),
+      max_iter_(max_iter),
+      fitted_(false),
+      base_classifier_(n_neighbors) {}
+
+Estimator& SelfTrainingClassifier::fit(const MatrixXd& X, const VectorXd& y) {
+    validation::check_X_y(X, y);
+    if (threshold_ <= 0.0 || threshold_ > 1.0) {
+        throw std::invalid_argument("threshold must be in (0, 1]");
+    }
+    if (n_neighbors_ <= 0) {
+        throw std::invalid_argument("n_neighbors must be positive");
+    }
+
+    VectorXi y_work = y.cast<int>();
+    X_fitted_ = X;
+
+    std::set<int> unique_classes;
+    for (int i = 0; i < y_work.size(); ++i) {
+        if (y_work(i) >= 0) {
+            unique_classes.insert(y_work(i));
+        }
+    }
+    if (unique_classes.empty()) {
+        throw std::invalid_argument("At least one labeled sample is required");
+    }
+
+    classes_.resize(static_cast<int>(unique_classes.size()));
+    int idx = 0;
+    for (int cls : unique_classes) {
+        classes_(idx++) = cls;
+    }
+
+    for (int iter = 0; iter < max_iter_; ++iter) {
+        std::vector<int> labeled_idx;
+        std::vector<int> unlabeled_idx;
+        labeled_idx.reserve(y_work.size());
+        unlabeled_idx.reserve(y_work.size());
+        for (int i = 0; i < y_work.size(); ++i) {
+            if (y_work(i) >= 0) {
+                labeled_idx.push_back(i);
+            } else {
+                unlabeled_idx.push_back(i);
+            }
+        }
+
+        if (unlabeled_idx.empty()) {
+            break;
+        }
+
+        MatrixXd X_labeled(static_cast<int>(labeled_idx.size()), X.cols());
+        VectorXd y_labeled(static_cast<int>(labeled_idx.size()));
+        for (size_t i = 0; i < labeled_idx.size(); ++i) {
+            X_labeled.row(static_cast<int>(i)) = X.row(labeled_idx[i]);
+            y_labeled(static_cast<int>(i)) = static_cast<double>(y_work(labeled_idx[i]));
+        }
+
+        base_classifier_ = neighbors::KNeighborsClassifier(n_neighbors_);
+        base_classifier_.fit(X_labeled, y_labeled);
+
+        MatrixXd X_unlabeled(static_cast<int>(unlabeled_idx.size()), X.cols());
+        for (size_t i = 0; i < unlabeled_idx.size(); ++i) {
+            X_unlabeled.row(static_cast<int>(i)) = X.row(unlabeled_idx[i]);
+        }
+
+        MatrixXd proba = base_classifier_.predict_proba(X_unlabeled);
+        int newly_labeled = 0;
+        for (int i = 0; i < proba.rows(); ++i) {
+            Eigen::Index max_idx = 0;
+            double max_val = proba.row(i).maxCoeff(&max_idx);
+            if (max_val >= threshold_) {
+                int global_idx = unlabeled_idx[static_cast<size_t>(i)];
+                y_work(global_idx) = classes_(static_cast<int>(max_idx));
+                newly_labeled++;
+            }
+        }
+
+        if (newly_labeled == 0) {
+            break;
+        }
+    }
+
+    std::vector<int> final_labeled;
+    final_labeled.reserve(y_work.size());
+    for (int i = 0; i < y_work.size(); ++i) {
+        if (y_work(i) >= 0) {
+            final_labeled.push_back(i);
+        }
+    }
+
+    MatrixXd X_final(static_cast<int>(final_labeled.size()), X.cols());
+    VectorXd y_final(static_cast<int>(final_labeled.size()));
+    for (size_t i = 0; i < final_labeled.size(); ++i) {
+        X_final.row(static_cast<int>(i)) = X.row(final_labeled[i]);
+        y_final(static_cast<int>(i)) = static_cast<double>(y_work(final_labeled[i]));
+    }
+
+    base_classifier_ = neighbors::KNeighborsClassifier(n_neighbors_);
+    base_classifier_.fit(X_final, y_final);
+
+    y_fitted_ = y_work;
+    fitted_ = true;
+    return *this;
+}
+
+VectorXi SelfTrainingClassifier::predict_classes(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("SelfTrainingClassifier must be fitted before predict");
+    }
+    return base_classifier_.predict_classes(X);
+}
+
+MatrixXd SelfTrainingClassifier::predict_proba(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("SelfTrainingClassifier must be fitted before predict_proba");
+    }
+    return base_classifier_.predict_proba(X);
+}
+
+VectorXd SelfTrainingClassifier::decision_function(const MatrixXd& X) const {
+    MatrixXd proba = predict_proba(X);
+    VectorXd decision(X.rows());
+    for (int i = 0; i < proba.rows(); ++i) {
+        decision(i) = proba.row(i).maxCoeff();
+    }
+    return decision;
+}
+
+Params SelfTrainingClassifier::get_params() const {
+    Params params;
+    params["n_neighbors"] = std::to_string(n_neighbors_);
+    params["threshold"] = std::to_string(threshold_);
+    params["max_iter"] = std::to_string(max_iter_);
+    return params;
+}
+
+Estimator& SelfTrainingClassifier::set_params(const Params& params) {
+    n_neighbors_ = utils::get_param_int(params, "n_neighbors", n_neighbors_);
+    threshold_ = utils::get_param_double(params, "threshold", threshold_);
+    max_iter_ = utils::get_param_int(params, "max_iter", max_iter_);
+    return *this;
+}
+
+} // namespace semi_supervised
+} // namespace ingenuityml

@@ -1,9 +1,9 @@
-#include "auroraml/isotonic.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/isotonic.hpp"
+#include "ingenuityml/base.hpp"
 #include <algorithm>
 #include <cmath>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace isotonic {
 
 IsotonicRegression::IsotonicRegression(bool increasing)
@@ -180,5 +180,5 @@ Estimator& IsotonicRegression::set_params(const Params& params) {
 }
 
 } // namespace isotonic
-} // namespace auroraml
+} // namespace ingenuityml
 

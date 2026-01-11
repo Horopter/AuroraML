@@ -1,5 +1,5 @@
-#include "auroraml/tree.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/tree.hpp"
+#include "ingenuityml/base.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 #include <numeric>
@@ -9,7 +9,7 @@
 #include <set>
 #include <fstream>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace tree {
 
 // DecisionTreeClassifier implementation
@@ -758,4 +758,4 @@ void DecisionTreeRegressor::load(const std::string& filepath) {
 }
 
 } // namespace tree
-} // namespace cxml
+} // namespace ingenuityml

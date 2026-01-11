@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# CxML Build Script
+# IngenuityML Build Script
 
-echo "Building CxML..."
+echo "Building IngenuityML..."
 
 # Create build directory
 mkdir -p build
@@ -15,4 +15,4 @@ cmake ..
 make -j4
 
 echo "Build complete!"
-echo "Python module should be available as: build/cxml.cpython-*.so"
+echo "Python module should be available as: build/ingenuityml.cpython-*.so"

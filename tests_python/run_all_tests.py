@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Run all AuroraML Python tests in parallel, ordered by fastest completion
+Run all IngenuityML Python tests in parallel, ordered by fastest completion
 """
 
 import sys
@@ -24,7 +24,7 @@ sys.stdout.reconfigure(line_buffering=True)
 sys.stderr.reconfigure(line_buffering=True)
 
 print("=" * 80)
-print("AuroraML Test Runner (Parallel)")
+print("IngenuityML Test Runner (Parallel)")
 print("=" * 80)
 print(f"Python: {sys.executable}", flush=True)
 print(f"Working directory: {os.getcwd()}", flush=True)
@@ -42,7 +42,7 @@ TEST_TIMEOUT_SECONDS = 15 * 60
 
 # Find all test files recursively
 test_files = []
-excluded_dirs = {"__pycache__", "logs", "build", "auroraml"}
+excluded_dirs = {"__pycache__", "logs", "build", "ingenuityml"}
 for root, dirs, files in os.walk(test_dir):
     dirs[:] = [d for d in dirs if d not in excluded_dirs]
     for filename in files:

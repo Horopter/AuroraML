@@ -1,10 +1,10 @@
-#include "auroraml/extratree.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/extratree.hpp"
+#include "ingenuityml/base.hpp"
 #include <set>
 #include <random>
 #include <algorithm>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace tree {
 
 // ExtraTreeClassifier implementation
@@ -506,5 +506,5 @@ Estimator& ExtraTreeRegressor::set_params(const Params& params) {
 }
 
 } // namespace tree
-} // namespace auroraml
+} // namespace ingenuityml
 

@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "auroraml/pca.hpp"
-#include "auroraml/decomposition_extended.hpp"
+#include "ingenuityml/pca.hpp"
+#include "ingenuityml/decomposition_extended.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class DecompositionExtendedTest : public ::testing::Test {
@@ -133,7 +133,7 @@ TEST_F(DecompositionExtendedTest, FactorAnalysisFit) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

@@ -6,7 +6,7 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import auroraml
+import ingenuityml
 import random
 
 class TestMixture(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestMixture(unittest.TestCase):
 
     def test_gaussian_mixture(self):
         """Test GaussianMixture"""
-        gm = auroraml.mixture.GaussianMixture(
+        gm = ingenuityml.mixture.GaussianMixture(
             n_components=2, max_iter=50, random_state=42
         )
         gm.fit(self.X, None)
@@ -39,6 +39,25 @@ class TestMixture(unittest.TestCase):
         covariances = gm.covariances()
         self.assertEqual(len(covariances), 2)
 
+    def test_bayesian_gaussian_mixture(self):
+        """Test BayesianGaussianMixture"""
+        bgm = ingenuityml.mixture.BayesianGaussianMixture(
+            n_components=2, max_iter=50, random_state=42
+        )
+        bgm.fit(self.X, None)
+
+        predictions = bgm.predict(self.X)
+        self.assertEqual(predictions.shape[0], self.X.shape[0])
+
+        proba = bgm.predict_proba(self.X)
+        self.assertEqual(proba.shape, (self.X.shape[0], 2))
+
+        scores = bgm.score_samples(self.X)
+        self.assertEqual(scores.shape[0], self.X.shape[0])
+
+        means = bgm.means()
+        self.assertEqual(len(means), 2)
+
 if __name__ == '__main__':
     # Shuffle tests within this file
     loader = unittest.TestLoader()
@@ -51,4 +70,3 @@ if __name__ == '__main__':
     shuffled_suite = unittest.TestSuite(test_methods)
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(shuffled_suite)
-

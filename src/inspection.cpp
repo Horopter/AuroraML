@@ -1,10 +1,10 @@
-#include "auroraml/inspection.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/inspection.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <random>
 #include <algorithm>
 #include <numeric>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace inspection {
 
 // PermutationImportance implementation
@@ -158,5 +158,5 @@ void PartialDependence::compute(const MatrixXd& X) {
 }
 
 } // namespace inspection
-} // namespace auroraml
+} // namespace ingenuityml
 

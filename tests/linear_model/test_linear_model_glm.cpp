@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/linear_model.hpp"
+#include "ingenuityml/linear_model.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class LinearModelGLMTest : public ::testing::Test {
@@ -58,7 +58,7 @@ TEST_F(LinearModelGLMTest, GammaRegressorInvalidY) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

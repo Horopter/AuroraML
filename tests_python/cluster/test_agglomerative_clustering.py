@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML AgglomerativeClustering Algorithm
+Test Suite for IngenuityML AgglomerativeClustering Algorithm
 Includes positive and negative test cases
 All tests run in shuffled order with 5-minute timeout
 """
@@ -32,9 +32,9 @@ class TestAgglomerativeClustering(unittest.TestCase):
     # Positive test cases
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.AgglomerativeClustering(n_clusters=3)
+        model = ing_cluster.AgglomerativeClustering(n_clusters=3)
         labels = model.fit_predict(self.X)
         
         self.assertEqual(len(labels), len(self.X))
@@ -44,9 +44,9 @@ class TestAgglomerativeClustering(unittest.TestCase):
         
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.AgglomerativeClustering(n_clusters=3)
+        model = ing_cluster.AgglomerativeClustering(n_clusters=3)
         
         params = model.get_params()
         self.assertIsInstance(params, dict)
@@ -54,10 +54,10 @@ class TestAgglomerativeClustering(unittest.TestCase):
         
     def test_different_n_clusters(self):
         """Test with different numbers of clusters"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
         for n_clusters in [2, 3, 4]:
-            model = aml_cluster.AgglomerativeClustering(n_clusters=n_clusters)
+            model = ing_cluster.AgglomerativeClustering(n_clusters=n_clusters)
             labels = model.fit_predict(self.X)
             self.assertEqual(len(labels), len(self.X))
             self.assertTrue(np.all(labels >= 0))
@@ -65,9 +65,9 @@ class TestAgglomerativeClustering(unittest.TestCase):
             
     def test_labels_method(self):
         """Test labels method"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.AgglomerativeClustering(n_clusters=3)
+        model = ing_cluster.AgglomerativeClustering(n_clusters=3)
         model.fit(self.X, self.y_dummy)
         
         labels = model.labels()
@@ -77,38 +77,38 @@ class TestAgglomerativeClustering(unittest.TestCase):
     # Negative test cases
     def test_empty_data(self):
         """Test with empty data - should raise error"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.AgglomerativeClustering(n_clusters=3)
+        model = ing_cluster.AgglomerativeClustering(n_clusters=3)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit_predict(np.array([]).reshape(0, 2))
             
     def test_zero_clusters(self):
         """Test with zero clusters - should raise error"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.AgglomerativeClustering(n_clusters=0)
+        model = ing_cluster.AgglomerativeClustering(n_clusters=0)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit_predict(self.X)
             
     def test_negative_clusters(self):
         """Test with negative clusters - should raise error"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
-        model = aml_cluster.AgglomerativeClustering(n_clusters=-1)
+        model = ing_cluster.AgglomerativeClustering(n_clusters=-1)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit_predict(self.X)
             
     def test_more_clusters_than_samples(self):
         """Test with more clusters than samples - should raise error"""
-        import auroraml.cluster as aml_cluster
+        import ingenuityml.cluster as ing_cluster
         
         X_small = self.X[:5]
         
-        model = aml_cluster.AgglomerativeClustering(n_clusters=10)
+        model = ing_cluster.AgglomerativeClustering(n_clusters=10)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit_predict(X_small)

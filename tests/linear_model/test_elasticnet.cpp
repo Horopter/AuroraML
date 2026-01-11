@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "auroraml/linear_model.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/linear_model.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class ElasticNetTest : public ::testing::Test {
@@ -133,7 +133,7 @@ TEST_F(ElasticNetTest, ElasticNetInvalidL1Ratio) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

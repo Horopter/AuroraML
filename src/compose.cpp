@@ -1,10 +1,10 @@
-#include "auroraml/compose.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/compose.hpp"
+#include "ingenuityml/base.hpp"
 #include <stdexcept>
 #include <algorithm>
 #include <set>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace compose {
 
 // ColumnTransformer implementation
@@ -254,5 +254,5 @@ Estimator& TransformedTargetRegressor::set_params(const Params& params) {
 }
 
 } // namespace compose
-} // namespace auroraml
+} // namespace ingenuityml
 

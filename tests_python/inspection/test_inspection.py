@@ -6,7 +6,7 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import auroraml
+import ingenuityml
 import random
 
 class TestInspection(unittest.TestCase):
@@ -18,10 +18,10 @@ class TestInspection(unittest.TestCase):
 
     def test_permutation_importance_classification(self):
         """Test PermutationImportance for classification"""
-        clf = auroraml.tree.DecisionTreeClassifier(max_depth=3)
+        clf = ingenuityml.tree.DecisionTreeClassifier(max_depth=3)
         clf.fit(self.X, self.y_class)
         
-        perm_imp = auroraml.inspection.PermutationImportance(
+        perm_imp = ingenuityml.inspection.PermutationImportance(
             estimator=clf, scoring="accuracy", n_repeats=3
         )
         perm_imp.fit(self.X, self.y_class)
@@ -32,10 +32,10 @@ class TestInspection(unittest.TestCase):
 
     def test_permutation_importance_regression(self):
         """Test PermutationImportance for regression"""
-        reg = auroraml.linear_model.LinearRegression()
+        reg = ingenuityml.linear_model.LinearRegression()
         reg.fit(self.X, self.y)
         
-        perm_imp = auroraml.inspection.PermutationImportance(
+        perm_imp = ingenuityml.inspection.PermutationImportance(
             estimator=reg, scoring="r2", n_repeats=3
         )
         perm_imp.fit(self.X, self.y)
@@ -45,10 +45,10 @@ class TestInspection(unittest.TestCase):
 
     def test_partial_dependence(self):
         """Test PartialDependence"""
-        reg = auroraml.linear_model.LinearRegression()
+        reg = ingenuityml.linear_model.LinearRegression()
         reg.fit(self.X, self.y)
         
-        pd = auroraml.inspection.PartialDependence(
+        pd = ingenuityml.inspection.PartialDependence(
             estimator=reg, features=[0, 1]
         )
         pd.compute(self.X)

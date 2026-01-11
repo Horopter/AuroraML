@@ -1,5 +1,5 @@
-#include "auroraml/neighbors.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/neighbors.hpp"
+#include "ingenuityml/base.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 #include <numeric>
@@ -13,7 +13,7 @@
 #include <omp.h>
 #endif
 
-namespace auroraml {
+namespace ingenuityml {
 namespace neighbors {
 
 // KNeighborsClassifier implementation
@@ -1455,4 +1455,4 @@ MatrixXd RadiusNeighborsTransformer::compute_distances(const MatrixXd& X) const 
 }
 
 } // namespace neighbors
-} // namespace cxml
+} // namespace ingenuityml

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import random
 """
-Test Suite for AuroraML Preprocessing
+Test Suite for IngenuityML Preprocessing
 Tests StandardScaler, MinMaxScaler, RobustScaler, LabelEncoder, OneHotEncoder, OrdinalEncoder
 """
 
@@ -24,9 +24,9 @@ class TestStandardScaler(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and transform functionality"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        scaler = aml_pp.StandardScaler()
+        scaler = ing_pp.StandardScaler()
         X_scaled = scaler.fit_transform(self.X, self.y_dummy)
         
         self.assertEqual(X_scaled.shape, self.X.shape)
@@ -34,9 +34,9 @@ class TestStandardScaler(unittest.TestCase):
         
     def test_fit_transform(self):
         """Test fit_transform method"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        scaler = aml_pp.StandardScaler()
+        scaler = ing_pp.StandardScaler()
         X_scaled = scaler.fit_transform(self.X, self.y_dummy)
         
         # Check that data is approximately standardized
@@ -48,9 +48,9 @@ class TestStandardScaler(unittest.TestCase):
         
     def test_inverse_transform(self):
         """Test inverse transform"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        scaler = aml_pp.StandardScaler()
+        scaler = ing_pp.StandardScaler()
         X_scaled = scaler.fit_transform(self.X, self.y_dummy)
         X_inverse = scaler.inverse_transform(X_scaled)
         
@@ -58,9 +58,9 @@ class TestStandardScaler(unittest.TestCase):
         
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        scaler = aml_pp.StandardScaler()
+        scaler = ing_pp.StandardScaler()
         
         # Test default parameters
         params = scaler.get_params()
@@ -73,9 +73,9 @@ class TestStandardScaler(unittest.TestCase):
         
     def test_with_mean_false(self):
         """Test StandardScaler with with_mean=False"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        scaler = aml_pp.StandardScaler(with_mean=False)
+        scaler = ing_pp.StandardScaler(with_mean=False)
         X_scaled = scaler.fit_transform(self.X, self.y_dummy)
         
         # Should still be fitted
@@ -97,9 +97,9 @@ class TestMinMaxScaler(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and transform functionality"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        scaler = aml_pp.MinMaxScaler()
+        scaler = ing_pp.MinMaxScaler()
         X_scaled = scaler.fit_transform(self.X, self.y_dummy)
         
         self.assertEqual(X_scaled.shape, self.X.shape)
@@ -107,9 +107,9 @@ class TestMinMaxScaler(unittest.TestCase):
         
     def test_fit_transform(self):
         """Test fit_transform method"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        scaler = aml_pp.MinMaxScaler()
+        scaler = ing_pp.MinMaxScaler()
         X_scaled = scaler.fit_transform(self.X, self.y_dummy)
         
         # Check that data is in [0, 1] range
@@ -118,9 +118,9 @@ class TestMinMaxScaler(unittest.TestCase):
         
     def test_inverse_transform(self):
         """Test inverse transform"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        scaler = aml_pp.MinMaxScaler()
+        scaler = ing_pp.MinMaxScaler()
         X_scaled = scaler.fit_transform(self.X, self.y_dummy)
         X_inverse = scaler.inverse_transform(X_scaled)
         
@@ -128,9 +128,9 @@ class TestMinMaxScaler(unittest.TestCase):
         
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        scaler = aml_pp.MinMaxScaler()
+        scaler = ing_pp.MinMaxScaler()
         
         # Test default parameters
         params = scaler.get_params()
@@ -153,9 +153,9 @@ class TestRobustScaler(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and transform functionality"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        scaler = aml_pp.RobustScaler()
+        scaler = ing_pp.RobustScaler()
         X_scaled = scaler.fit_transform(self.X, self.y_dummy)
         
         self.assertEqual(X_scaled.shape, self.X.shape)
@@ -163,9 +163,9 @@ class TestRobustScaler(unittest.TestCase):
         
     def test_fit_transform(self):
         """Test fit_transform method"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        scaler = aml_pp.RobustScaler()
+        scaler = ing_pp.RobustScaler()
         X_scaled = scaler.fit_transform(self.X, self.y_dummy)
         
         # Check that data is approximately centered and scaled
@@ -174,9 +174,9 @@ class TestRobustScaler(unittest.TestCase):
         
     def test_inverse_transform(self):
         """Test inverse transform"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        scaler = aml_pp.RobustScaler()
+        scaler = ing_pp.RobustScaler()
         X_scaled = scaler.fit_transform(self.X, self.y_dummy)
         X_inverse = scaler.inverse_transform(X_scaled)
         
@@ -192,9 +192,9 @@ class TestLabelEncoder(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and transform functionality"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        encoder = aml_pp.LabelEncoder()
+        encoder = ing_pp.LabelEncoder()
         y_encoded = encoder.fit_transform(self.y_dummy, self.y_labels)
         
         self.assertEqual(len(y_encoded), len(self.y_labels))
@@ -202,9 +202,9 @@ class TestLabelEncoder(unittest.TestCase):
         
     def test_inverse_transform(self):
         """Test inverse transform"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        encoder = aml_pp.LabelEncoder()
+        encoder = ing_pp.LabelEncoder()
         y_encoded = encoder.fit_transform(self.y_dummy, self.y_labels)
         y_decoded = encoder.inverse_transform(y_encoded)
         
@@ -213,12 +213,12 @@ class TestLabelEncoder(unittest.TestCase):
         
     def test_unique_labels(self):
         """Test with unique labels"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
         unique_labels = np.array([0, 1, 2], dtype=np.float64)
         y_dummy = np.zeros((len(unique_labels), 1)).astype(np.float64)
         
-        encoder = aml_pp.LabelEncoder()
+        encoder = ing_pp.LabelEncoder()
         y_encoded = encoder.fit_transform(y_dummy, unique_labels)
         
         # Should have 3 unique encoded values
@@ -235,9 +235,9 @@ class TestOneHotEncoder(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and transform functionality"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        encoder = aml_pp.OneHotEncoder()
+        encoder = ing_pp.OneHotEncoder()
         X_encoded = encoder.fit_transform(self.X_categorical, self.y_dummy)
         
         self.assertIsInstance(X_encoded, np.ndarray)
@@ -245,9 +245,9 @@ class TestOneHotEncoder(unittest.TestCase):
         
     def test_inverse_transform(self):
         """Test inverse transform"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        encoder = aml_pp.OneHotEncoder()
+        encoder = ing_pp.OneHotEncoder()
         X_encoded = encoder.fit_transform(self.X_categorical, self.y_dummy)
         X_decoded = encoder.inverse_transform(X_encoded)
         
@@ -264,9 +264,9 @@ class TestOrdinalEncoder(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and transform functionality"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        encoder = aml_pp.OrdinalEncoder()
+        encoder = ing_pp.OrdinalEncoder()
         X_encoded = encoder.fit_transform(self.X_categorical, self.y_dummy)
         
         self.assertEqual(X_encoded.shape, self.X_categorical.shape)
@@ -274,9 +274,9 @@ class TestOrdinalEncoder(unittest.TestCase):
         
     def test_inverse_transform(self):
         """Test inverse transform"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
-        encoder = aml_pp.OrdinalEncoder()
+        encoder = ing_pp.OrdinalEncoder()
         X_encoded = encoder.fit_transform(self.X_categorical, self.y_dummy)
         X_decoded = encoder.inverse_transform(X_encoded)
         
@@ -288,15 +288,15 @@ class TestPreprocessingIntegration(unittest.TestCase):
     
     def test_pipeline_compatibility(self):
         """Test that different scalers can be used in sequence"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
         np.random.seed(42)
         X = np.random.randn(100, 4).astype(np.float64)
         y_dummy = np.zeros((X.shape[0], 1)).astype(np.float64)
         
         # Test StandardScaler -> MinMaxScaler pipeline
-        scaler1 = aml_pp.StandardScaler()
-        scaler2 = aml_pp.MinMaxScaler()
+        scaler1 = ing_pp.StandardScaler()
+        scaler2 = ing_pp.MinMaxScaler()
         
         X_scaled1 = scaler1.fit_transform(X, y_dummy)
         X_scaled2 = scaler2.fit_transform(X_scaled1, y_dummy)
@@ -307,13 +307,13 @@ class TestPreprocessingIntegration(unittest.TestCase):
         
     def test_edge_cases(self):
         """Test edge cases"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
         # Test with single sample
         X_single = np.random.randn(1, 4).astype(np.float64)
         y_dummy_single = np.zeros((1, 1)).astype(np.float64)
         
-        scaler = aml_pp.StandardScaler()
+        scaler = ing_pp.StandardScaler()
         X_scaled = scaler.fit_transform(X_single, y_dummy_single)
         
         self.assertEqual(X_scaled.shape, X_single.shape)
@@ -324,13 +324,13 @@ class TestPreprocessingIntegration(unittest.TestCase):
             
     def test_model_persistence(self):
         """Test model saving and loading"""
-        import auroraml.preprocessing as aml_pp
+        import ingenuityml.preprocessing as ing_pp
         
         np.random.seed(42)
         X = np.random.randn(100, 4).astype(np.float64)
         y_dummy = np.zeros((X.shape[0], 1)).astype(np.float64)
         
-        scaler = aml_pp.StandardScaler()
+        scaler = ing_pp.StandardScaler()
         scaler.fit(X, y_dummy)
         
         # Save model
@@ -338,7 +338,7 @@ class TestPreprocessingIntegration(unittest.TestCase):
         scaler.save(filename)
         
         # Load model
-        loaded_scaler = aml_pp.StandardScaler()
+        loaded_scaler = ing_pp.StandardScaler()
         loaded_scaler.load(filename)
         
         # Compare transformations

@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "auroraml/kmeans.hpp"
+#include "ingenuityml/kmeans.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class KMeansTest : public ::testing::Test {
@@ -101,7 +101,7 @@ TEST_F(KMeansTest, KMeansLabels) {
 }
 
 } // namespace test
-} // namespace cxml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

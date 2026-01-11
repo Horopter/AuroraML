@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "auroraml/adaboost.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/adaboost.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 class AdaBoostRegressorTest : public ::testing::Test {
@@ -113,7 +113,7 @@ TEST_F(AdaBoostRegressorTest, AdaBoostRegressorNegativeLearningRate) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     // Enable test shuffling within this file

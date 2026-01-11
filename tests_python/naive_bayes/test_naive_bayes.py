@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML Naive Bayes
+Test Suite for IngenuityML Naive Bayes
 Tests GaussianNB algorithm
 """
 
@@ -27,9 +27,9 @@ class TestGaussianNB(unittest.TestCase):
         
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.naive_bayes as aml_nb
+        import ingenuityml.naive_bayes as ing_nb
         
-        model = aml_nb.GaussianNB()
+        model = ing_nb.GaussianNB()
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -39,9 +39,9 @@ class TestGaussianNB(unittest.TestCase):
         
     def test_predict_proba(self):
         """Test probability prediction"""
-        import auroraml.naive_bayes as aml_nb
+        import ingenuityml.naive_bayes as ing_nb
         
-        model = aml_nb.GaussianNB()
+        model = ing_nb.GaussianNB()
         model.fit(self.X, self.y)
         probabilities = model.predict_proba(self.X_test)
         
@@ -52,9 +52,9 @@ class TestGaussianNB(unittest.TestCase):
         
     def test_predict_log_proba(self):
         """Test log probability prediction"""
-        import auroraml.naive_bayes as aml_nb
+        import ingenuityml.naive_bayes as ing_nb
         
-        model = aml_nb.GaussianNB()
+        model = ing_nb.GaussianNB()
         model.fit(self.X, self.y)
         probabilities = model.predict_proba(self.X_test)
         
@@ -69,9 +69,9 @@ class TestGaussianNB(unittest.TestCase):
         
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.naive_bayes as aml_nb
+        import ingenuityml.naive_bayes as ing_nb
         
-        model = aml_nb.GaussianNB()
+        model = ing_nb.GaussianNB()
         
         # Test default parameters
         params = model.get_params()
@@ -83,21 +83,21 @@ class TestGaussianNB(unittest.TestCase):
         
     def test_performance(self):
         """Test model performance"""
-        import auroraml.naive_bayes as aml_nb
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.naive_bayes as ing_nb
+        import ingenuityml.metrics as ing_metrics
         
-        model = aml_nb.GaussianNB()
+        model = ing_nb.GaussianNB()
         model.fit(self.X, self.y)
         predictions = model.predict(self.X)
         
-        accuracy = aml_metrics.accuracy_score(self.y, predictions)
+        accuracy = ing_metrics.accuracy_score(self.y, predictions)
         self.assertGreater(accuracy, 0.5)  # Should be better than random
         
     def test_class_prior(self):
         """Test class prior estimation"""
-        import auroraml.naive_bayes as aml_nb
+        import ingenuityml.naive_bayes as ing_nb
         
-        model = aml_nb.GaussianNB()
+        model = ing_nb.GaussianNB()
         model.fit(self.X, self.y)
         
         # Check that class priors are estimated
@@ -109,9 +109,9 @@ class TestGaussianNB(unittest.TestCase):
             
     def test_feature_statistics(self):
         """Test feature statistics estimation"""
-        import auroraml.naive_bayes as aml_nb
+        import ingenuityml.naive_bayes as ing_nb
         
-        model = aml_nb.GaussianNB()
+        model = ing_nb.GaussianNB()
         model.fit(self.X, self.y)
         
         # Check that means and variances are estimated
@@ -125,9 +125,9 @@ class TestGaussianNB(unittest.TestCase):
             
     def test_edge_cases(self):
         """Test edge cases"""
-        import auroraml.naive_bayes as aml_nb
+        import ingenuityml.naive_bayes as ing_nb
         
-        model = aml_nb.GaussianNB()
+        model = ing_nb.GaussianNB()
         
         # Test with single sample per class (must match feature count)
         X_single = np.array([[1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, 8.0]])
@@ -142,9 +142,9 @@ class TestGaussianNB(unittest.TestCase):
             
     def test_model_persistence(self):
         """Test model saving and loading"""
-        import auroraml.naive_bayes as aml_nb
+        import ingenuityml.naive_bayes as ing_nb
         
-        model = aml_nb.GaussianNB()
+        model = ing_nb.GaussianNB()
         model.fit(self.X, self.y)
         
         # Save model
@@ -152,7 +152,7 @@ class TestGaussianNB(unittest.TestCase):
         model.save(filename)
         
         # Load model
-        loaded_model = aml_nb.GaussianNB()
+        loaded_model = ing_nb.GaussianNB()
         loaded_model.load(filename)
         
         # Compare predictions
@@ -176,12 +176,12 @@ class TestGaussianNBIntegration(unittest.TestCase):
         
     def test_cross_validation_compatibility(self):
         """Test compatibility with cross-validation"""
-        import auroraml.naive_bayes as aml_nb
-        import auroraml.model_selection as aml_ms
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.naive_bayes as ing_nb
+        import ingenuityml.model_selection as ing_ms
+        import ingenuityml.metrics as ing_metrics
         
-        model = aml_nb.GaussianNB()
-        kfold = aml_ms.KFold(n_splits=5, shuffle=True, random_state=42)
+        model = ing_nb.GaussianNB()
+        kfold = ing_ms.KFold(n_splits=5, shuffle=True, random_state=42)
         
         scores = []
         for train_idx, val_idx in kfold.split(self.X):
@@ -190,7 +190,7 @@ class TestGaussianNBIntegration(unittest.TestCase):
             
             model.fit(X_train, y_train)
             predictions = model.predict(X_val)
-            accuracy = aml_metrics.accuracy_score(y_val, predictions)
+            accuracy = ing_metrics.accuracy_score(y_val, predictions)
             scores.append(accuracy)
             
         mean_score = np.mean(scores)
@@ -198,9 +198,9 @@ class TestGaussianNBIntegration(unittest.TestCase):
         
     def test_probability_consistency(self):
         """Test consistency between predict and predict_proba"""
-        import auroraml.naive_bayes as aml_nb
+        import ingenuityml.naive_bayes as ing_nb
         
-        model = aml_nb.GaussianNB()
+        model = ing_nb.GaussianNB()
         model.fit(self.X, self.y)
         
         predictions = model.predict(self.X_test)
@@ -212,25 +212,25 @@ class TestGaussianNBIntegration(unittest.TestCase):
         
     def test_different_class_distributions(self):
         """Test with different class distributions"""
-        import auroraml.naive_bayes as aml_nb
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.naive_bayes as ing_nb
+        import ingenuityml.metrics as ing_metrics
         
         # Create imbalanced dataset
         n_samples = 100
         X_imbalanced = np.random.randn(n_samples, 4).astype(np.float64)
         y_imbalanced = np.concatenate([np.zeros(80), np.ones(20)])
         
-        model = aml_nb.GaussianNB()
+        model = ing_nb.GaussianNB()
         model.fit(X_imbalanced, y_imbalanced)
         predictions = model.predict(X_imbalanced)
         
-        accuracy = aml_metrics.accuracy_score(y_imbalanced, predictions)
+        accuracy = ing_metrics.accuracy_score(y_imbalanced, predictions)
         self.assertGreater(accuracy, 0.5)
         
     def test_feature_importance_estimation(self):
         """Test that the model can handle different feature scales"""
-        import auroraml.naive_bayes as aml_nb
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.naive_bayes as ing_nb
+        import ingenuityml.metrics as ing_metrics
         
         # Create data with different feature scales
         X_scaled = np.column_stack([
@@ -242,28 +242,28 @@ class TestGaussianNBIntegration(unittest.TestCase):
         
         y_scaled = (X_scaled[:, 0] + X_scaled[:, 1] > 0).astype(np.int32)
         
-        model = aml_nb.GaussianNB()
+        model = ing_nb.GaussianNB()
         model.fit(X_scaled, y_scaled)
         predictions = model.predict(X_scaled)
         
-        accuracy = aml_metrics.accuracy_score(y_scaled, predictions)
+        accuracy = ing_metrics.accuracy_score(y_scaled, predictions)
         self.assertGreater(accuracy, 0.5)
         
     def test_hyperparameter_tuning(self):
         """Test hyperparameter tuning with GridSearchCV"""
-        import auroraml.naive_bayes as aml_nb
-        import auroraml.model_selection as aml_ms
+        import ingenuityml.naive_bayes as ing_nb
+        import ingenuityml.model_selection as ing_ms
         
-        model = aml_nb.GaussianNB()
+        model = ing_nb.GaussianNB()
         # GridSearchCV expects a list of dicts (Sequence[Mapping[str, str]])
         param_grid = [
             {'var_smoothing': '1e-9'},
             {'var_smoothing': '1e-8'},
             {'var_smoothing': '1e-7'}
         ]
-        kfold = aml_ms.KFold(n_splits=3, shuffle=True, random_state=42)
+        kfold = ing_ms.KFold(n_splits=3, shuffle=True, random_state=42)
         
-        grid_search = aml_ms.GridSearchCV(
+        grid_search = ing_ms.GridSearchCV(
             model, param_grid, cv=kfold, scoring='accuracy'
         )
         

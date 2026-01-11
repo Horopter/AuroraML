@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "auroraml/base.hpp"
-#include "auroraml/metrics.hpp"
+#include "ingenuityml/base.hpp"
+#include "ingenuityml/metrics.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 #include <map>
@@ -8,7 +8,7 @@
 #include <cmath>
 #include <limits>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace test {
 
 // Simple NearestCentroid implementation for testing
@@ -286,7 +286,7 @@ TEST_F(NearestCentroidTest, EmptyData) {
 }
 
 } // namespace test
-} // namespace auroraml
+} // namespace ingenuityml
 
 int main(int argc, char **argv) {
     ::testing::FLAGS_gtest_shuffle = true;

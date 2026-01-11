@@ -1,6 +1,6 @@
-#include "auroraml/xgboost.hpp"
-#include "auroraml/base.hpp"
-#include "auroraml/tree.hpp"
+#include "ingenuityml/xgboost.hpp"
+#include "ingenuityml/base.hpp"
+#include "ingenuityml/tree.hpp"
 #include <Eigen/Dense>
 #include <vector>
 #include <random>
@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace ensemble {
 
 // Helper function for sigmoid
@@ -393,4 +393,4 @@ Estimator& XGBRegressor::set_params(const Params& params) {
 }
 
 } // namespace ensemble
-} // namespace cxml
+} // namespace ingenuityml

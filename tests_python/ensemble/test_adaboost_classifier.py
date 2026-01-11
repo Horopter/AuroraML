@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite for AuroraML AdaBoostClassifier Algorithm
+Test Suite for IngenuityML AdaBoostClassifier Algorithm
 Includes positive and negative test cases
 All tests run in shuffled order with 5-minute timeout
 """
@@ -30,9 +30,9 @@ class TestAdaBoostClassifier(unittest.TestCase):
     # Positive test cases
     def test_basic_functionality(self):
         """Test basic fit and predict functionality"""
-        import auroraml.adaboost as aml_adaboost
+        import ingenuityml.adaboost as ing_adaboost
         
-        model = aml_adaboost.AdaBoostClassifier(n_estimators=50, learning_rate=1.0, random_state=42)
+        model = ing_adaboost.AdaBoostClassifier(n_estimators=50, learning_rate=1.0, random_state=42)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X_test)
         
@@ -43,9 +43,9 @@ class TestAdaBoostClassifier(unittest.TestCase):
         
     def test_predict_proba(self):
         """Test probability prediction"""
-        import auroraml.adaboost as aml_adaboost
+        import ingenuityml.adaboost as ing_adaboost
         
-        model = aml_adaboost.AdaBoostClassifier(n_estimators=50, learning_rate=1.0, random_state=42)
+        model = ing_adaboost.AdaBoostClassifier(n_estimators=50, learning_rate=1.0, random_state=42)
         model.fit(self.X, self.y)
         probabilities = model.predict_proba(self.X_test)
         
@@ -56,9 +56,9 @@ class TestAdaBoostClassifier(unittest.TestCase):
         
     def test_decision_function(self):
         """Test decision function"""
-        import auroraml.adaboost as aml_adaboost
+        import ingenuityml.adaboost as ing_adaboost
         
-        model = aml_adaboost.AdaBoostClassifier(n_estimators=50, learning_rate=1.0, random_state=42)
+        model = ing_adaboost.AdaBoostClassifier(n_estimators=50, learning_rate=1.0, random_state=42)
         model.fit(self.X, self.y)
         decision = model.decision_function(self.X_test)
         
@@ -67,9 +67,9 @@ class TestAdaBoostClassifier(unittest.TestCase):
         
     def test_parameters(self):
         """Test parameter getter and setter"""
-        import auroraml.adaboost as aml_adaboost
+        import ingenuityml.adaboost as ing_adaboost
         
-        model = aml_adaboost.AdaBoostClassifier(n_estimators=50, learning_rate=1.0, random_state=42)
+        model = ing_adaboost.AdaBoostClassifier(n_estimators=50, learning_rate=1.0, random_state=42)
         
         params = model.get_params()
         self.assertIn('n_estimators', params)
@@ -83,43 +83,43 @@ class TestAdaBoostClassifier(unittest.TestCase):
         
     def test_performance(self):
         """Test model performance"""
-        import auroraml.adaboost as aml_adaboost
-        import auroraml.metrics as aml_metrics
+        import ingenuityml.adaboost as ing_adaboost
+        import ingenuityml.metrics as ing_metrics
         
-        model = aml_adaboost.AdaBoostClassifier(n_estimators=100, learning_rate=1.0, random_state=42)
+        model = ing_adaboost.AdaBoostClassifier(n_estimators=100, learning_rate=1.0, random_state=42)
         model.fit(self.X, self.y)
         predictions = model.predict(self.X)
         
-        accuracy = aml_metrics.accuracy_score(self.y, predictions)
+        accuracy = ing_metrics.accuracy_score(self.y, predictions)
         self.assertGreater(accuracy, 0.7)
         
     def test_different_learning_rates(self):
         """Test with different learning rates"""
-        import auroraml.adaboost as aml_adaboost
+        import ingenuityml.adaboost as ing_adaboost
         
         learning_rates = [0.5, 1.0, 2.0]
         for lr in learning_rates:
-            model = aml_adaboost.AdaBoostClassifier(n_estimators=50, learning_rate=lr, random_state=42)
+            model = ing_adaboost.AdaBoostClassifier(n_estimators=50, learning_rate=lr, random_state=42)
             model.fit(self.X, self.y)
             predictions = model.predict(self.X_test)
             self.assertEqual(len(predictions), len(self.X_test))
             
     def test_different_n_estimators(self):
         """Test with different numbers of estimators"""
-        import auroraml.adaboost as aml_adaboost
+        import ingenuityml.adaboost as ing_adaboost
         
         n_estimators_list = [10, 50, 100]
         for n_est in n_estimators_list:
-            model = aml_adaboost.AdaBoostClassifier(n_estimators=n_est, learning_rate=1.0, random_state=42)
+            model = ing_adaboost.AdaBoostClassifier(n_estimators=n_est, learning_rate=1.0, random_state=42)
             model.fit(self.X, self.y)
             predictions = model.predict(self.X_test)
             self.assertEqual(len(predictions), len(self.X_test))
             
     def test_is_fitted(self):
         """Test is_fitted method"""
-        import auroraml.adaboost as aml_adaboost
+        import ingenuityml.adaboost as ing_adaboost
         
-        model = aml_adaboost.AdaBoostClassifier()
+        model = ing_adaboost.AdaBoostClassifier()
         self.assertFalse(model.is_fitted())
         
         model.fit(self.X, self.y)
@@ -127,9 +127,9 @@ class TestAdaBoostClassifier(unittest.TestCase):
         
     def test_classes_attribute(self):
         """Test classes attribute"""
-        import auroraml.adaboost as aml_adaboost
+        import ingenuityml.adaboost as ing_adaboost
         
-        model = aml_adaboost.AdaBoostClassifier(n_estimators=50, random_state=42)
+        model = ing_adaboost.AdaBoostClassifier(n_estimators=50, random_state=42)
         model.fit(self.X, self.y)
         
         classes = model.classes()
@@ -139,36 +139,36 @@ class TestAdaBoostClassifier(unittest.TestCase):
     # Negative test cases
     def test_empty_data(self):
         """Test with empty data - should raise error"""
-        import auroraml.adaboost as aml_adaboost
+        import ingenuityml.adaboost as ing_adaboost
         
-        model = aml_adaboost.AdaBoostClassifier(n_estimators=50)
+        model = ing_adaboost.AdaBoostClassifier(n_estimators=50)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(np.array([]).reshape(0, 4), np.array([]))
             
     def test_dimension_mismatch(self):
         """Test with dimension mismatch - should raise error"""
-        import auroraml.adaboost as aml_adaboost
+        import ingenuityml.adaboost as ing_adaboost
         
-        model = aml_adaboost.AdaBoostClassifier(n_estimators=50)
+        model = ing_adaboost.AdaBoostClassifier(n_estimators=50)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(self.X, self.y[:-1])
             
     def test_not_fitted_predict(self):
         """Test predict without fitting - should raise error"""
-        import auroraml.adaboost as aml_adaboost
+        import ingenuityml.adaboost as ing_adaboost
         
-        model = aml_adaboost.AdaBoostClassifier(n_estimators=50)
+        model = ing_adaboost.AdaBoostClassifier(n_estimators=50)
         
         with self.assertRaises((RuntimeError, ValueError)):
             model.predict(self.X_test)
             
     def test_wrong_feature_count(self):
         """Test predict with wrong feature count - should raise error"""
-        import auroraml.adaboost as aml_adaboost
+        import ingenuityml.adaboost as ing_adaboost
         
-        model = aml_adaboost.AdaBoostClassifier(n_estimators=50, random_state=42)
+        model = ing_adaboost.AdaBoostClassifier(n_estimators=50, random_state=42)
         model.fit(self.X, self.y)
         
         X_wrong = np.random.randn(30, 6).astype(np.float64)
@@ -178,18 +178,18 @@ class TestAdaBoostClassifier(unittest.TestCase):
             
     def test_negative_n_estimators(self):
         """Test with negative n_estimators - should raise error"""
-        import auroraml.adaboost as aml_adaboost
+        import ingenuityml.adaboost as ing_adaboost
         
-        model = aml_adaboost.AdaBoostClassifier(n_estimators=-1)
+        model = ing_adaboost.AdaBoostClassifier(n_estimators=-1)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(self.X, self.y)
             
     def test_zero_n_estimators(self):
         """Test with zero n_estimators - edge case"""
-        import auroraml.adaboost as aml_adaboost
+        import ingenuityml.adaboost as ing_adaboost
         
-        model = aml_adaboost.AdaBoostClassifier(n_estimators=0)
+        model = ing_adaboost.AdaBoostClassifier(n_estimators=0)
         
         try:
             model.fit(self.X, self.y)
@@ -201,9 +201,9 @@ class TestAdaBoostClassifier(unittest.TestCase):
             
     def test_negative_learning_rate(self):
         """Test with negative learning rate - should raise error"""
-        import auroraml.adaboost as aml_adaboost
+        import ingenuityml.adaboost as ing_adaboost
         
-        model = aml_adaboost.AdaBoostClassifier(n_estimators=50, learning_rate=-1.0)
+        model = ing_adaboost.AdaBoostClassifier(n_estimators=50, learning_rate=-1.0)
         
         with self.assertRaises((ValueError, RuntimeError)):
             model.fit(self.X, self.y)

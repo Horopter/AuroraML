@@ -1,7 +1,7 @@
-#include "auroraml/linear_model.hpp"
-#include "auroraml/model_selection.hpp"
-#include "auroraml/metrics.hpp"
-#include "auroraml/base.hpp"
+#include "ingenuityml/linear_model.hpp"
+#include "ingenuityml/model_selection.hpp"
+#include "ingenuityml/metrics.hpp"
+#include "ingenuityml/base.hpp"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -11,7 +11,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace auroraml {
+namespace ingenuityml {
 namespace linear_model {
 
 namespace {
@@ -40,6 +40,26 @@ void center_data(const MatrixXd& X, const VectorXd& y, bool fit_intercept,
         X_centered.rowwise() -= X_mean.transpose();
         y_centered.array() -= y_mean;
     }
+}
+
+void weighted_center_data(const MatrixXd& X, const VectorXd& y, const VectorXd& weights, bool fit_intercept,
+                          MatrixXd& X_centered, VectorXd& y_centered,
+                          VectorXd& X_mean, double& y_mean) {
+    X_centered = X;
+    y_centered = y;
+    X_mean = VectorXd::Zero(X.cols());
+    y_mean = 0.0;
+    if (!fit_intercept) {
+        return;
+    }
+    double weight_sum = weights.sum();
+    if (weight_sum <= 0.0) {
+        throw std::invalid_argument("weights must sum to a positive value");
+    }
+    X_mean = (X.transpose() * weights) / weight_sum;
+    y_mean = weights.dot(y) / weight_sum;
+    X_centered.rowwise() -= X_mean.transpose();
+    y_centered.array() -= y_mean;
 }
 
 void fit_ridge_closed_form(const MatrixXd& X, const VectorXd& y, double alpha, bool fit_intercept,
@@ -1984,6 +2004,659 @@ bool RidgeClassifierCV::is_fitted() const {
     return fitted_;
 }
 
+RidgeCV::RidgeCV(const std::vector<double>& alphas, bool fit_intercept, int cv_folds)
+    : coef_(), intercept_(0.0), fitted_(false), alphas_(alphas), best_alpha_(0.0),
+      fit_intercept_(fit_intercept), cv_folds_(cv_folds) {}
+
+Estimator& RidgeCV::fit(const MatrixXd& X, const VectorXd& y) {
+    validation::check_X_y(X, y);
+    if (alphas_.empty()) {
+        throw std::invalid_argument("alphas must not be empty");
+    }
+    if (cv_folds_ <= 1) {
+        throw std::invalid_argument("cv_folds must be at least 2");
+    }
+
+    model_selection::KFold kfold(cv_folds_, true, 42);
+    auto splits = kfold.split(X, y);
+
+    double best_mse = std::numeric_limits<double>::infinity();
+    double best_alpha = alphas_.front();
+    bool found = false;
+
+    for (double alpha : alphas_) {
+        if (alpha <= 0.0) {
+            continue;
+        }
+        double mse_sum = 0.0;
+        for (const auto& split : splits) {
+            const auto& train_idx = split.first;
+            const auto& test_idx = split.second;
+
+            MatrixXd X_train(train_idx.size(), X.cols());
+            VectorXd y_train(train_idx.size());
+            MatrixXd X_test(test_idx.size(), X.cols());
+            VectorXd y_test(test_idx.size());
+
+            for (size_t i = 0; i < train_idx.size(); ++i) {
+                X_train.row(i) = X.row(train_idx[i]);
+                y_train(i) = y(train_idx[i]);
+            }
+            for (size_t i = 0; i < test_idx.size(); ++i) {
+                X_test.row(i) = X.row(test_idx[i]);
+                y_test(i) = y(test_idx[i]);
+            }
+
+            VectorXd coef_fold;
+            double intercept_fold = 0.0;
+            fit_ridge_closed_form(X_train, y_train, alpha, fit_intercept_, coef_fold, intercept_fold);
+            VectorXd preds = X_test * coef_fold;
+            preds.array() += intercept_fold;
+            mse_sum += metrics::mean_squared_error(y_test, preds);
+        }
+        double mse = mse_sum / static_cast<double>(splits.size());
+        if (mse < best_mse) {
+            best_mse = mse;
+            best_alpha = alpha;
+            found = true;
+        }
+    }
+
+    if (!found) {
+        throw std::invalid_argument("alphas must contain positive values");
+    }
+
+    best_alpha_ = best_alpha;
+    fit_ridge_closed_form(X, y, best_alpha_, fit_intercept_, coef_, intercept_);
+    fitted_ = true;
+    return *this;
+}
+
+VectorXd RidgeCV::predict(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("RidgeCV must be fitted before predict");
+    }
+    if (X.cols() != coef_.size()) {
+        throw std::runtime_error("X must have the same number of features as training data");
+    }
+    VectorXd preds = X * coef_;
+    preds.array() += intercept_;
+    return preds;
+}
+
+Params RidgeCV::get_params() const {
+    return {
+        {"alphas", join_double_list(alphas_)},
+        {"fit_intercept", fit_intercept_ ? "true" : "false"},
+        {"cv", std::to_string(cv_folds_)}
+    };
+}
+
+Estimator& RidgeCV::set_params(const Params& params) {
+    alphas_ = parse_double_list(utils::get_param_string(params, "alphas", join_double_list(alphas_)), alphas_);
+    fit_intercept_ = utils::get_param_bool(params, "fit_intercept", fit_intercept_);
+    cv_folds_ = utils::get_param_int(params, "cv", cv_folds_);
+    return *this;
+}
+
+bool RidgeCV::is_fitted() const {
+    return fitted_;
+}
+
+LassoCV::LassoCV(const std::vector<double>& alphas, bool fit_intercept, int cv_folds, int max_iter, double tol)
+    : coef_(), intercept_(0.0), fitted_(false), alphas_(alphas), best_alpha_(0.0),
+      fit_intercept_(fit_intercept), cv_folds_(cv_folds), max_iter_(max_iter), tol_(tol) {}
+
+Estimator& LassoCV::fit(const MatrixXd& X, const VectorXd& y) {
+    validation::check_X_y(X, y);
+    if (alphas_.empty()) {
+        throw std::invalid_argument("alphas must not be empty");
+    }
+    if (cv_folds_ <= 1) {
+        throw std::invalid_argument("cv_folds must be at least 2");
+    }
+    if (max_iter_ <= 0) {
+        throw std::invalid_argument("max_iter must be positive");
+    }
+    if (tol_ <= 0.0) {
+        throw std::invalid_argument("tol must be positive");
+    }
+
+    model_selection::KFold kfold(cv_folds_, true, 42);
+    auto splits = kfold.split(X, y);
+
+    double best_mse = std::numeric_limits<double>::infinity();
+    double best_alpha = alphas_.front();
+    bool found = false;
+
+    for (double alpha : alphas_) {
+        if (alpha <= 0.0) {
+            continue;
+        }
+        double mse_sum = 0.0;
+        for (const auto& split : splits) {
+            const auto& train_idx = split.first;
+            const auto& test_idx = split.second;
+
+            MatrixXd X_train(train_idx.size(), X.cols());
+            VectorXd y_train(train_idx.size());
+            MatrixXd X_test(test_idx.size(), X.cols());
+            VectorXd y_test(test_idx.size());
+
+            for (size_t i = 0; i < train_idx.size(); ++i) {
+                X_train.row(i) = X.row(train_idx[i]);
+                y_train(i) = y(train_idx[i]);
+            }
+            for (size_t i = 0; i < test_idx.size(); ++i) {
+                X_test.row(i) = X.row(test_idx[i]);
+                y_test(i) = y(test_idx[i]);
+            }
+
+            VectorXd coef_fold;
+            double intercept_fold = 0.0;
+            fit_lasso_coordinate_descent(X_train, y_train, alpha, 1.0, fit_intercept_, max_iter_, tol_, coef_fold, intercept_fold);
+            VectorXd preds = X_test * coef_fold;
+            preds.array() += intercept_fold;
+            mse_sum += metrics::mean_squared_error(y_test, preds);
+        }
+        double mse = mse_sum / static_cast<double>(splits.size());
+        if (mse < best_mse) {
+            best_mse = mse;
+            best_alpha = alpha;
+            found = true;
+        }
+    }
+
+    if (!found) {
+        throw std::invalid_argument("alphas must contain positive values");
+    }
+
+    best_alpha_ = best_alpha;
+    fit_lasso_coordinate_descent(X, y, best_alpha_, 1.0, fit_intercept_, max_iter_, tol_, coef_, intercept_);
+    fitted_ = true;
+    return *this;
+}
+
+VectorXd LassoCV::predict(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("LassoCV must be fitted before predict");
+    }
+    if (X.cols() != coef_.size()) {
+        throw std::runtime_error("X must have the same number of features as training data");
+    }
+    VectorXd preds = X * coef_;
+    preds.array() += intercept_;
+    return preds;
+}
+
+Params LassoCV::get_params() const {
+    return {
+        {"alphas", join_double_list(alphas_)},
+        {"fit_intercept", fit_intercept_ ? "true" : "false"},
+        {"cv", std::to_string(cv_folds_)},
+        {"max_iter", std::to_string(max_iter_)},
+        {"tol", std::to_string(tol_)}
+    };
+}
+
+Estimator& LassoCV::set_params(const Params& params) {
+    alphas_ = parse_double_list(utils::get_param_string(params, "alphas", join_double_list(alphas_)), alphas_);
+    fit_intercept_ = utils::get_param_bool(params, "fit_intercept", fit_intercept_);
+    cv_folds_ = utils::get_param_int(params, "cv", cv_folds_);
+    max_iter_ = utils::get_param_int(params, "max_iter", max_iter_);
+    tol_ = utils::get_param_double(params, "tol", tol_);
+    return *this;
+}
+
+bool LassoCV::is_fitted() const {
+    return fitted_;
+}
+
+ElasticNetCV::ElasticNetCV(const std::vector<double>& alphas, const std::vector<double>& l1_ratios,
+                           bool fit_intercept, int cv_folds, int max_iter, double tol)
+    : coef_(), intercept_(0.0), fitted_(false), alphas_(alphas), l1_ratios_(l1_ratios),
+      best_alpha_(0.0), best_l1_ratio_(0.0), fit_intercept_(fit_intercept),
+      cv_folds_(cv_folds), max_iter_(max_iter), tol_(tol) {}
+
+Estimator& ElasticNetCV::fit(const MatrixXd& X, const VectorXd& y) {
+    validation::check_X_y(X, y);
+    if (alphas_.empty()) {
+        throw std::invalid_argument("alphas must not be empty");
+    }
+    if (l1_ratios_.empty()) {
+        throw std::invalid_argument("l1_ratios must not be empty");
+    }
+    if (cv_folds_ <= 1) {
+        throw std::invalid_argument("cv_folds must be at least 2");
+    }
+    if (max_iter_ <= 0) {
+        throw std::invalid_argument("max_iter must be positive");
+    }
+    if (tol_ <= 0.0) {
+        throw std::invalid_argument("tol must be positive");
+    }
+
+    model_selection::KFold kfold(cv_folds_, true, 42);
+    auto splits = kfold.split(X, y);
+
+    double best_mse = std::numeric_limits<double>::infinity();
+    double best_alpha = alphas_.front();
+    double best_l1 = l1_ratios_.front();
+    bool found = false;
+
+    for (double l1_ratio : l1_ratios_) {
+        if (l1_ratio < 0.0 || l1_ratio > 1.0) {
+            continue;
+        }
+        for (double alpha : alphas_) {
+            if (alpha <= 0.0) {
+                continue;
+            }
+            double mse_sum = 0.0;
+            for (const auto& split : splits) {
+                const auto& train_idx = split.first;
+                const auto& test_idx = split.second;
+
+                MatrixXd X_train(train_idx.size(), X.cols());
+                VectorXd y_train(train_idx.size());
+                MatrixXd X_test(test_idx.size(), X.cols());
+                VectorXd y_test(test_idx.size());
+
+                for (size_t i = 0; i < train_idx.size(); ++i) {
+                    X_train.row(i) = X.row(train_idx[i]);
+                    y_train(i) = y(train_idx[i]);
+                }
+                for (size_t i = 0; i < test_idx.size(); ++i) {
+                    X_test.row(i) = X.row(test_idx[i]);
+                    y_test(i) = y(test_idx[i]);
+                }
+
+                VectorXd coef_fold;
+                double intercept_fold = 0.0;
+                fit_lasso_coordinate_descent(X_train, y_train, alpha, l1_ratio, fit_intercept_, max_iter_, tol_, coef_fold, intercept_fold);
+                VectorXd preds = X_test * coef_fold;
+                preds.array() += intercept_fold;
+                mse_sum += metrics::mean_squared_error(y_test, preds);
+            }
+            double mse = mse_sum / static_cast<double>(splits.size());
+            if (mse < best_mse) {
+                best_mse = mse;
+                best_alpha = alpha;
+                best_l1 = l1_ratio;
+                found = true;
+            }
+        }
+    }
+
+    if (!found) {
+        throw std::invalid_argument("alphas and l1_ratios must contain valid values");
+    }
+
+    best_alpha_ = best_alpha;
+    best_l1_ratio_ = best_l1;
+    fit_lasso_coordinate_descent(X, y, best_alpha_, best_l1_ratio_, fit_intercept_, max_iter_, tol_, coef_, intercept_);
+    fitted_ = true;
+    return *this;
+}
+
+VectorXd ElasticNetCV::predict(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("ElasticNetCV must be fitted before predict");
+    }
+    if (X.cols() != coef_.size()) {
+        throw std::runtime_error("X must have the same number of features as training data");
+    }
+    VectorXd preds = X * coef_;
+    preds.array() += intercept_;
+    return preds;
+}
+
+Params ElasticNetCV::get_params() const {
+    return {
+        {"alphas", join_double_list(alphas_)},
+        {"l1_ratios", join_double_list(l1_ratios_)},
+        {"fit_intercept", fit_intercept_ ? "true" : "false"},
+        {"cv", std::to_string(cv_folds_)},
+        {"max_iter", std::to_string(max_iter_)},
+        {"tol", std::to_string(tol_)}
+    };
+}
+
+Estimator& ElasticNetCV::set_params(const Params& params) {
+    alphas_ = parse_double_list(utils::get_param_string(params, "alphas", join_double_list(alphas_)), alphas_);
+    l1_ratios_ = parse_double_list(utils::get_param_string(params, "l1_ratios", join_double_list(l1_ratios_)), l1_ratios_);
+    fit_intercept_ = utils::get_param_bool(params, "fit_intercept", fit_intercept_);
+    cv_folds_ = utils::get_param_int(params, "cv", cv_folds_);
+    max_iter_ = utils::get_param_int(params, "max_iter", max_iter_);
+    tol_ = utils::get_param_double(params, "tol", tol_);
+    return *this;
+}
+
+bool ElasticNetCV::is_fitted() const {
+    return fitted_;
+}
+
+BayesianRidge::BayesianRidge(double alpha_1, double alpha_2, double lambda_1, double lambda_2,
+                             bool fit_intercept, int max_iter, double tol)
+    : coef_(), intercept_(0.0), fitted_(false), alpha_1_(alpha_1), alpha_2_(alpha_2),
+      lambda_1_(lambda_1), lambda_2_(lambda_2), fit_intercept_(fit_intercept),
+      max_iter_(max_iter), tol_(tol) {}
+
+Estimator& BayesianRidge::fit(const MatrixXd& X, const VectorXd& y) {
+    validation::check_X_y(X, y);
+    if (alpha_1_ <= 0.0 || alpha_2_ <= 0.0 || lambda_1_ <= 0.0 || lambda_2_ <= 0.0) {
+        throw std::invalid_argument("alpha_1, alpha_2, lambda_1, lambda_2 must be positive");
+    }
+    if (max_iter_ <= 0) {
+        throw std::invalid_argument("max_iter must be positive");
+    }
+    if (tol_ <= 0.0) {
+        throw std::invalid_argument("tol must be positive");
+    }
+
+    MatrixXd X_work;
+    VectorXd y_work;
+    VectorXd X_mean;
+    double y_mean = 0.0;
+    center_data(X, y, fit_intercept_, X_work, y_work, X_mean, y_mean);
+
+    int n_samples = X_work.rows();
+    int n_features = X_work.cols();
+    MatrixXd XtX = X_work.transpose() * X_work;
+    VectorXd Xty = X_work.transpose() * y_work;
+
+    double alpha = 1.0;
+    double lambda = 1.0;
+    VectorXd coef = VectorXd::Zero(n_features);
+
+    for (int iter = 0; iter < max_iter_; ++iter) {
+        MatrixXd A = alpha * XtX;
+        A.diagonal().array() += lambda;
+        MatrixXd Sigma = A.ldlt().solve(MatrixXd::Identity(n_features, n_features));
+        VectorXd mu = alpha * Sigma * Xty;
+
+        double gamma = (VectorXd::Ones(n_features) - lambda * Sigma.diagonal()).sum();
+        double residual_norm = (y_work - X_work * mu).squaredNorm();
+
+        double lambda_new = (gamma + 2.0 * lambda_1_) / (mu.squaredNorm() + 2.0 * lambda_2_);
+        double alpha_new = (n_samples - gamma + 2.0 * alpha_1_) / (residual_norm + 2.0 * alpha_2_);
+
+        double coef_change = (mu - coef).norm();
+        if (std::abs(alpha_new - alpha) < tol_ && std::abs(lambda_new - lambda) < tol_ && coef_change < tol_) {
+            coef = mu;
+            alpha = alpha_new;
+            lambda = lambda_new;
+            break;
+        }
+
+        coef = mu;
+        alpha = alpha_new;
+        lambda = lambda_new;
+    }
+
+    coef_ = coef;
+    intercept_ = fit_intercept_ ? (y_mean - X_mean.dot(coef_)) : 0.0;
+    fitted_ = true;
+    return *this;
+}
+
+VectorXd BayesianRidge::predict(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("BayesianRidge must be fitted before predict");
+    }
+    if (X.cols() != coef_.size()) {
+        throw std::runtime_error("X must have the same number of features as training data");
+    }
+    VectorXd preds = X * coef_;
+    preds.array() += intercept_;
+    return preds;
+}
+
+Params BayesianRidge::get_params() const {
+    return {
+        {"alpha_1", std::to_string(alpha_1_)},
+        {"alpha_2", std::to_string(alpha_2_)},
+        {"lambda_1", std::to_string(lambda_1_)},
+        {"lambda_2", std::to_string(lambda_2_)},
+        {"fit_intercept", fit_intercept_ ? "true" : "false"},
+        {"max_iter", std::to_string(max_iter_)},
+        {"tol", std::to_string(tol_)}
+    };
+}
+
+Estimator& BayesianRidge::set_params(const Params& params) {
+    alpha_1_ = utils::get_param_double(params, "alpha_1", alpha_1_);
+    alpha_2_ = utils::get_param_double(params, "alpha_2", alpha_2_);
+    lambda_1_ = utils::get_param_double(params, "lambda_1", lambda_1_);
+    lambda_2_ = utils::get_param_double(params, "lambda_2", lambda_2_);
+    fit_intercept_ = utils::get_param_bool(params, "fit_intercept", fit_intercept_);
+    max_iter_ = utils::get_param_int(params, "max_iter", max_iter_);
+    tol_ = utils::get_param_double(params, "tol", tol_);
+    return *this;
+}
+
+bool BayesianRidge::is_fitted() const {
+    return fitted_;
+}
+
+ARDRegression::ARDRegression(double alpha_1, double alpha_2, double lambda_1, double lambda_2,
+                             bool fit_intercept, int max_iter, double tol)
+    : coef_(), intercept_(0.0), fitted_(false), alpha_1_(alpha_1), alpha_2_(alpha_2),
+      lambda_1_(lambda_1), lambda_2_(lambda_2), fit_intercept_(fit_intercept),
+      max_iter_(max_iter), tol_(tol) {}
+
+Estimator& ARDRegression::fit(const MatrixXd& X, const VectorXd& y) {
+    validation::check_X_y(X, y);
+    if (alpha_1_ <= 0.0 || alpha_2_ <= 0.0 || lambda_1_ <= 0.0 || lambda_2_ <= 0.0) {
+        throw std::invalid_argument("alpha_1, alpha_2, lambda_1, lambda_2 must be positive");
+    }
+    if (max_iter_ <= 0) {
+        throw std::invalid_argument("max_iter must be positive");
+    }
+    if (tol_ <= 0.0) {
+        throw std::invalid_argument("tol must be positive");
+    }
+
+    MatrixXd X_work;
+    VectorXd y_work;
+    VectorXd X_mean;
+    double y_mean = 0.0;
+    center_data(X, y, fit_intercept_, X_work, y_work, X_mean, y_mean);
+
+    int n_samples = X_work.rows();
+    int n_features = X_work.cols();
+    MatrixXd XtX = X_work.transpose() * X_work;
+    VectorXd Xty = X_work.transpose() * y_work;
+
+    double alpha = 1.0;
+    VectorXd lambda = VectorXd::Ones(n_features);
+    VectorXd coef = VectorXd::Zero(n_features);
+
+    for (int iter = 0; iter < max_iter_; ++iter) {
+        MatrixXd A = alpha * XtX;
+        A.diagonal().array() += lambda.array();
+        MatrixXd Sigma = A.ldlt().solve(MatrixXd::Identity(n_features, n_features));
+        VectorXd mu = alpha * Sigma * Xty;
+
+        VectorXd gamma = VectorXd::Ones(n_features) - lambda.cwiseProduct(Sigma.diagonal());
+        double residual_norm = (y_work - X_work * mu).squaredNorm();
+
+        VectorXd lambda_new = (gamma.array() + 2.0 * lambda_1_) / (mu.array().square() + 2.0 * lambda_2_);
+        for (int i = 0; i < lambda_new.size(); ++i) {
+            if (lambda_new(i) <= 0.0) {
+                lambda_new(i) = lambda(i);
+            }
+        }
+        double alpha_new = (n_samples - gamma.sum() + 2.0 * alpha_1_) / (residual_norm + 2.0 * alpha_2_);
+
+        double coef_change = (mu - coef).norm();
+        if ((lambda_new - lambda).norm() < tol_ && std::abs(alpha_new - alpha) < tol_ && coef_change < tol_) {
+            coef = mu;
+            alpha = alpha_new;
+            lambda = lambda_new;
+            break;
+        }
+
+        coef = mu;
+        alpha = alpha_new;
+        lambda = lambda_new;
+    }
+
+    coef_ = coef;
+    intercept_ = fit_intercept_ ? (y_mean - X_mean.dot(coef_)) : 0.0;
+    fitted_ = true;
+    return *this;
+}
+
+VectorXd ARDRegression::predict(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("ARDRegression must be fitted before predict");
+    }
+    if (X.cols() != coef_.size()) {
+        throw std::runtime_error("X must have the same number of features as training data");
+    }
+    VectorXd preds = X * coef_;
+    preds.array() += intercept_;
+    return preds;
+}
+
+Params ARDRegression::get_params() const {
+    return {
+        {"alpha_1", std::to_string(alpha_1_)},
+        {"alpha_2", std::to_string(alpha_2_)},
+        {"lambda_1", std::to_string(lambda_1_)},
+        {"lambda_2", std::to_string(lambda_2_)},
+        {"fit_intercept", fit_intercept_ ? "true" : "false"},
+        {"max_iter", std::to_string(max_iter_)},
+        {"tol", std::to_string(tol_)}
+    };
+}
+
+Estimator& ARDRegression::set_params(const Params& params) {
+    alpha_1_ = utils::get_param_double(params, "alpha_1", alpha_1_);
+    alpha_2_ = utils::get_param_double(params, "alpha_2", alpha_2_);
+    lambda_1_ = utils::get_param_double(params, "lambda_1", lambda_1_);
+    lambda_2_ = utils::get_param_double(params, "lambda_2", lambda_2_);
+    fit_intercept_ = utils::get_param_bool(params, "fit_intercept", fit_intercept_);
+    max_iter_ = utils::get_param_int(params, "max_iter", max_iter_);
+    tol_ = utils::get_param_double(params, "tol", tol_);
+    return *this;
+}
+
+bool ARDRegression::is_fitted() const {
+    return fitted_;
+}
+
+HuberRegressor::HuberRegressor(double epsilon, double alpha, bool fit_intercept, int max_iter, double tol)
+    : coef_(), intercept_(0.0), fitted_(false), epsilon_(epsilon), alpha_(alpha),
+      fit_intercept_(fit_intercept), max_iter_(max_iter), tol_(tol) {}
+
+Estimator& HuberRegressor::fit(const MatrixXd& X, const VectorXd& y) {
+    validation::check_X_y(X, y);
+    if (epsilon_ <= 0.0) {
+        throw std::invalid_argument("epsilon must be positive");
+    }
+    if (alpha_ < 0.0) {
+        throw std::invalid_argument("alpha must be non-negative");
+    }
+    if (max_iter_ <= 0) {
+        throw std::invalid_argument("max_iter must be positive");
+    }
+    if (tol_ <= 0.0) {
+        throw std::invalid_argument("tol must be positive");
+    }
+
+    int n_samples = X.rows();
+    int n_features = X.cols();
+
+    VectorXd weights = VectorXd::Ones(n_samples);
+    VectorXd coef = VectorXd::Zero(n_features);
+    double intercept = 0.0;
+
+    for (int iter = 0; iter < max_iter_; ++iter) {
+        MatrixXd X_centered;
+        VectorXd y_centered;
+        VectorXd X_mean;
+        double y_mean = 0.0;
+        weighted_center_data(X, y, weights, fit_intercept_, X_centered, y_centered, X_mean, y_mean);
+
+        VectorXd sqrt_w = weights.array().sqrt();
+        MatrixXd Xw = X_centered;
+        VectorXd yw = y_centered;
+        for (int i = 0; i < n_samples; ++i) {
+            Xw.row(i) *= sqrt_w(i);
+            yw(i) *= sqrt_w(i);
+        }
+
+        MatrixXd XtX = Xw.transpose() * Xw;
+        XtX.diagonal().array() += alpha_;
+        VectorXd Xty = Xw.transpose() * yw;
+        VectorXd coef_new = XtX.ldlt().solve(Xty);
+        double intercept_new = fit_intercept_ ? (y_mean - X_mean.dot(coef_new)) : 0.0;
+
+        VectorXd preds = X * coef_new;
+        preds.array() += intercept_new;
+        VectorXd residuals = y - preds;
+
+        VectorXd new_weights(n_samples);
+        for (int i = 0; i < n_samples; ++i) {
+            double abs_r = std::abs(residuals(i));
+            new_weights(i) = (abs_r <= epsilon_) ? 1.0 : (epsilon_ / abs_r);
+        }
+
+        if ((coef_new - coef).norm() < tol_ && std::abs(intercept_new - intercept) < tol_) {
+            coef = coef_new;
+            intercept = intercept_new;
+            weights = new_weights;
+            break;
+        }
+
+        coef = coef_new;
+        intercept = intercept_new;
+        weights = new_weights;
+    }
+
+    coef_ = coef;
+    intercept_ = intercept;
+    fitted_ = true;
+    return *this;
+}
+
+VectorXd HuberRegressor::predict(const MatrixXd& X) const {
+    if (!fitted_) {
+        throw std::runtime_error("HuberRegressor must be fitted before predict");
+    }
+    if (X.cols() != coef_.size()) {
+        throw std::runtime_error("X must have the same number of features as training data");
+    }
+    VectorXd preds = X * coef_;
+    preds.array() += intercept_;
+    return preds;
+}
+
+Params HuberRegressor::get_params() const {
+    return {
+        {"epsilon", std::to_string(epsilon_)},
+        {"alpha", std::to_string(alpha_)},
+        {"fit_intercept", fit_intercept_ ? "true" : "false"},
+        {"max_iter", std::to_string(max_iter_)},
+        {"tol", std::to_string(tol_)}
+    };
+}
+
+Estimator& HuberRegressor::set_params(const Params& params) {
+    epsilon_ = utils::get_param_double(params, "epsilon", epsilon_);
+    alpha_ = utils::get_param_double(params, "alpha", alpha_);
+    fit_intercept_ = utils::get_param_bool(params, "fit_intercept", fit_intercept_);
+    max_iter_ = utils::get_param_int(params, "max_iter", max_iter_);
+    tol_ = utils::get_param_double(params, "tol", tol_);
+    return *this;
+}
+
+bool HuberRegressor::is_fitted() const {
+    return fitted_;
+}
+
 QuantileRegressor::QuantileRegressor(double quantile, double alpha, bool fit_intercept,
                                      int max_iter, double tol, double learning_rate)
     : coef_(), intercept_(0.0), fitted_(false), quantile_(quantile), alpha_(alpha),
@@ -2628,4 +3301,4 @@ bool MultiTaskElasticNetCV::is_fitted() const {
 }
 
 } // namespace linear_model
-} // namespace auroraml
+} // namespace ingenuityml
