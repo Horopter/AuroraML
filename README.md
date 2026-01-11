@@ -16,6 +16,7 @@ IngenuityML is a C++ machine learning library with Python bindings. It targets a
 ## Documentation map
 - `docs/STATUS_TODAY.md` - current coverage and implementation snapshot.
 - `docs/NEXT_STEPS.md` - prioritized backlog to reach parity.
+- `docs/TEST_COVERAGE.md` - test coverage catalog and matrices.
 
 ## Build and install
 
